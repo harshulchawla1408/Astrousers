@@ -1,98 +1,28 @@
+"use client";
+
 import { SignIn } from "@clerk/nextjs";
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen">
-      {/* Left Column - Background Image */}
-      <div className="flex-1 relative hidden lg:block">
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: "url('/login.jpg')"
+    <div className="min-h-screen flex items-center justify-center bg-black">
+      <div className="p-6 rounded-2xl shadow-xl bg-gray-900 border border-gray-800">
+        <SignIn
+          appearance={{
+            elements: {
+              formButtonPrimary:
+                "bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition",
+              card: "bg-gray-900 text-white border border-gray-800 rounded-2xl shadow-xl",
+              headerTitle: "text-2xl font-bold text-center text-purple-400",
+              headerSubtitle: "text-gray-400 text-center",
+              socialButtonsBlockButton:
+                "bg-gray-800 hover:bg-gray-700 text-white font-medium",
+            },
           }}
+          path="/login"
+          routing="path"
+          signUpUrl="/register"
+          afterSignInUrl="/"
         />
-        <div className="absolute inset-0 bg-black/40" />
-        
-        {/* Overlay content */}
-        <div className="absolute inset-0 flex flex-col justify-center items-center p-12 text-white">
-          <div className="text-center max-w-md">
-            <h1 className="text-4xl font-bold mb-6">Welcome to Astrousers</h1>
-            <p className="text-lg mb-8 opacity-90">
-              To keep connected with us please login with your personal info.
-            </p>
-            
-            {/* Rectangular astrology illustration */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-8 border border-white/20">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                  <span className="text-2xl">🌌</span>
-                </div>
-                <div className="flex justify-center space-x-3 mb-4">
-                  <span className="text-xl">✨</span>
-                  <span className="text-xl">✨</span>
-                </div>
-                <div className="flex justify-center space-x-2 mb-4">
-                  <span className="text-lg">⭐</span>
-                  <span className="text-lg">🌙</span>
-                  <span className="text-lg">☀️</span>
-                </div>
-                <div className="text-sm opacity-80">Astrology Insights</div>
-              </div>
-            </div>
-            
-            {/* Community card */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 mt-6">
-              <div className="flex items-center mb-3">
-                <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center mr-3">
-                  <span className="text-white text-sm font-bold">X</span>
-                </div>
-                <span className="font-semibold">Join Astrousers Community</span>
-                <span className="ml-auto text-gray-300">→</span>
-              </div>
-              <p className="text-sm opacity-80">
-                Access Support Share insights and stay in the know effortlessly.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Right Column - Login Form */}
-      <div className="flex-1 flex justify-center items-center p-8 bg-gradient-to-br from-gray-900 to-black">
-        <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 w-full max-w-md border border-white/20">
-          <h2 className="text-2xl font-bold text-white mb-2">Login to Your account</h2>
-          <p className="text-gray-300 mb-8">
-            Don't have an account?{" "}
-            <a href="/register" className="text-blue-400 hover:text-blue-300 font-medium">
-              Sign Up
-            </a>
-          </p>
-          
-          <SignIn
-            appearance={{
-              elements: {
-                formButtonPrimary: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition-colors duration-200 w-full",
-                formFieldInput: "bg-gray-800 border border-gray-600 text-white rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200",
-                formFieldLabel: "text-gray-300 font-medium mb-2",
-                formFieldInputShowPasswordButton: "text-gray-400 hover:text-gray-200",
-                footerActionLink: "text-blue-400 hover:text-blue-300 font-medium",
-                formFieldRow: "mb-4",
-                formField: "mb-4",
-                formHeaderTitle: "hidden",
-                formHeaderSubtitle: "hidden",
-                socialButtonsBlockButton: "bg-gray-800 border border-gray-600 text-white rounded-lg px-4 py-3 hover:bg-gray-700 transition-colors duration-200 flex items-center justify-center space-x-2",
-                socialButtonsBlockButtonText: "text-gray-200 font-medium",
-                dividerLine: "bg-gray-600",
-                dividerText: "text-gray-400 text-sm",
-                identityPreviewText: "text-gray-300",
-                identityPreviewEditButton: "text-blue-400 hover:text-blue-300",
-              },
-            }}
-            path="/login"
-            routing="path"
-            signUpUrl="/register"
-          />
-        </div>
       </div>
     </div>
   );
