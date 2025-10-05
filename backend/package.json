@@ -11,12 +11,24 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "astronomia": "^4.2.0",
     "axios": "^1.12.2",
     "cors": "^2.8.5",
-    "dotenv": "^17.2.2",
+    "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "express-mongo-sanitize": "^2.2.0",
+    "fontkit": "^2.0.4",
+    "helmet": "^8.1.0",
+    "hpp": "^0.2.3",
+    "luxon": "^3.7.2",
     "mongodb": "^6.20.0",
-    "mongoose": "^8.18.2",
-    "nodemon": "^3.1.10"
+    "mongoose": "^8.18.3",
+    "morgan": "^1.10.1",
+    "nodemon": "^3.1.10",
+    "pdf-lib": "^1.17.1",
+    "tz-lookup": "^6.1.25",
+    "xss": "^1.0.15",
+    "xss-clean": "^0.1.4",
+    "zod": "^4.1.11"
   }
 }
