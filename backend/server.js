@@ -10,6 +10,7 @@ import xss from "xss"; // modern XSS sanitizer
 
 import userRoutes from "./routes/userRoutes.js";
 import kundliRoutes from "./routes/kundliRoutes.js";
+import astrologerRoutes from "./routes/astrologerRoutes.js";
 
 dotenv.config();
 
@@ -66,6 +67,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/users", userRoutes);
 app.use("/api/v1/kundli", kundliRoutes);
+app.use("/api/v1/astrologers", astrologerRoutes);
 
 // -------------------- MongoDB Connection --------------------
 mongoose

@@ -73,13 +73,11 @@ const FAQAccordion = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button 
               className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
-              data-cursor="pointer"
             >
               Contact Support
             </button>
             <button 
               className="border border-orange-500 text-orange-600 hover:bg-orange-50 px-6 py-3 rounded-lg font-semibold transition-all duration-200"
-              data-cursor="pointer"
             >
               Live Chat
             </button>

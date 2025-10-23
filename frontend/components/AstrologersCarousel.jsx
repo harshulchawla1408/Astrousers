@@ -1,92 +1,87 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import Link from 'next/link';
 
 const AstrologersCarousel = () => {
-  const astrologers = [
-    {
-      id: 1,
-      name: "Pandit Rohit Sharma",
-      specialty: "Kundli, Marriage Compatibility, Career Guidance",
-      experience: "15+ years",
-      rating: 4.9,
-      reviews: 1200,
-      languages: "Hindi, English",
-      price: "₹5/min",
-      image: "/login.jpg", // Using available image
-      verified: true,
-      online: true
-    },
-    {
-      id: 2,
-      name: "Dr. Priya Singh",
-      specialty: "Vedic Astrology, Tarot, Numerology",
-      experience: "12+ years",
-      rating: 4.8,
-      reviews: 980,
-      languages: "Hindi, English, Tamil",
-      price: "₹7/min",
-      image: "/signup.jpg", // Using available image
-      verified: true,
-      online: true
-    },
-    {
-      id: 3,
-      name: "Acharya Vikram",
-      specialty: "Vastu, Palmistry, Remedies",
-      experience: "20+ years",
-      rating: 4.9,
-      reviews: 1500,
-      languages: "Hindi, Punjabi, English",
-      price: "₹6/min",
-      image: "/slider-01.jpg", // Using available image
-      verified: true,
-      online: false
-    },
-    {
-      id: 4,
-      name: "Swami Ananda",
-      specialty: "Spiritual Guidance, Chakra Healing",
-      experience: "18+ years",
-      rating: 4.7,
-      reviews: 850,
-      languages: "Hindi, English, Sanskrit",
-      price: "₹8/min",
-      image: "/slider-02.png", // Using available image
-      verified: true,
-      online: true
-    },
-    {
-      id: 5,
-      name: "Mata Rani Devi",
-      specialty: "Love Problems, Family Issues",
-      experience: "25+ years",
-      rating: 4.9,
-      reviews: 2000,
-      languages: "Hindi, Bengali, English",
-      price: "₹4/min",
-      image: "/logo.jpg", // Using available image
-      verified: true,
-      online: true
-    },
-    {
-      id: 6,
-      name: "Guru Maharaj",
-      specialty: "Business Astrology, Stock Market",
-      experience: "22+ years",
-      rating: 4.8,
-      reviews: 1200,
-      languages: "Hindi, English, Gujarati",
-      price: "₹10/min",
-      image: "/login.jpg", // Using available image
-      verified: true,
-      online: false
-    }
-  ];
+  const [astrologers, setAstrologers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchTopAstrologers = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/v1/astrologers/top?limit=6');
+        if (!response.ok) {
+          throw new Error('Failed to fetch astrologers');
+        }
+        const data = await response.json();
+        setAstrologers(data.data || []);
+      } catch (err) {
+        console.error('Error fetching astrologers:', err);
+        setError(err.message);
+        // Set empty array if API fails - no fallback data
+        setAstrologers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTopAstrologers();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-gradient-to-br from-orange-50 to-yellow-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Connect with our <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">professional astrologers</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-4">
+              Our astrologers are experts in Vedic and modern astrology, tarot, numerology, and remedial therapies.
+            </p>
+          </div>
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error || astrologers.length === 0) {
+    return (
+      <section className="py-20 bg-gradient-to-br from-orange-50 to-yellow-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Connect with our <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">professional astrologers</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-4">
+              Our astrologers are experts in Vedic and modern astrology, tarot, numerology, and remedial therapies.
+            </p>
+          </div>
+          <div className="text-center py-20">
+            <p className="text-gray-600 text-lg mb-4">
+              {error ? `Error loading astrologers: ${error}` : 'No astrologers available at the moment.'}
+            </p>
+            <Button 
+              onClick={() => window.location.reload()} 
+              className="bg-orange-500 hover:bg-orange-600 text-white"
+            >
+              Retry
+            </Button>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-20 bg-gradient-to-br from-orange-50 to-yellow-50">
@@ -113,7 +108,7 @@ const AstrologersCarousel = () => {
           >
             <CarouselContent className="-ml-2 md:-ml-4">
               {astrologers.map((astrologer) => (
-                <CarouselItem key={astrologer.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                <CarouselItem key={astrologer._id || astrologer.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
                   <Card className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-0 shadow-lg bg-white">
                     <CardContent className="p-6">
                       <div className="flex flex-col items-center text-center space-y-4">
@@ -142,7 +137,7 @@ const AstrologersCarousel = () => {
                             {astrologer.name}
                           </h3>
                           <p className="text-sm text-gray-600 leading-relaxed">
-                            {astrologer.specialty}
+                            {astrologer.expertise}
                           </p>
                         </div>
 
@@ -154,18 +149,18 @@ const AstrologersCarousel = () => {
                             <span className="text-gray-500">({astrologer.reviews})</span>
                           </div>
                           <div className="text-gray-500">•</div>
-                          <div className="text-gray-600">{astrologer.experience}</div>
+                          <div className="text-gray-600">{astrologer.experience} years</div>
                         </div>
 
                         {/* Languages */}
                         <div className="text-sm text-gray-600">
-                          {astrologer.languages}
+                          {Array.isArray(astrologer.languages) ? astrologer.languages.join(', ') : astrologer.languages}
                         </div>
 
                         {/* Price and Badges */}
                         <div className="flex items-center justify-center space-x-2">
                           <Badge variant="secondary" className="bg-orange-100 text-orange-700">
-                            {astrologer.price}
+                            ₹{astrologer.pricePerMin}/min
                           </Badge>
                           {astrologer.verified && (
                             <Badge variant="secondary" className="bg-green-100 text-green-700">
@@ -179,18 +174,18 @@ const AstrologersCarousel = () => {
                           <Button 
                             size="sm" 
                             className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
-                            data-cursor="pointer"
                           >
                             Chat Now
                           </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="flex-1 border-orange-500 text-orange-600 hover:bg-orange-50"
-                            data-cursor="pointer"
-                          >
-                            View Profile
-                          </Button>
+                          <Link href={`/astrologers/${astrologer._id || astrologer.id}`}>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="flex-1 border-orange-500 text-orange-600 hover:bg-orange-50"
+                            >
+                              View Profile
+                            </Button>
+                          </Link>
                         </div>
                       </div>
                     </CardContent>
@@ -205,13 +200,14 @@ const AstrologersCarousel = () => {
 
         {/* View All Button */}
         <div className="text-center mt-12">
-          <Button 
-            size="lg"
-            className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-            data-cursor="pointer"
-          >
-            View All Astrologers
-          </Button>
+          <Link href="/astrologers">
+            <Button 
+              size="lg"
+              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              View All Astrologers
+            </Button>
+          </Link>
         </div>
       </div>
     </section>

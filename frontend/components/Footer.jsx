@@ -16,7 +16,6 @@ const Footer = () => {
           <Button 
             size="lg"
             className="bg-white text-orange-600 hover:bg-gray-100 shadow-lg hover:shadow-xl transition-all duration-200"
-            data-cursor="pointer"
           >
             Talk Now
           </Button>
@@ -42,13 +41,13 @@ const Footer = () => {
                 Your personal astrology companion for the modern world. Discover, explore, and embrace your cosmic destiny.
               </p>
               <div className="flex space-x-4">
-                <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-orange-600 transition-colors duration-200" data-cursor="pointer">
+                <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-orange-600 transition-colors duration-200">
                   <span className="text-lg">📷</span>
                 </a>
-                <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-orange-600 transition-colors duration-200" data-cursor="pointer">
+                <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-orange-600 transition-colors duration-200">
                   <span className="text-lg">🐦</span>
                 </a>
-                <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-orange-600 transition-colors duration-200" data-cursor="pointer">
+                <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-orange-600 transition-colors duration-200">
                   <span className="text-lg">📺</span>
                 </a>
               </div>
@@ -59,17 +58,17 @@ const Footer = () => {
               <h3 className="text-lg font-semibold text-white">Company</h3>
               <ul className="space-y-3">
                 <li>
-                  <Link href="/about" className="text-gray-400 hover:text-orange-400 transition-colors duration-200" data-cursor="pointer">
+                  <Link href="/about" className="text-gray-400 hover:text-orange-400 transition-colors duration-200">
                     About
                   </Link>
                 </li>
                 <li>
-                  <Link href="/careers" className="text-gray-400 hover:text-orange-400 transition-colors duration-200" data-cursor="pointer">
+                  <Link href="/careers" className="text-gray-400 hover:text-orange-400 transition-colors duration-200">
                     Careers
                   </Link>
                 </li>
                 <li>
-                  <Link href="/press" className="text-gray-400 hover:text-orange-400 transition-colors duration-200" data-cursor="pointer">
+                  <Link href="/press" className="text-gray-400 hover:text-orange-400 transition-colors duration-200">
                     Press
                   </Link>
                 </li>
@@ -81,22 +80,22 @@ const Footer = () => {
               <h3 className="text-lg font-semibold text-white">Services</h3>
               <ul className="space-y-3">
                 <li>
-                  <Link href="/kundli" className="text-gray-400 hover:text-orange-400 transition-colors duration-200" data-cursor="pointer">
+                  <Link href="/kundli" className="text-gray-400 hover:text-orange-400 transition-colors duration-200">
                     Birth Chart
                   </Link>
                 </li>
                 <li>
-                  <Link href="/compatibility" className="text-gray-400 hover:text-orange-400 transition-colors duration-200" data-cursor="pointer">
+                  <Link href="/compatibility" className="text-gray-400 hover:text-orange-400 transition-colors duration-200">
                     Compatibility
                   </Link>
                 </li>
                 <li>
-                  <Link href="/tarot" className="text-gray-400 hover:text-orange-400 transition-colors duration-200" data-cursor="pointer">
+                  <Link href="/tarot" className="text-gray-400 hover:text-orange-400 transition-colors duration-200">
                     Tarot
                   </Link>
                 </li>
                 <li>
-                  <Link href="/numerology" className="text-gray-400 hover:text-orange-400 transition-colors duration-200" data-cursor="pointer">
+                  <Link href="/numerology" className="text-gray-400 hover:text-orange-400 transition-colors duration-200">
                     Numerology
                   </Link>
                 </li>
@@ -108,22 +107,22 @@ const Footer = () => {
               <h3 className="text-lg font-semibold text-white">Support</h3>
               <ul className="space-y-3">
                 <li>
-                  <Link href="/faq" className="text-gray-400 hover:text-orange-400 transition-colors duration-200" data-cursor="pointer">
+                  <Link href="/faq" className="text-gray-400 hover:text-orange-400 transition-colors duration-200">
                     FAQ
                   </Link>
                 </li>
                 <li>
-                  <Link href="/contact" className="text-gray-400 hover:text-orange-400 transition-colors duration-200" data-cursor="pointer">
+                  <Link href="/contact" className="text-gray-400 hover:text-orange-400 transition-colors duration-200">
                     Contact
                   </Link>
                 </li>
                 <li>
-                  <Link href="/privacy" className="text-gray-400 hover:text-orange-400 transition-colors duration-200" data-cursor="pointer">
+                  <Link href="/privacy" className="text-gray-400 hover:text-orange-400 transition-colors duration-200">
                     Privacy Policy
                   </Link>
                 </li>
                 <li>
-                  <Link href="/terms" className="text-gray-400 hover:text-orange-400 transition-colors duration-200" data-cursor="pointer">
+                  <Link href="/terms" className="text-gray-400 hover:text-orange-400 transition-colors duration-200">
                     Terms of Service
                   </Link>
                 </li>

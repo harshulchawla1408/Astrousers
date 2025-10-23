@@ -18,8 +18,8 @@ const ReviewsCarousel = () => {
     },
     {
       id: 2,
-      name: "Rohit K.",
-      location: "Delhi, India",
+      name: "Anushka P.",
+      location: "Srinagar, India",
       rating: 5,
       review: "I had a 3-month consultation and my relationship improved dramatically. Grateful for the practical suggestions.",
       category: "Relationship",
@@ -162,7 +162,7 @@ const ReviewsCarousel = () => {
         {/* Call to Action */}
         <div className="text-center mt-12">
           <p className="text-white/90 mb-4">See more success stories</p>
-          <button className="text-white underline hover:text-white/80 transition-colors duration-200" data-cursor="pointer">
+          <button className="text-white underline hover:text-white/80 transition-colors duration-200">
             All Reviews →
           </button>
         </div>

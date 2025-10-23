@@ -99,7 +99,6 @@ const Hero = () => {
               <Button 
                 size="lg" 
                 className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 text-lg px-8 py-4"
-                data-cursor="pointer"
               >
                 {heroContent.cta}
               </Button>
@@ -107,7 +106,6 @@ const Hero = () => {
                 variant="outline" 
                 size="lg"
                 className="border-blue-500 text-blue-600 hover:bg-blue-50 text-lg px-8 py-4"
-                data-cursor="pointer"
               >
                 {heroContent.secondaryCta}
               </Button>

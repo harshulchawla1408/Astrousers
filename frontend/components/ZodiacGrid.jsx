@@ -95,7 +95,6 @@ const ZodiacGrid = () => {
             <Card 
               key={index} 
               className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-0 shadow-lg bg-white cursor-pointer"
-              data-cursor="pointer"
             >
               <CardContent className="p-6 text-center">
                 <div className={`w-16 h-16 bg-gradient-to-br ${sign.color} rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
