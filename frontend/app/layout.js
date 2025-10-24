@@ -16,6 +16,9 @@ export default function RootLayout({ children }) {
   return (
     <ClerkProvider>
       <html lang="en">
+        <head>
+          <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+        </head>
         <body className="antialiased bg-white text-gray-900">
           {children}
         </body>

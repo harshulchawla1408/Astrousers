@@ -14,8 +14,19 @@ export const upsertUser = async (req, res) => {
       user.profileImage = profileImage;
       await user.save();
     } else {
-      // Create if not exists
-      user = await User.create({ clerkId, email, fullName, profileImage });
+      // Create if not exists with default 100 coins
+      user = await User.create({ 
+        clerkId, 
+        email, 
+        fullName, 
+        profileImage,
+        coins: 100, // Default wallet balance
+        transactions: [{
+          type: 'credit',
+          amount: 100,
+          description: 'Welcome bonus - Account created'
+        }]
+      });
     }
 
     res.status(200).json(user);

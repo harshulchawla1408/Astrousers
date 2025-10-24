@@ -12,28 +12,46 @@ const AstrologersCarousel = () => {
   const [astrologers, setAstrologers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // same query state as /astrologers/page.js
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState({
+    category: '',
+    gender: '',
+    language: '',
+    expertise: ''
+  });
+  const [sortBy, setSortBy] = useState('rating');
+  const [sortOrder, setSortOrder] = useState('desc');
 
   useEffect(() => {
-    const fetchTopAstrologers = async () => {
+    const fetchAstrologers = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/v1/astrologers/top?limit=6');
-        if (!response.ok) {
-          throw new Error('Failed to fetch astrologers');
-        }
+        setLoading(true);
+        const params = new URLSearchParams();
+        if (searchTerm) params.append('search', searchTerm);
+        if (filters.category) params.append('category', filters.category);
+        if (filters.gender) params.append('gender', filters.gender);
+        if (filters.language) params.append('language', filters.language);
+        if (filters.expertise) params.append('expertise', filters.expertise);
+        if (sortBy) params.append('sortBy', sortBy);
+        if (sortOrder) params.append('sortOrder', sortOrder);
+
+        const url = `http://localhost:5000/api/v1/astrologers?${params.toString()}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Failed to fetch astrologers');
         const data = await response.json();
         setAstrologers(data.data || []);
       } catch (err) {
         console.error('Error fetching astrologers:', err);
         setError(err.message);
-        // Set empty array if API fails - no fallback data
         setAstrologers([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTopAstrologers();
-  }, []);
+    fetchAstrologers();
+  }, [searchTerm, filters, sortBy, sortOrder]);
 
   if (loading) {
     return (
@@ -107,7 +125,7 @@ const AstrologersCarousel = () => {
             className="w-full"
           >
             <CarouselContent className="-ml-2 md:-ml-4">
-              {astrologers.map((astrologer) => (
+              {astrologers.slice(0, 4).map((astrologer) => (
                 <CarouselItem key={astrologer._id || astrologer.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
                   <Card className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-0 shadow-lg bg-white">
                     <CardContent className="p-6">
@@ -177,7 +195,7 @@ const AstrologersCarousel = () => {
                           >
                             Chat Now
                           </Button>
-                          <Link href={`/astrologers/${astrologer._id || astrologer.id}`}>
+                          <Link href={`/astrologers/${astrologer._id || astrologer.id}`} scroll={false}>
                             <Button 
                               size="sm" 
                               variant="outline" 
@@ -200,12 +218,12 @@ const AstrologersCarousel = () => {
 
         {/* View All Button */}
         <div className="text-center mt-12">
-          <Link href="/astrologers">
+          <Link href="/astrologers" scroll={false}>
             <Button 
               size="lg"
               className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
             >
-              View All Astrologers
+              Show More
             </Button>
           </Link>
         </div>

@@ -118,6 +118,25 @@ const AstrologersPage = () => {
             <Button className="bg-white text-orange-600 hover:bg-orange-50 border-2 border-white btn-glow">
               Recharge
             </Button>
+            <Button 
+              onClick={async () => {
+                try {
+                  const response = await fetch('http://localhost:5000/api/v1/astrologers/make-online', {
+                    method: 'POST'
+                  });
+                  const data = await response.json();
+                  if (data.success) {
+                    alert('All astrologers are now online!');
+                    window.location.reload();
+                  }
+                } catch (error) {
+                  console.error('Error making astrologers online:', error);
+                }
+              }}
+              className="bg-green-500 text-white hover:bg-green-600 border-2 border-green-400 btn-glow"
+            >
+              Make All Online
+            </Button>
           </div>
         </div>
       </div>
@@ -258,12 +277,8 @@ const AstrologersPage = () => {
                       </Avatar>
                       
                       {/* Online Status */}
-                      <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white/20 ${
-                        astrologer.online ? 'bg-green-500' : 'bg-gray-400'
-                      }`}>
-                        <div className={`w-full h-full rounded-full ${
-                          astrologer.online ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
-                        }`}></div>
+                      <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white/20 bg-green-500">
+                        <div className="w-full h-full rounded-full bg-green-500 animate-pulse"></div>
                       </div>
                     </div>
 
@@ -311,7 +326,7 @@ const AstrologersPage = () => {
                         size="sm" 
                         className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
                       >
-                        {astrologer.online ? 'Call' : 'Busy'}
+                        Call
                       </Button>
                       <Link href={`/astrologers/${astrologer._id}`} scroll={false}>
                         <Button 

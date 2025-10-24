@@ -191,3 +191,31 @@ export const getTopAstrologers = async (req, res) => {
     });
   }
 };
+
+// Update all astrologers to be online and available
+export const makeAllAstrologersOnline = async (req, res) => {
+  try {
+    const result = await Astrologer.updateMany(
+      {},
+      { 
+        online: true,
+        'availability.chat': true,
+        'availability.call': true,
+        'availability.video': true
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'All astrologers are now online and available',
+      modifiedCount: result.modifiedCount
+    });
+  } catch (error) {
+    console.error('Error updating astrologers:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating astrologers',
+      error: error.message
+    });
+  }
+};
