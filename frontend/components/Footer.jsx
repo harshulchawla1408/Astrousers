@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-gradient-to-t from-gray-900 via-gray-900 to-transparent text-gray-300 py-8">
       {/* Top Callout */}
       <div className="bg-gradient-to-r from-orange-500 to-red-500 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -163,7 +163,7 @@ const Footer = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-gray-400 text-sm">
-              © 2025 Astrousers. All rights reserved. We do not share personal data without consent. Read our Privacy Policy.
+              © {new Date().getFullYear()} Astrousers. All rights reserved. We do not share personal data without consent. Read our Privacy Policy.
             </div>
             <div className="flex items-center space-x-4 text-sm text-gray-400">
               <span>Made with ❤️ for astrology lovers</span>
