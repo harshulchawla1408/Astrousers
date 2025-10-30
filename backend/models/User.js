@@ -9,15 +9,15 @@ const transactionSchema = new mongoose.Schema({
 
 const userSchema = new mongoose.Schema(
   {
-    clerkId: { type: String, required: true, unique: true }, // Clerk User ID
-    email: { type: String, required: true, unique: true },
-    fullName: { type: String },
+    clerkId: { type: String, required: true, unique: true },
+    email: { type: String },
+    name: { type: String },
     profileImage: { type: String },
-    dob: { type: Date },  // optional for kundli
-    tob: { type: String }, // optional for kundli
-    city: { type: String }, // optional
-    coins: { type: Number, default: 100 }, // wallet balance with default 100 coins
-    transactions: [transactionSchema], // transaction history
+    dob: { type: Date },
+    tob: { type: String },
+    city: { type: String },
+    wallet: { type: Number, default: 30 },
+    transactions: [transactionSchema]
   },
   { timestamps: true }
 );

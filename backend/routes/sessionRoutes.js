@@ -41,13 +41,13 @@ router.post("/start", requireAuth, async (req, res) => {
       });
     }
 
-    // Check if user has enough coins for at least 1 minute
-    if (user.coins < ratePerMinute) {
+    // Check if user has enough wallet for at least 1 minute
+    if (user.wallet < ratePerMinute) {
       return res.status(400).json({ 
         success: false,
         message: "Insufficient balance",
         requiredCoins: ratePerMinute,
-        currentBalance: user.coins
+        currentBalance: user.wallet
       });
     }
 
@@ -78,7 +78,7 @@ router.post("/start", requireAuth, async (req, res) => {
     res.json({ 
       success: true,
       session: session,
-      currentBalance: user.coins,
+      currentBalance: user.wallet,
       message: "Session started successfully"
     });
   } catch (error) {
@@ -144,17 +144,17 @@ router.post("/end", requireAuth, async (req, res) => {
     }
 
     // Check if user has enough coins
-    if (user.coins < coinsToDeduct) {
+    if (user.wallet < coinsToDeduct) {
       return res.status(400).json({ 
         success: false,
         message: "Insufficient balance to complete session",
         requiredCoins: coinsToDeduct,
-        currentBalance: user.coins
+        currentBalance: user.wallet
       });
     }
 
     // Deduct coins and add transaction
-    user.coins -= coinsToDeduct;
+    user.wallet -= coinsToDeduct;
     user.transactions.push({
       type: "debit",
       amount: coinsToDeduct,
@@ -175,7 +175,7 @@ router.post("/end", requireAuth, async (req, res) => {
       success: true,
       session: session,
       coinsUsed: coinsToDeduct,
-      remainingBalance: user.coins,
+      remainingBalance: user.wallet,
       message: "Session ended successfully"
     });
   } catch (error) {

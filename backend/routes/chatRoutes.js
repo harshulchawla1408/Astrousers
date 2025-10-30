@@ -1,5 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
+import { requireAuth } from "../middleware/clerkAuth.js";
 
 const router = express.Router();
 
@@ -16,9 +17,9 @@ const chatMessageSchema = new mongoose.Schema({
 const ChatMessage = mongoose.model('ChatMessage', chatMessageSchema);
 
 // Get messages for a chat session
-router.get("/messages", async (req, res) => {
+router.get("/messages", requireAuth, async (req, res) => {
   try {
-    const { astrologerId, userId } = req.query;
+    const { astrologerId } = req.query;
     
     if (!astrologerId) {
       return res.status(400).json({ 
@@ -26,8 +27,7 @@ router.get("/messages", async (req, res) => {
       });
     }
 
-    // For now, we'll use a simple userId (in production, get from auth)
-    const currentUserId = userId || "user_" + Date.now();
+    const currentUserId = req.userId;
 
     const messages = await ChatMessage.find({
       astrologerId: astrologerId,
@@ -47,9 +47,9 @@ router.get("/messages", async (req, res) => {
 });
 
 // Send a message
-router.post("/send", async (req, res) => {
+router.post("/send", requireAuth, async (req, res) => {
   try {
-    const { astrologerId, message, sender = 'user', userId } = req.body;
+    const { astrologerId, message, sender = 'user' } = req.body;
     
     if (!astrologerId || !message) {
       return res.status(400).json({ 
@@ -57,8 +57,7 @@ router.post("/send", async (req, res) => {
       });
     }
 
-    // For now, we'll use a simple userId (in production, get from auth)
-    const currentUserId = userId || "user_" + Date.now();
+    const currentUserId = req.userId;
 
     const chatMessage = new ChatMessage({
       astrologerId,
@@ -83,9 +82,9 @@ router.post("/send", async (req, res) => {
 });
 
 // Mark messages as read
-router.put("/read", async (req, res) => {
+router.put("/read", requireAuth, async (req, res) => {
   try {
-    const { astrologerId, userId } = req.body;
+    const { astrologerId } = req.body;
     
     if (!astrologerId || !userId) {
       return res.status(400).json({ 
@@ -95,7 +94,7 @@ router.put("/read", async (req, res) => {
 
     await ChatMessage.updateMany({
       astrologerId,
-      userId,
+      userId: req.userId,
       sender: 'astrologer',
       isRead: false
     }, {
