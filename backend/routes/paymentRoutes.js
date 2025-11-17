@@ -4,7 +4,7 @@ dotenv.config();
 import express from "express";
 import Razorpay from "razorpay";
 import crypto from "crypto";
-import User from "../models/user-temp.js";
+import User from "../models/user.js";
 import { requireAuth } from "../middleware/clerkAuth.js";
 
 const router = express.Router();
