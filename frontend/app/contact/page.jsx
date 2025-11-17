@@ -1,10 +1,7 @@
+"use client";
+
 import { motion } from "framer-motion";
 import Link from "next/link";
-
-export const metadata = {
-  title: "Contact — Astrousers",
-  description: "Contact Astrousers support for questions, feedback or help with consultations and payments.",
-};
 
 export default function Contact() {
   return (
@@ -17,14 +14,17 @@ export default function Contact() {
       >
         <h1 className="text-3xl font-bold mb-6 text-white">Contact Us</h1>
         <p className="mb-4">
-          Have questions, feedback, or need support? We’d love to hear from you. Reach out to our team
-          using the contact details below.
+          Have questions, feedback, or need support? We’d love to hear from you.
+          Reach out to our team using the contact details below.
         </p>
 
         <h2 className="text-xl font-semibold mt-6 mb-3">Customer Support</h2>
         <p>
           Email:{" "}
-          <a href="mailto:support@astrousers.com" className="text-blue-400 underline">
+          <a
+            href="mailto:support@astrousers.com"
+            className="text-blue-400 underline"
+          >
             support@astrousers.com
           </a>
           <br />
@@ -40,7 +40,9 @@ export default function Contact() {
         <p className="mt-8 text-gray-400">We aim to respond within 24 hours.</p>
 
         <div className="mt-8 text-center">
-          <Link href="/" className="text-sm text-gray-400 hover:text-white">← Back to Home</Link>
+          <Link href="/" className="text-sm text-gray-400 hover:text-white">
+            ← Back to Home
+          </Link>
         </div>
       </motion.div>
     </main>
