@@ -1,11 +1,7 @@
 "use client";
+
 import { motion } from "framer-motion";
 import Link from "next/link";
-
-export const metadata = {
-  title: "Cancellation & Refund Policy — Astrousers",
-  description: "Read Astrousers cancellation and refund policy including coins/wallet rules and refund conditions.",
-};
 
 export default function CancellationRefund() {
   return (
@@ -29,14 +25,11 @@ export default function CancellationRefund() {
         </p>
 
         <h2 className="text-xl font-semibold mt-6 mb-3">2. Refund Policy</h2>
-        <p>
-          Refunds will only be issued if:
-          <ul className="list-disc pl-5 mt-2">
-            <li>The astrologer fails to attend the session.</li>
-            <li>A technical error prevents service completion.</li>
-            <li>Duplicate payment is made by mistake.</li>
-          </ul>
-        </p>
+        <ul className="list-disc pl-5 mt-2">
+          <li>The astrologer fails to attend the session.</li>
+          <li>A technical error prevents service completion.</li>
+          <li>Duplicate payment is made by mistake.</li>
+        </ul>
 
         <h2 className="text-xl font-semibold mt-6 mb-3">3. Coins & Wallet</h2>
         <p>

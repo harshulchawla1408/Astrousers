@@ -1,11 +1,7 @@
 "use client";
+
 import { motion } from "framer-motion";
 import Link from "next/link";
-
-export const metadata = {
-  title: "Privacy Policy — Astrousers",
-  description: "Astrousers Privacy Policy: how we collect, use, and protect your personal information.",
-};
 
 export default function PrivacyPolicy() {
   return (
@@ -18,8 +14,8 @@ export default function PrivacyPolicy() {
       >
         <h1 className="text-3xl font-bold mb-6 text-white">Privacy Policy</h1>
         <p className="mb-4">
-          At Astrousers, we value your privacy. This Privacy Policy explains how we collect, use, and
-          protect your personal information when you use our platform.
+          At Astrousers, we value your privacy. This Privacy Policy explains how we collect, use,
+          and protect your personal information when you use our platform.
         </p>
 
         <h2 className="text-xl font-semibold mt-6 mb-3">1. Information We Collect</h2>
@@ -30,8 +26,8 @@ export default function PrivacyPolicy() {
 
         <h2 className="text-xl font-semibold mt-6 mb-3">2. How We Use Your Data</h2>
         <p>
-          Your data is used to personalize your astrological reports, connect you with astrologers,
-          and process payments. We never sell or rent your information to third parties.
+          Your data is used to personalize your reports, connect you with astrologers, and process
+          payments. We never sell or rent your information to third parties.
         </p>
 
         <h2 className="text-xl font-semibold mt-6 mb-3">3. Cookies</h2>
@@ -48,7 +44,7 @@ export default function PrivacyPolicy() {
 
         <h2 className="text-xl font-semibold mt-6 mb-3">5. Contact Us</h2>
         <p>
-          For any privacy-related questions, reach us at{" "}
+          For privacy-related questions, reach us at{" "}
           <a href="mailto:support@astrousers.com" className="text-blue-400 underline">
             support@astrousers.com
           </a>
