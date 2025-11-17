@@ -1,5 +1,5 @@
 import { verifyToken } from '@clerk/clerk-sdk-node';
-import User from '../models/user.js';
+import User from '../models/user-temp.js';
 
 // Clerk JWT verification middleware using Clerk SDK
 export const requireAuth = async (req, res, next) => {

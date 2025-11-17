@@ -1,6 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
-import User from "../models/user.js";
+import User from "../models/user-temp.js";
 import { requireAuth } from "../middleware/clerkAuth.js";
 
 const router = express.Router();
