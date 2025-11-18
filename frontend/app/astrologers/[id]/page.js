@@ -26,15 +26,32 @@ const AstrologerDetailPage = () => {
     const fetchAstrologer = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/astrologers/${params.id}`);
+        setError(null);
+        // Get backend URL and ensure no trailing slash
+        const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000').replace(/\/$/, '');
+        const url = `${backendUrl}/api/v1/astrologers/${params.id}`;
+        
+        console.log('Backend URL:', process.env.NEXT_PUBLIC_BACKEND_URL || 'NOT SET - using fallback');
+        console.log('Fetching astrologer from:', url);
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch astrologer');
+          const errorText = await response.text();
+          console.error('Response error:', response.status, errorText);
+          throw new Error(`Failed to fetch astrologer: ${response.status} ${response.statusText}`);
         }
+        
         const data = await response.json();
+        console.log('Astrologer data received:', data);
         setAstrologer(data.data);
       } catch (err) {
         console.error('Error fetching astrologer:', err);
-        setError(err.message);
+        setError(err.message || 'Failed to fetch astrologer. Please check if the backend is running.');
       } finally {
         setLoading(false);
       }

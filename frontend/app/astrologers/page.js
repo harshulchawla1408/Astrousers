@@ -29,6 +29,7 @@ const AstrologersPage = () => {
     const fetchAstrologers = async () => {
       try {
         setLoading(true);
+        setError(null);
         const params = new URLSearchParams();
         
         if (searchTerm) params.append('search', searchTerm);
@@ -39,15 +40,31 @@ const AstrologersPage = () => {
         if (sortBy) params.append('sortBy', sortBy);
         if (sortOrder) params.append('sortOrder', sortOrder);
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/astrologers?${params.toString()}`);
+        // Get backend URL and ensure no trailing slash
+        const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000').replace(/\/$/, '');
+        const url = `${backendUrl}/api/v1/astrologers?${params.toString()}`;
+        
+        console.log('Backend URL:', process.env.NEXT_PUBLIC_BACKEND_URL || 'NOT SET - using fallback');
+        console.log('Fetching astrologers from:', url);
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch astrologers');
+          const errorText = await response.text();
+          console.error('Response error:', response.status, errorText);
+          throw new Error(`Failed to fetch astrologers: ${response.status} ${response.statusText}`);
         }
+        
         const data = await response.json();
+        console.log('Astrologers data received:', data);
         setAstrologers(data.data || []);
       } catch (err) {
         console.error('Error fetching astrologers:', err);
-        setError(err.message);
+        setError(err.message || 'Failed to fetch astrologers. Please check if the backend is running.');
       } finally {
         setLoading(false);
       }
@@ -121,8 +138,12 @@ const AstrologersPage = () => {
             <Button 
               onClick={async () => {
                 try {
-                  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/astrologers/make-online`, {
-                    method: 'POST'
+                  const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000').replace(/\/$/, '');
+                  const response = await fetch(`${backendUrl}/api/v1/astrologers/make-online`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
                   });
                   const data = await response.json();
                   if (data.success) {
@@ -131,6 +152,7 @@ const AstrologersPage = () => {
                   }
                 } catch (error) {
                   console.error('Error making astrologers online:', error);
+                  alert('Failed to make astrologers online. Please check if the backend is running.');
                 }
               }}
               className="bg-green-500 text-white hover:bg-green-600 border-2 border-green-400 btn-glow"

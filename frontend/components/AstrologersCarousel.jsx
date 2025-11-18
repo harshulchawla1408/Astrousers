@@ -27,6 +27,7 @@ const AstrologersCarousel = () => {
     const fetchAstrologers = async () => {
       try {
         setLoading(true);
+        setError(null);
         const params = new URLSearchParams();
         if (searchTerm) params.append('search', searchTerm);
         if (filters.category) params.append('category', filters.category);
@@ -36,14 +37,31 @@ const AstrologersCarousel = () => {
         if (sortBy) params.append('sortBy', sortBy);
         if (sortOrder) params.append('sortOrder', sortOrder);
 
-        const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/astrologers?${params.toString()}`;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Failed to fetch astrologers');
+        // Get backend URL and ensure no trailing slash
+        const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000').replace(/\/$/, '');
+        const url = `${backendUrl}/api/v1/astrologers?${params.toString()}`;
+        
+        console.log('Backend URL:', process.env.NEXT_PUBLIC_BACKEND_URL || 'NOT SET - using fallback');
+        console.log('Fetching astrologers from:', url);
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Response error:', response.status, errorText);
+          throw new Error(`Failed to fetch astrologers: ${response.status} ${response.statusText}`);
+        }
+        
         const data = await response.json();
+        console.log('Astrologers data received:', data);
         setAstrologers(data.data || []);
       } catch (err) {
         console.error('Error fetching astrologers:', err);
-        setError(err.message);
+        setError(err.message || 'Failed to fetch astrologers. Please check if the backend is running.');
         setAstrologers([]);
       } finally {
         setLoading(false);
