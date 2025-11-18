@@ -9,9 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
-import VideoCall from '@/components/agora/VideoCall';
-import AudioCall from '@/components/agora/AudioCall';
-import ChatBox from '@/components/chat/ChatBox';
+import SessionManager from '@/components/session/SessionManager';
 
 const AstrologerDetailPage = () => {
   const params = useParams();
@@ -19,8 +17,6 @@ const AstrologerDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeMode, setActiveMode] = useState(null); // 'chat', 'audio', 'video'
-  const [showAddCoinsModal, setShowAddCoinsModal] = useState(false);
-  const [userCoins, setUserCoins] = useState(100); // Mock user coins
 
   useEffect(() => {
     const fetchAstrologer = async () => {
@@ -63,28 +59,7 @@ const AstrologerDetailPage = () => {
   }, [params.id]);
 
   const handleCommunication = (mode) => {
-    // Check if user has enough coins
-    const requiredCoins = mode === 'chat' ? 10 : mode === 'audio' ? 50 : 100;
-    
-    if (userCoins < requiredCoins) {
-      setShowAddCoinsModal(true);
-      return;
-    }
-
     setActiveMode(mode);
-  };
-
-  const handleEndCall = (duration) => {
-    // Calculate coins to deduct based on duration
-    const coinsPerMinute = astrologer?.pricePerMin || 10;
-    const coinsToDeduct = Math.ceil((duration / 60) * coinsPerMinute);
-    
-    setUserCoins(prev => Math.max(0, prev - coinsToDeduct));
-    setActiveMode(null);
-  };
-
-  const closeModal = () => {
-    setShowAddCoinsModal(false);
   };
 
   if (loading) {
@@ -199,11 +174,6 @@ const AstrologerDetailPage = () => {
                     <p className="text-3xl font-bold text-orange-400">₹{astrologer.pricePerMin}</p>
                   </div>
 
-                  {/* User Coins Display */}
-                  <div className="bg-blue-500/20 rounded-lg p-3 border border-blue-500/30 mb-4">
-                    <p className="text-white/80 text-sm">Your Coins</p>
-                    <p className="text-2xl font-bold text-blue-400">💰 {userCoins}</p>
-                  </div>
 
                   {/* Action Buttons */}
                   <div className="space-y-3">
@@ -332,63 +302,14 @@ const AstrologerDetailPage = () => {
         </div>
 
         {/* Communication Components */}
-        {activeMode && (
+        {activeMode && astrologer && (
           <div className="mt-8">
-            {activeMode === 'chat' && (
-              <ChatBox 
-                astrologerId={params.id} 
-                astrologerName={astrologer?.name}
-              />
-            )}
-            {activeMode === 'audio' && (
-              <AudioCall 
-                channelName={`audio_${params.id}_${Date.now()}`}
-                astrologerId={params.id}
-                onEndCall={handleEndCall}
-              />
-            )}
-            {activeMode === 'video' && (
-              <VideoCall 
-                channelName={`video_${params.id}_${Date.now()}`}
-                astrologerId={params.id}
-                onEndCall={handleEndCall}
-              />
-            )}
-          </div>
-        )}
-
-        {/* Add Coins Modal */}
-        {showAddCoinsModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <Card className="bg-white/10 backdrop-blur-sm border-0 shadow-xl max-w-md mx-4">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <div className="text-4xl mb-4">💰</div>
-                  <h3 className="text-white text-xl font-semibold mb-2">Insufficient Coins</h3>
-                  <p className="text-white/80 mb-4">
-                    You need more coins to start this session. Add coins to continue.
-                  </p>
-                  <div className="flex space-x-3">
-                    <Button 
-                      onClick={closeModal}
-                      variant="outline"
-                      className="flex-1 border-white/30 text-white hover:bg-white/20"
-                    >
-                      Cancel
-                    </Button>
-                    <Button 
-                      onClick={() => {
-                        setUserCoins(prev => prev + 100);
-                        closeModal();
-                      }}
-                      className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
-                    >
-                      Add 100 Coins
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <SessionManager
+              astrologerId={params.id}
+              astrologerName={astrologer.name}
+              sessionType={activeMode}
+              pricePerMin={astrologer.pricePerMin}
+            />
           </div>
         )}
       </main>

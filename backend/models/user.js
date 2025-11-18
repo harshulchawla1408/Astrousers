@@ -17,7 +17,13 @@ const userSchema = new mongoose.Schema(
     tob: { type: String },
     city: { type: String },
     wallet: { type: Number, default: 30 },
-    transactions: [transactionSchema]
+    transactions: [transactionSchema],
+    // Presence and session fields
+    isOnline: { type: Boolean, default: false },
+    socketId: { type: String, default: null },
+    currentSessionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Session', default: null },
+    lastSeen: { type: Date, default: Date.now },
+    role: { type: String, enum: ['user', 'astrologer', 'admin'], default: 'user' }
   },
   { timestamps: true }
 );

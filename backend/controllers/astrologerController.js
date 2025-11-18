@@ -1,4 +1,6 @@
 import Astrologer from "../models/astrologerModel.js";
+import User from "../models/user.js";
+import { getIO } from "../socket/socketServer.js";
 
 // Get all astrologers with search and filter functionality
 export const getAllAstrologers = async (req, res) => {
@@ -215,6 +217,123 @@ export const makeAllAstrologersOnline = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error updating astrologers',
+      error: error.message
+    });
+  }
+};
+
+// Set astrologer online (presence)
+export const setAstrologerOnline = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+
+    // Verify user is the astrologer
+    const user = await User.findOne({ clerkId: userId });
+    if (!user || user.role !== 'astrologer' || user.clerkId !== id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized: Only astrologers can set their own online status'
+      });
+    }
+
+    await User.findOneAndUpdate(
+      { clerkId: id },
+      { isOnline: true, lastSeen: new Date() }
+    );
+
+    // Note: Astrologer model uses MongoDB _id, but we're using clerkId here
+    // If you need to sync, you'll need to map clerkId to astrologer _id
+
+    // Broadcast updated online list
+    const io = getIO();
+    if (io) {
+      const onlineAstrologers = await User.find({ 
+        role: 'astrologer', 
+        isOnline: true 
+      }).select('clerkId name profileImage');
+      io.emit('presence:online-list', { astrologers: onlineAstrologers });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Astrologer is now online'
+    });
+  } catch (error) {
+    console.error('Error setting astrologer online:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error setting astrologer online',
+      error: error.message
+    });
+  }
+};
+
+// Set astrologer offline (presence)
+export const setAstrologerOffline = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+
+    // Verify user is the astrologer
+    const user = await User.findOne({ clerkId: userId });
+    if (!user || user.role !== 'astrologer' || user.clerkId !== id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized: Only astrologers can set their own offline status'
+      });
+    }
+
+    await User.findOneAndUpdate(
+      { clerkId: id },
+      { isOnline: false, lastSeen: new Date() }
+    );
+
+    // Note: Astrologer model uses MongoDB _id, but we're using clerkId here
+    // If you need to sync, you'll need to map clerkId to astrologer _id
+
+    // Broadcast updated online list
+    const io = getIO();
+    if (io) {
+      const onlineAstrologers = await User.find({ 
+        role: 'astrologer', 
+        isOnline: true 
+      }).select('clerkId name profileImage');
+      io.emit('presence:online-list', { astrologers: onlineAstrologers });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Astrologer is now offline'
+    });
+  } catch (error) {
+    console.error('Error setting astrologer offline:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error setting astrologer offline',
+      error: error.message
+    });
+  }
+};
+
+// Get online astrologers
+export const getOnlineAstrologers = async (req, res) => {
+  try {
+    const onlineUsers = await User.find({ 
+      role: 'astrologer', 
+      isOnline: true 
+    }).select('clerkId name profileImage lastSeen');
+
+    res.status(200).json({
+      success: true,
+      count: onlineUsers.length,
+      data: onlineUsers
+    });
+  } catch (error) {
+    console.error('Error fetching online astrologers:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching online astrologers',
       error: error.message
     });
   }

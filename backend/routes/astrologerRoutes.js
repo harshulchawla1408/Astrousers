@@ -6,18 +6,26 @@ import {
   updateAstrologer,
   deleteAstrologer,
   getTopAstrologers,
-  makeAllAstrologersOnline
+  makeAllAstrologersOnline,
+  setAstrologerOnline,
+  setAstrologerOffline,
+  getOnlineAstrologers
 } from "../controllers/astrologerController.js";
+import { requireAuth } from "../middleware/clerkAuth.js";
 
 const router = express.Router();
 
 // Routes
 router.get("/", getAllAstrologers);
 router.get("/top", getTopAstrologers);
+router.get("/online", getOnlineAstrologers);
 router.get("/:id", getAstrologerById);
 router.post("/", createAstrologer);
 router.put("/:id", updateAstrologer);
 router.delete("/:id", deleteAstrologer);
 router.post("/make-online", makeAllAstrologersOnline);
+// Presence endpoints (require auth)
+router.post("/:id/online", requireAuth, setAstrologerOnline);
+router.post("/:id/offline", requireAuth, setAstrologerOffline);
 
 export default router;

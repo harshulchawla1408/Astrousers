@@ -7,6 +7,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import hpp from "hpp";
 import xss from "xss"; // modern XSS sanitizer
+import { createServer } from "http";
 
 import userRoutes from "./routes/userRoutes.js";
 import kundliRoutes from "./routes/kundliRoutes.js";
@@ -15,10 +16,12 @@ import agoraRoutes from "./routes/agoraRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import sessionRoutes from "./routes/sessionRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import { initializeSocket } from "./socket/socketServer.js";
 
 dotenv.config();
 
 const app = express();
+const httpServer = createServer(app);
 
 // -------------------- Middlewares --------------------
 app.use(cors());
@@ -95,9 +98,13 @@ app.use((err, req, res, next) => {
   });
 });
 
+// -------------------- Initialize Socket.io --------------------
+initializeSocket(httpServer);
+
 // -------------------- Start Server --------------------
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`🚀 Backend running on port ${PORT}`);
+  console.log(`🔌 Socket.io server initialized`);
 });
