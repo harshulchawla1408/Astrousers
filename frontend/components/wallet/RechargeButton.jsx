@@ -24,7 +24,7 @@ export default function RechargeButton() {
       const token = await user.getToken();
 
       // Step 1: Create Razorpay order
-      const orderResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/payment/create-order`, {
+      const orderResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/payment/create-order`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -50,7 +50,7 @@ export default function RechargeButton() {
         handler: async (response) => {
           try {
             // Step 3: Verify payment
-            const verifyResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/payment/verify`, {
+            const verifyResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/payment/verify`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",

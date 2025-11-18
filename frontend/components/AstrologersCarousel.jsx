@@ -36,7 +36,7 @@ const AstrologersCarousel = () => {
         if (sortBy) params.append('sortBy', sortBy);
         if (sortOrder) params.append('sortOrder', sortOrder);
 
-        const url = `http://localhost:5000/api/v1/astrologers?${params.toString()}`;
+        const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/astrologers?${params.toString()}`;
         const response = await fetch(url);
         if (!response.ok) throw new Error('Failed to fetch astrologers');
         const data = await response.json();

@@ -57,7 +57,7 @@ export default function KundliPage() {
         .join(" ");
 
       // Try JSON first to see if backend returns an URL; if not, fallback to blob
-      const response = await fetch("/api/v1/kundli/generate", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/kundli/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, dob, tob, city: normalizedCity }),

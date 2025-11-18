@@ -39,7 +39,7 @@ const AstrologersPage = () => {
         if (sortBy) params.append('sortBy', sortBy);
         if (sortOrder) params.append('sortOrder', sortOrder);
 
-        const response = await fetch(`http://localhost:5000/api/v1/astrologers?${params.toString()}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/astrologers?${params.toString()}`);
         if (!response.ok) {
           throw new Error('Failed to fetch astrologers');
         }
@@ -121,7 +121,7 @@ const AstrologersPage = () => {
             <Button 
               onClick={async () => {
                 try {
-                  const response = await fetch('http://localhost:5000/api/v1/astrologers/make-online', {
+                  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/astrologers/make-online`, {
                     method: 'POST'
                   });
                   const data = await response.json();

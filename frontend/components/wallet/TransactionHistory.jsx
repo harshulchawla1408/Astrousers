@@ -25,7 +25,7 @@ export default function TransactionHistory() {
       const token = await user.getToken();
       
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/payment/history?page=${currentPage}&limit=10`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/payment/history?page=${currentPage}&limit=10`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,

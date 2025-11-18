@@ -16,7 +16,7 @@ export const useWallet = () => {
       setError(null);
       
       const token = await user.getToken();
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/payment/balance`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/payment/balance`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -46,7 +46,7 @@ export const useWallet = () => {
 
     try {
       const token = await user.getToken();
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/payment/balance`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/payment/balance`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -80,7 +80,7 @@ export const useWallet = () => {
 
     try {
       const token = await user.getToken();
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/start`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/sessions/start`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -114,7 +114,7 @@ export const useWallet = () => {
 
     try {
       const token = await user.getToken();
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/end`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/sessions/end`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

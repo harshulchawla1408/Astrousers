@@ -26,7 +26,7 @@ const AstrologerDetailPage = () => {
     const fetchAstrologer = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/api/v1/astrologers/${params.id}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/astrologers/${params.id}`);
         if (!response.ok) {
           throw new Error('Failed to fetch astrologer');
         }

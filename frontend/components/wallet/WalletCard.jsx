@@ -22,7 +22,7 @@ export default function WalletCard() {
       setLoading(true);
       const token = await user.getToken();
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/payment/balance`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/payment/balance`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

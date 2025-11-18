@@ -56,7 +56,7 @@ export default function ChatBox({ astrologerId, astrologerName = "Astrologer" })
   const loadMessages = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/chat/messages?astrologerId=${astrologerId}`
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/chat/messages?astrologerId=${astrologerId}`
       );
       
       if (response.ok) {
@@ -81,7 +81,7 @@ export default function ChatBox({ astrologerId, astrologerName = "Astrologer" })
     try {
       setIsLoading(true);
       
-      const response = await fetch("http://localhost:5000/api/chat/send", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/chat/send`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

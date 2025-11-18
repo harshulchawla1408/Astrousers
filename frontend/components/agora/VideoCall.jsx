@@ -39,7 +39,7 @@ export default function VideoCall({ channelName, astrologerId, onEndCall }) {
       try {
         setIsLoading(true);
         const response = await fetch(
-          `http://localhost:5000/api/agora/token?channel=${channelName}&uid=${Date.now()}`
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/agora/token?channel=${channelName}&uid=${Date.now()}`
         );
         
         if (!response.ok) {
