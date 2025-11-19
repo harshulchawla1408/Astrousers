@@ -232,8 +232,8 @@ router.post("/end", requireAuth, async (req, res) => {
     const coinsToDeduct = Math.ceil((finalDuration / 60) * ratePerMinute);
 
     // Get user and deduct coins
-    const user = await User.findOne({ clerkId: req.userId });
-    if (!user) {
+    const existingUser = await User.findOne({ clerkId: req.userId });
+    if (!existingUser) {
       return res.status(404).json({ 
         success: false,
         message: "User not found" 
@@ -241,24 +241,24 @@ router.post("/end", requireAuth, async (req, res) => {
     }
 
     // Check if user has enough coins
-    if (user.wallet < coinsToDeduct) {
+    if (existingUser.wallet < coinsToDeduct) {
       return res.status(400).json({ 
         success: false,
         message: "Insufficient balance to complete session",
         requiredCoins: coinsToDeduct,
-        currentBalance: user.wallet
+        currentBalance: existingUser.wallet
       });
     }
 
     // Deduct coins and add transaction
-    user.wallet -= coinsToDeduct;
-    user.transactions.push({
+    existingUser.wallet -= coinsToDeduct;
+    existingUser.transactions.push({
       type: "debit",
       amount: coinsToDeduct,
       description: `${session.sessionType} session with astrologer ${session.astrologerId}`,
     });
 
-    await user.save();
+    await existingUser.save();
 
     // Update session
     session.endTime = endTime;
@@ -272,7 +272,7 @@ router.post("/end", requireAuth, async (req, res) => {
       success: true,
       session: session,
       coinsUsed: coinsToDeduct,
-      remainingBalance: user.wallet,
+      remainingBalance: existingUser.wallet,
       message: "Session ended successfully"
     });
   } catch (error) {
