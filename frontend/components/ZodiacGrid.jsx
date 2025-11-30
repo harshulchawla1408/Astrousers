@@ -1,82 +1,10 @@
 'use client';
 
+import Link from 'next/link';
 import { Card, CardContent } from "@/components/ui/card";
+import { zodiacs } from "@/data/zodiacs";
 
 const ZodiacGrid = () => {
-  const zodiacSigns = [
-    {
-      name: "Aries",
-      dateRange: "Mar 21 - Apr 19",
-      symbol: "♈",
-      color: "from-red-400 to-pink-500"
-    },
-    {
-      name: "Taurus",
-      dateRange: "Apr 20 - May 20",
-      symbol: "♉",
-      color: "from-green-400 to-emerald-500"
-    },
-    {
-      name: "Gemini",
-      dateRange: "May 21 - Jun 20",
-      symbol: "♊",
-      color: "from-yellow-400 to-orange-500"
-    },
-    {
-      name: "Cancer",
-      dateRange: "Jun 21 - Jul 22",
-      symbol: "♋",
-      color: "from-blue-400 to-cyan-500"
-    },
-    {
-      name: "Leo",
-      dateRange: "Jul 23 - Aug 22",
-      symbol: "♌",
-      color: "from-orange-400 to-yellow-500"
-    },
-    {
-      name: "Virgo",
-      dateRange: "Aug 23 - Sep 22",
-      symbol: "♍",
-      color: "from-purple-400 to-violet-500"
-    },
-    {
-      name: "Libra",
-      dateRange: "Sep 23 - Oct 22",
-      symbol: "♎",
-      color: "from-pink-400 to-rose-500"
-    },
-    {
-      name: "Scorpio",
-      dateRange: "Oct 23 - Nov 21",
-      symbol: "♏",
-      color: "from-red-500 to-orange-500"
-    },
-    {
-      name: "Sagittarius",
-      dateRange: "Nov 22 - Dec 21",
-      symbol: "♐",
-      color: "from-blue-500 to-purple-500"
-    },
-    {
-      name: "Capricorn",
-      dateRange: "Dec 22 - Jan 19",
-      symbol: "♑",
-      color: "from-gray-500 to-slate-500"
-    },
-    {
-      name: "Aquarius",
-      dateRange: "Jan 20 - Feb 18",
-      symbol: "♒",
-      color: "from-cyan-400 to-blue-500"
-    },
-    {
-      name: "Pisces",
-      dateRange: "Feb 19 - Mar 20",
-      symbol: "♓",
-      color: "from-indigo-400 to-purple-500"
-    }
-  ];
 
   return (
     <section className="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
@@ -91,23 +19,28 @@ const ZodiacGrid = () => {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-          {zodiacSigns.map((sign, index) => (
-            <Card 
-              key={index} 
-              className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-0 shadow-lg bg-white cursor-pointer"
+          {zodiacs.map((sign, index) => (
+            <Link 
+              key={index}
+              href={`/zodiac/${sign.slug}`}
+              className="block"
             >
-              <CardContent className="p-6 text-center">
-                <div className={`w-16 h-16 bg-gradient-to-br ${sign.color} rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                  <span className="text-2xl text-white">{sign.symbol}</span>
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors duration-200">
-                  {sign.name}
-                </h3>
-                <p className="text-sm text-gray-600">
-                  {sign.dateRange}
-                </p>
-              </CardContent>
-            </Card>
+              <Card 
+                className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-0 shadow-lg bg-white cursor-pointer h-full"
+              >
+                <CardContent className="p-6 text-center">
+                  <div className={`w-16 h-16 bg-gradient-to-br ${sign.color} rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                    <span className="text-2xl text-white">{sign.symbol}</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors duration-200">
+                    {sign.name}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {sign.dates}
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
 

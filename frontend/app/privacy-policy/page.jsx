@@ -45,8 +45,8 @@ export default function PrivacyPolicy() {
         <h2 className="text-xl font-semibold mt-6 mb-3">5. Contact Us</h2>
         <p>
           For privacy-related questions, reach us at{" "}
-          <a href="mailto:support@astrousers.com" className="text-blue-400 underline">
-            support@astrousers.com
+          <a href="mailto:support@Astrousers.com" className="text-blue-400 underline">
+            support@Astrousers.com
           </a>
         </p>
 

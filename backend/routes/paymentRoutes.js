@@ -25,8 +25,8 @@ const razorpay = new Razorpay({
   key_secret: RAZORPAY_KEY_SECRET,
 });
 
-// Step 1: Create Razorpay Order
-router.post("/create-order", requireAuth, async (req, res) => {
+// Step 1: Create Razorpay Order (POST /api/v1/payments/order)
+router.post("/order", async (req, res) => {
   try {
     const { amount } = req.body; // amount in INR
 
@@ -37,12 +37,22 @@ router.post("/create-order", requireAuth, async (req, res) => {
       });
     }
 
+    // Get userId from body or header
+    const userId = req.body.userId || req.headers['x-user-id'];
+    
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "userId is required",
+      });
+    }
+
     const options = {
       amount: amount * 100, // convert to paise
       currency: "INR",
-      receipt: `receipt_${Date.now()}_${req.userId}`,
+      receipt: `receipt_${Date.now()}_${userId}`,
       notes: {
-        userId: req.userId,
+        userId: userId,
         type: "wallet_recharge",
       },
     };
@@ -64,8 +74,8 @@ router.post("/create-order", requireAuth, async (req, res) => {
   }
 });
 
-// Step 2: Verify Payment and Credit Coins
-router.post("/verify", requireAuth, async (req, res) => {
+// Step 2: Verify Payment and Credit Coins (POST /api/v1/payments/verify)
+router.post("/verify", async (req, res) => {
   try {
     const {
       razorpay_order_id,
@@ -95,8 +105,19 @@ router.post("/verify", requireAuth, async (req, res) => {
       });
     }
 
-    // Credit wallet (1 INR = 1 coin)
-    const user = await User.findOne({ clerkId: req.userId });
+    // Get userId from notes or body
+    const userId = req.body.userId || req.body.razorpay_order_id?.notes?.userId;
+    
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "userId is required",
+      });
+    }
+
+    // Credit wallet (1 INR = 1 coin, or custom rate)
+    const coinsPurchased = req.body.coinsPurchased || amount; // Default 1:1 ratio
+    const user = await User.findOne({ clerkId: userId });
 
     if (!user) {
       return res.status(404).json({
@@ -106,13 +127,13 @@ router.post("/verify", requireAuth, async (req, res) => {
     }
 
     // Add coins to wallet
-    user.wallet += amount;
+    user.wallet += coinsPurchased;
 
     // Add transaction record
     user.transactions.push({
       type: "credit",
-      amount: amount,
-      description: `Wallet Recharge via Razorpay - Order: ${razorpay_order_id}`,
+      amount: coinsPurchased,
+      description: `Wallet Recharge via Razorpay - Order: ${razorpay_order_id} - Amount: ₹${amount}`,
     });
 
     await user.save();
@@ -121,6 +142,7 @@ router.post("/verify", requireAuth, async (req, res) => {
       success: true,
       message: "Payment verified and coins credited",
       newBalance: user.wallet,
+      coinsPurchased: coinsPurchased,
       transactionId: razorpay_payment_id,
     });
   } catch (error) {
@@ -134,9 +156,16 @@ router.post("/verify", requireAuth, async (req, res) => {
 });
 
 // Get user wallet balance
-router.get("/balance", requireAuth, async (req, res) => {
+router.get("/balance", async (req, res) => {
   try {
-    const user = await User.findOne({ clerkId: req.userId });
+    const userId = req.query.userId || req.headers['x-user-id'];
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "userId is required",
+      });
+    }
+    const user = await User.findOne({ clerkId: userId });
 
     if (!user) {
       return res.status(404).json({
@@ -161,10 +190,17 @@ router.get("/balance", requireAuth, async (req, res) => {
 });
 
 // Get transaction history
-router.get("/history", requireAuth, async (req, res) => {
+router.get("/history", async (req, res) => {
   try {
-    const { page = 1, limit = 20 } = req.query;
-    const user = await User.findOne({ clerkId: req.userId });
+    const { page = 1, limit = 20, userId } = req.query;
+    const targetUserId = userId || req.headers['x-user-id'];
+    if (!targetUserId) {
+      return res.status(400).json({
+        success: false,
+        message: "userId is required",
+      });
+    }
+    const user = await User.findOne({ clerkId: targetUserId });
 
     if (!user) {
       return res.status(404).json({

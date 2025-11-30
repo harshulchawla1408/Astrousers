@@ -1,6 +1,7 @@
 import { Server } from 'socket.io';
 import { verifyToken } from '@clerk/clerk-sdk-node';
 import User from '../models/user.js';
+import Astrologer from '../models/astrologerModel.js';
 import Session from '../models/sessionModel.js';
 import Message from '../models/messageModel.js';
 
@@ -71,15 +72,19 @@ export const initializeSocket = (server) => {
     // Join user's personal room
     socket.join(`user:${socket.userId}`);
 
-    // If user is astrologer, join astrologer room
+    // If user is astrologer, join astrologer room and update astrologers collection
     const currentUser = await User.findOne({ clerkId: socket.userId });
     if (currentUser && currentUser.role === 'astrologer') {
       socket.join('astrologers');
+      // Update astrologers collection if clerkId matches
+      await Astrologer.findOneAndUpdate(
+        { clerkId: socket.userId },
+        { online: true },
+        { upsert: false }
+      );
       // Broadcast updated online list
-      const onlineAstrologers = await User.find({ 
-        role: 'astrologer', 
-        isOnline: true 
-      }).select('clerkId name profileImage');
+      const onlineAstrologers = await Astrologer.find({ online: true })
+        .select('_id name image rating pricePerMin availability');
       io.emit('presence:online-list', { astrologers: onlineAstrologers });
     }
 
@@ -92,10 +97,14 @@ export const initializeSocket = (server) => {
       );
       
       if (currentUser && currentUser.role === 'astrologer') {
-        const onlineAstrologers = await User.find({ 
-          role: 'astrologer', 
-          isOnline: true 
-        }).select('clerkId name profileImage');
+        // Update astrologers collection
+        await Astrologer.findOneAndUpdate(
+          { clerkId: socket.userId },
+          { online: true },
+          { upsert: false }
+        );
+        const onlineAstrologers = await Astrologer.find({ online: true })
+          .select('_id name image rating pricePerMin availability');
         io.emit('presence:online-list', { astrologers: onlineAstrologers });
       }
     });
@@ -109,10 +118,14 @@ export const initializeSocket = (server) => {
       );
       
       if (currentUser && currentUser.role === 'astrologer') {
-        const onlineAstrologers = await User.find({ 
-          role: 'astrologer', 
-          isOnline: true 
-        }).select('clerkId name profileImage');
+        // Update astrologers collection
+        await Astrologer.findOneAndUpdate(
+          { clerkId: socket.userId },
+          { online: false },
+          { upsert: false }
+        );
+        const onlineAstrologers = await Astrologer.find({ online: true })
+          .select('_id name image rating pricePerMin availability');
         io.emit('presence:online-list', { astrologers: onlineAstrologers });
       }
     });
@@ -135,7 +148,7 @@ export const initializeSocket = (server) => {
       }
     });
 
-    // Handle message:send
+    // Handle message:send (chat messages)
     socket.on('message:send', async (data) => {
       try {
         const { sessionId, text } = data;
@@ -151,12 +164,26 @@ export const initializeSocket = (server) => {
           return;
         }
 
-        // Determine recipient
-        const toUserId = socket.userId === session.userId 
-          ? session.astrologerId 
-          : session.userId;
+        // Verify session is active
+        if (session.status !== 'active') {
+          socket.emit('message:error', { message: 'Session is not active' });
+          return;
+        }
 
-        // Save message to DB
+        // Verify user is part of this session
+        const isUser = session.userId === socket.userId;
+        const astrologer = await Astrologer.findById(session.astrologerId);
+        const isAstrologer = astrologer && astrologer.clerkId === socket.userId;
+
+        if (!isUser && !isAstrologer) {
+          socket.emit('message:error', { message: 'Unauthorized' });
+          return;
+        }
+
+        // Determine recipient
+        const toUserId = isUser ? session.astrologerId : session.userId;
+
+        // Save message to DB (using chatmessages collection)
         const message = new Message({
           sessionId,
           fromUserId: socket.userId,
@@ -168,6 +195,7 @@ export const initializeSocket = (server) => {
 
         // Emit to session room
         io.to(`session:${sessionId}`).emit('message:receive', {
+          _id: message._id,
           sessionId,
           fromUserId: socket.userId,
           toUserId,
@@ -180,8 +208,8 @@ export const initializeSocket = (server) => {
       }
     });
 
-    // Handle session request (user starts session)
-    socket.on('session:request', async (data) => {
+    // Handle session:accept (astrologer accepts)
+    socket.on('session:accept', async (data) => {
       try {
         const { sessionId } = data;
         const session = await Session.findById(sessionId);
@@ -191,19 +219,65 @@ export const initializeSocket = (server) => {
           return;
         }
 
-        // Notify astrologer
-        const astrologer = await User.findOne({ clerkId: session.astrologerId });
-        if (astrologer && astrologer.socketId) {
-          io.to(astrologer.socketId).emit('session:request', {
-            sessionId: session._id.toString(),
-            userId: session.userId,
-            sessionType: session.sessionType,
-            channelName: session.channelName
-          });
-        }
+        // Notify user
+        io.to(`user:${session.userId}`).emit('session:accepted', {
+          sessionId: session._id.toString(),
+          channelName: session.channelName,
+          sessionType: session.sessionType
+        });
       } catch (error) {
-        console.error('Error handling session request:', error);
-        socket.emit('session:error', { message: 'Failed to send session request' });
+        console.error('Error handling session accept:', error);
+        socket.emit('session:error', { message: 'Failed to accept session' });
+      }
+    });
+
+    // Handle session:reject (astrologer rejects)
+    socket.on('session:reject', async (data) => {
+      try {
+        const { sessionId } = data;
+        const session = await Session.findById(sessionId);
+        
+        if (!session) {
+          socket.emit('session:error', { message: 'Session not found' });
+          return;
+        }
+
+        // Notify user
+        io.to(`user:${session.userId}`).emit('session:rejected', {
+          sessionId: session._id.toString(),
+          message: 'Astrologer declined your consultation request'
+        });
+      } catch (error) {
+        console.error('Error handling session reject:', error);
+        socket.emit('session:error', { message: 'Failed to reject session' });
+      }
+    });
+
+    // Handle call signaling (for audio/video calls)
+    socket.on('call:signal', async (data) => {
+      try {
+        const { sessionId, signal, type } = data;
+        const session = await Session.findById(sessionId);
+        
+        if (!session) {
+          socket.emit('call:error', { message: 'Session not found' });
+          return;
+        }
+
+        // Forward signal to other party in session
+        const targetUserId = socket.userId === session.userId 
+          ? session.astrologerId 
+          : session.userId;
+        
+        io.to(`user:${targetUserId}`).emit('call:signal', {
+          sessionId,
+          signal,
+          type,
+          from: socket.userId
+        });
+      } catch (error) {
+        console.error('Error handling call signal:', error);
+        socket.emit('call:error', { message: 'Failed to send signal' });
       }
     });
 
@@ -222,10 +296,14 @@ export const initializeSocket = (server) => {
       );
 
       if (currentUser && currentUser.role === 'astrologer') {
-        const onlineAstrologers = await User.find({ 
-          role: 'astrologer', 
-          isOnline: true 
-        }).select('clerkId name profileImage');
+        // Update astrologers collection
+        await Astrologer.findOneAndUpdate(
+          { clerkId: socket.userId },
+          { online: false },
+          { upsert: false }
+        );
+        const onlineAstrologers = await Astrologer.find({ online: true })
+          .select('_id name image rating pricePerMin availability');
         io.emit('presence:online-list', { astrologers: onlineAstrologers });
       }
     });

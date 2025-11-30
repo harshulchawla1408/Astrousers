@@ -9,7 +9,7 @@ Create a `.env` file in the `backend` directory with the following variables:
 
 ```env
 # MongoDB Configuration
-MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/astrousers?retryWrites=true&w=majority
+MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/Astrousers?retryWrites=true&w=majority
 
 # Clerk Authentication
 CLERK_SECRET_KEY=sk_test_your_clerk_secret_key_here

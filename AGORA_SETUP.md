@@ -7,7 +7,7 @@ Create a `.env` file in the `backend` directory with the following variables:
 
 ```env
 # MongoDB Configuration
-MONGO_URI=mongodb://localhost:27017/astrousers
+MONGO_URI=mongodb://localhost:27017/Astrousers
 
 # Agora Configuration
 AGORA_APP_ID=your_agora_app_id_here

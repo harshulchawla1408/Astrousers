@@ -24,7 +24,15 @@ const app = express();
 const httpServer = createServer(app);
 
 // -------------------- Middlewares --------------------
-app.use(cors());
+// CORS configuration - allow all origins in development
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || '*', // Allow all origins in dev, restrict in production
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id']
+}));
+
+// Body parsing middleware - MUST be before routes
 app.use(express.json({ limit: "10mb" })); // JSON payload limit
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
@@ -51,7 +59,30 @@ function sanitizeObject(obj) {
   return sanitized;
 }
 
+// Request logging middleware (for debugging)
 app.use((req, res, next) => {
+  if (req.path === '/api/users/sync' || req.path === '/api/v1/user') {
+    console.log(`📥 Incoming request to ${req.path}`);
+    console.log('📥 Method:', req.method);
+    console.log('📥 Headers:', {
+      'content-type': req.headers['content-type'],
+      'authorization': req.headers['authorization'] ? 'Present' : 'Missing'
+    });
+    console.log('📥 Body:', JSON.stringify(req.body, null, 2));
+  }
+  next();
+});
+
+// Sanitization middleware - SKIP for user endpoints to preserve all fields
+app.use((req, res, next) => {
+  // Skip sanitization for user endpoints to preserve all fields
+  if (req.path === '/api/users/sync' || 
+      req.path === '/api/v1/user' || 
+      req.path.startsWith('/api/v1/user/')) {
+    console.log(`⏭️ Skipping sanitization for ${req.path}`);
+    return next();
+  }
+  
   if (req.body && typeof req.body === "object") {
     req.body = sanitizeObject(req.body);
   }
@@ -72,22 +103,92 @@ app.get("/", (req, res) => {
   res.send("🔮 Astrousers API is running...");
 });
 
+// Health check endpoint
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    uptime: process.uptime()
+  });
+});
+
 app.use("/api/users", userRoutes);
+app.use("/api/v1/user", userRoutes); // Primary route for user creation/update
 app.use("/api/v1/kundli", kundliRoutes);
 app.use("/api/v1/astrologers", astrologerRoutes);
 app.use("/api/agora", agoraRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/sessions", sessionRoutes);
+app.use("/api/v1/sessions", sessionRoutes); // Primary route for sessions
 app.use("/api/payment", paymentRoutes);
 
 // -------------------- MongoDB Connection --------------------
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => {
-    console.error("❌ MongoDB connection error:", err);
-    process.exit(1); // Exit process on DB failure
-  });
+const connectDB = async () => {
+  try {
+    if (!process.env.MONGO_URI) {
+      console.error("❌ MONGO_URI is not defined in environment variables");
+      console.error("❌ Please set MONGO_URI in your .env file");
+      process.exit(1);
+    }
+
+    console.log("🔄 Attempting to connect to MongoDB...");
+    
+    const conn = await mongoose.connect(process.env.MONGO_URI, {
+      // Modern connection options
+      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+      socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+    });
+
+    console.log(`✅ MongoDB connected successfully!`);
+    console.log(`   Host: ${conn.connection.host}`);
+    console.log(`   Database: ${conn.connection.name}`);
+    console.log(`   Ready State: ${conn.connection.readyState} (1 = connected)`);
+    
+    // Log connection events
+    mongoose.connection.on('error', (err) => {
+      console.error('❌ MongoDB connection error:', err.message);
+      console.error('❌ Error details:', err);
+    });
+
+    mongoose.connection.on('disconnected', () => {
+      console.warn('⚠️ MongoDB disconnected - attempting to reconnect...');
+    });
+
+    mongoose.connection.on('reconnected', () => {
+      console.log('✅ MongoDB reconnected successfully');
+    });
+
+    mongoose.connection.on('connecting', () => {
+      console.log('🔄 MongoDB connecting...');
+    });
+
+  } catch (err) {
+    console.error("❌ MongoDB connection failed!");
+    console.error("❌ Error message:", err.message);
+    
+    // Provide helpful error messages
+    if (err.message.includes('authentication failed')) {
+      console.error("❌ Authentication failed - check your MongoDB username and password");
+    } else if (err.message.includes('ENOTFOUND') || err.message.includes('getaddrinfo')) {
+      console.error("❌ Network error - check your MongoDB cluster URL");
+    } else if (err.message.includes('timeout')) {
+      console.error("❌ Connection timeout - check your network and MongoDB Atlas IP whitelist");
+    } else {
+      console.error("❌ Full error:", err);
+    }
+    
+    console.error("\n💡 Troubleshooting tips:");
+    console.error("   1. Verify MONGO_URI in your .env file");
+    console.error("   2. Check MongoDB Atlas IP whitelist (should include 0.0.0.0/0 for development)");
+    console.error("   3. Verify database user credentials");
+    console.error("   4. Check your internet connection");
+    
+    process.exit(1);
+  }
+};
+
+connectDB();
 
 // -------------------- Global Error Handling --------------------
 app.use((err, req, res, next) => {

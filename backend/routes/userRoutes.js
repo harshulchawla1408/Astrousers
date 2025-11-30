@@ -1,19 +1,21 @@
 import express from "express";
 import { createOrUpdateUser, getUserProfile, updateUserWallet, updateUserProfile } from "../controllers/userController.js";
-import { requireAuth } from "../middleware/clerkAuth.js";
 
 const router = express.Router();
 
-// Sync or create user after signup/login
-router.post("/sync", requireAuth, createOrUpdateUser);
+// Create or update user after signup/login (primary route)
+router.post("/", createOrUpdateUser);
+
+// Sync route (points to same function)
+router.post("/sync", createOrUpdateUser);
 
 // Get current user's profile
-router.get("/me", requireAuth, getUserProfile);
+router.get("/me", getUserProfile);
 
 // Update current user's profile
-router.patch("/me", requireAuth, updateUserProfile);
+router.patch("/me", updateUserProfile);
 
 // Update wallet (increment or set)
-router.patch("/wallet", requireAuth, updateUserWallet);
+router.patch("/wallet", updateUserWallet);
 
 export default router;

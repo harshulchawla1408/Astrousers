@@ -338,3 +338,37 @@ export const getOnlineAstrologers = async (req, res) => {
     });
   }
 };
+
+// Check if clerkId exists in astrologers collection
+export const checkAstrologerByClerkId = async (req, res) => {
+  try {
+    const { clerkId } = req.params;
+    
+    if (!clerkId) {
+      return res.status(400).json({
+        success: false,
+        message: "clerkId is required"
+      });
+    }
+
+    const astrologer = await Astrologer.findOne({ clerkId });
+    
+    res.status(200).json({
+      success: true,
+      exists: !!astrologer,
+      astrologer: astrologer ? {
+        _id: astrologer._id,
+        name: astrologer.name,
+        expertise: astrologer.expertise,
+        online: astrologer.online
+      } : null
+    });
+  } catch (error) {
+    console.error('Error checking astrologer:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error checking astrologer',
+      error: error.message
+    });
+  }
+};

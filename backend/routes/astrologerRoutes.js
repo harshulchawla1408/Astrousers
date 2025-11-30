@@ -9,7 +9,8 @@ import {
   makeAllAstrologersOnline,
   setAstrologerOnline,
   setAstrologerOffline,
-  getOnlineAstrologers
+  getOnlineAstrologers,
+  checkAstrologerByClerkId
 } from "../controllers/astrologerController.js";
 import { requireAuth } from "../middleware/clerkAuth.js";
 
@@ -19,6 +20,7 @@ const router = express.Router();
 router.get("/", getAllAstrologers);
 router.get("/top", getTopAstrologers);
 router.get("/online", getOnlineAstrologers);
+router.get("/check/:clerkId", checkAstrologerByClerkId); // Check if clerkId is astrologer
 router.get("/:id", getAstrologerById);
 router.post("/", createAstrologer);
 router.put("/:id", updateAstrologer);

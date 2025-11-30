@@ -5,8 +5,8 @@ import { requireAuth } from "../middleware/clerkAuth.js";
 const router = express.Router();
 const { RtcTokenBuilder, RtcRole } = pkg;
 
-// Generate Agora token for video/audio calls (POST endpoint) - requires auth
-router.post("/token", requireAuth, (req, res) => {
+// Generate Agora token for video/audio calls (POST /api/v1/agora/token)
+router.post("/token", (req, res) => {
   try {
     const appID = process.env.AGORA_APP_ID;
     const appCertificate = process.env.AGORA_APP_CERTIFICATE;

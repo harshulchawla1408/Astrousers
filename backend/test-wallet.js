@@ -15,7 +15,7 @@ const testWalletSystem = async () => {
     console.log("\n🧪 Test 1: Creating user with wallet...");
     const testUser = await User.create({
       clerkId: "test_user_123",
-      email: "test@astrousers.com",
+      email: "test@Astrousers.com",
       fullName: "Test User",
       profileImage: "https://example.com/avatar.jpg",
       coins: 100,

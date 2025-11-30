@@ -1,6 +1,13 @@
 import mongoose from "mongoose";
 
 const astrologerSchema = new mongoose.Schema({
+  clerkId: { 
+    type: String, 
+    unique: true, 
+    sparse: true, 
+    index: true,
+    trim: true
+  }, // Link to Clerk user (optional for existing astrologers)
   name: { type: String, required: true },
   expertise: { type: String, required: true },
   category: { type: String, required: true },

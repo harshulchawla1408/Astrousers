@@ -136,7 +136,7 @@ const Footer = () => {
               <div>
                 <h4 className="text-lg font-semibold text-white mb-4">Contact Information</h4>
                 <div className="space-y-2 text-gray-400">
-                  <p>Email: support@astrousers.com</p>
+                  <p>Email: support@Astrousers.com</p>
                   <p>Phone: +91 98765 43210</p>
                 </div>
               </div>

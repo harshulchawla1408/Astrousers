@@ -85,7 +85,7 @@ PORT=5000
 
 ### Frontend (.env.local)
 ```
-NEXT_PUBLIC_BACKEND_URL=https://astrousers.onrender.com
+NEXT_PUBLIC_BACKEND_URL=https://Astrousers.onrender.com
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
 NEXT_PUBLIC_AGORA_APP_ID=your_agora_app_id (if needed client-side)
 ```

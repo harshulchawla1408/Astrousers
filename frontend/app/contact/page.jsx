@@ -22,10 +22,10 @@ export default function Contact() {
         <p>
           Email:{" "}
           <a
-            href="mailto:support@astrousers.com"
+            href="mailto:support@Astrousers.com"
             className="text-blue-400 underline"
           >
-            support@astrousers.com
+            support@Astrousers.com
           </a>
           <br />
           Phone: +91-98765-43210 (Mon–Sat, 10 AM – 6 PM)
