@@ -4,6 +4,19 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Astrology Premium Color Palette */
+  --color-primary-orange: #FFA726;
+  --color-vibrant-orange: #FF8F00;
+  --color-golden-yellow: #FFB300;
+  --color-soft-cream: #FFF7E6;
+  --color-deep-navy: #0A1A2F;
+  --color-midnight-blue: #081423;
+  --color-astro-gold: #FFD56B;
+  --color-pure-white: #FFFFFF;
+  --color-light-gray: #F4F4F4;
+  --color-card-shadow: #E5E5E5;
+  
+  /* Legacy theme variables for compatibility */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -44,38 +57,38 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --radius: 1.25rem; /* 20px for modern rounded cards */
+  --background: #FFF7E6; /* Soft Cream */
+  --foreground: #0A1A2F; /* Deep Navy */
+  --card: #FFFFFF; /* Pure White */
+  --card-foreground: #0A1A2F; /* Deep Navy */
+  --popover: #FFFFFF;
+  --popover-foreground: #0A1A2F;
+  --primary: #FFA726; /* Primary Orange */
+  --primary-foreground: #FFFFFF;
+  --secondary: #0A1A2F; /* Deep Navy */
+  --secondary-foreground: #FFFFFF;
+  --muted: #F4F4F4; /* Light Gray */
+  --muted-foreground: #666666;
+  --accent: #FFD56B; /* Astro Gold */
+  --accent-foreground: #0A1A2F;
+  --destructive: #EF4444;
+  --border: #E5E5E5; /* Card Shadow Gray */
+  --input: #FFFFFF;
+  --ring: #FFA726; /* Primary Orange for focus */
+  --chart-1: #FFA726;
+  --chart-2: #FFB300;
+  --chart-3: #FFD56B;
+  --chart-4: #FF8F00;
+  --chart-5: #0A1A2F;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #0A1A2F;
+  --sidebar-primary: #FFA726;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #FFF7E6;
+  --sidebar-accent-foreground: #0A1A2F;
+  --sidebar-border: #E5E5E5;
+  --sidebar-ring: #FFA726;
 }
 
 .dark {
@@ -124,7 +137,7 @@
 
 /* Focus styles for accessibility */
 *:focus-visible {
-  outline: 2px solid #f97316 !important;
+  outline: 2px solid #FFA726 !important;
   outline-offset: 2px !important;
 }
 
@@ -139,16 +152,16 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #F4F4F4;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #f97316, #ef4444);
+  background: linear-gradient(to bottom, #FFA726, #FFB300);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, #ea580c, #dc2626);
+  background: linear-gradient(to bottom, #FF8F00, #FFA726);
 }
 
 /* Star field background effect */
@@ -171,13 +184,13 @@ html {
 
 /* Glowing border effect for online astrologers */
 .glow-border {
-  box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
-  border: 1px solid rgba(249, 115, 22, 0.5);
+  box-shadow: 0 0 20px rgba(255, 167, 38, 0.3);
+  border: 1px solid rgba(255, 167, 38, 0.5);
 }
 
 .glow-border:hover {
-  box-shadow: 0 0 30px rgba(249, 115, 22, 0.5);
-  border: 1px solid rgba(249, 115, 22, 0.7);
+  box-shadow: 0 0 30px rgba(255, 167, 38, 0.5);
+  border: 1px solid rgba(255, 167, 38, 0.7);
 }
 
 /* Smooth transitions for cards */
@@ -191,7 +204,7 @@ html {
 
 /* Gradient text effect */
 .gradient-text {
-  background: linear-gradient(135deg, #f97316, #ef4444, #f97316);
+  background: linear-gradient(135deg, #FFA726, #FFB300, #FFA726);
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -207,8 +220,27 @@ html {
 
 /* Custom button hover effects */
 .btn-glow:hover {
-  box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
+  box-shadow: 0 0 20px rgba(255, 167, 38, 0.4);
   transform: translateY(-2px);
+}
+
+/* Premium card shadow */
+.card-shadow {
+  box-shadow: 0 4px 20px rgba(10, 26, 47, 0.08);
+}
+
+.card-shadow-lg {
+  box-shadow: 0 8px 30px rgba(10, 26, 47, 0.12);
+}
+
+/* Orange to Gold gradient */
+.gradient-orange-gold {
+  background: linear-gradient(135deg, #FFA726, #FFB300);
+}
+
+/* Hero gradient background */
+.hero-gradient {
+  background: linear-gradient(135deg, #FFF7E6, #FFE0A3, rgba(255, 179, 0, 0.12));
 }
 
 /* Loading animation */

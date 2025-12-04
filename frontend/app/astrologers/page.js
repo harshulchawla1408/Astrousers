@@ -103,10 +103,10 @@ const AstrologersPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      <div className="min-h-screen bg-[#FFF7E6]">
         <Header />
         <div className="flex justify-center items-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#FFA726]"></div>
         </div>
         <Footer />
       </div>
@@ -114,25 +114,31 @@ const AstrologersPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="min-h-screen bg-[#FFF7E6]">
       <Header />
       
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-orange-500 to-red-500 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 gradient-text">
+      <div className="bg-gradient-to-r from-[#FFA726] to-[#FFB300] py-16 relative overflow-hidden">
+        {/* Subtle pattern overlay */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 text-4xl">⭐</div>
+          <div className="absolute top-20 right-20 text-3xl">🌙</div>
+          <div className="absolute bottom-10 left-1/4 text-3xl">☀️</div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
             Talk to India's Best Astrologers
           </h1>
-          <p className="text-xl text-orange-100 mb-8">
+          <p className="text-xl text-white/90 mb-8">
             Connect with verified astrologers for personalized guidance
           </p>
           
           {/* Balance and Recharge */}
-          <div className="flex justify-center items-center space-x-4 mb-8">
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-6 py-3">
+          <div className="flex flex-wrap justify-center items-center gap-4 mb-8">
+            <div className="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3">
               <span className="text-white font-semibold">Available Balance ₹ 0</span>
             </div>
-            <Button className="bg-white text-orange-600 hover:bg-orange-50 border-2 border-white btn-glow">
+            <Button className="bg-white text-[#0A1A2F] hover:bg-[#FFF7E6] border-2 border-white rounded-xl btn-glow">
               Recharge
             </Button>
             <Button 
@@ -155,7 +161,7 @@ const AstrologersPage = () => {
                   alert('Failed to make astrologers online. Please check if the backend is running.');
                 }
               }}
-              className="bg-green-500 text-white hover:bg-green-600 border-2 border-green-400 btn-glow"
+              className="bg-green-500 text-white hover:bg-green-600 border-2 border-green-400 rounded-xl btn-glow"
             >
               Make All Online
             </Button>
@@ -165,7 +171,7 @@ const AstrologersPage = () => {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 overflow-visible">
         {/* Search and Filter Section */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8">
+        <div className="bg-white rounded-[20px] shadow-md border border-[#E5E5E5] p-6 mb-8">
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
             {/* Search Bar */}
             <div className="flex-1 max-w-md">
@@ -175,9 +181,9 @@ const AstrologersPage = () => {
                   placeholder="Search Name..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/70"
+                  className="pl-10 bg-white border border-[#E5E5E5] text-[#0A1A2F] placeholder:text-[#0A1A2F]/50 rounded-xl"
                 />
-                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/70">
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#0A1A2F]/50">
                   🔍
                 </div>
               </div>
@@ -186,7 +192,7 @@ const AstrologersPage = () => {
             {/* Filters */}
             <div className="flex flex-wrap gap-3">
               <Select value={filters.category} onValueChange={(value) => handleFilterChange('category', value)}>
-                <SelectTrigger className="w-40 bg-white/20 border-white/30 text-white">
+                <SelectTrigger className="w-40 bg-white border border-[#E5E5E5] text-[#0A1A2F] rounded-xl">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -198,7 +204,7 @@ const AstrologersPage = () => {
               </Select>
 
               <Select value={filters.gender} onValueChange={(value) => handleFilterChange('gender', value)}>
-                <SelectTrigger className="w-32 bg-white/20 border-white/30 text-white">
+                <SelectTrigger className="w-32 bg-white border border-[#E5E5E5] text-[#0A1A2F] rounded-xl">
                   <SelectValue placeholder="Gender" />
                 </SelectTrigger>
                 <SelectContent>
@@ -209,7 +215,7 @@ const AstrologersPage = () => {
               </Select>
 
               <Select value={filters.language} onValueChange={(value) => handleFilterChange('language', value)}>
-                <SelectTrigger className="w-32 bg-white/20 border-white/30 text-white">
+                <SelectTrigger className="w-32 bg-white border border-[#E5E5E5] text-[#0A1A2F] rounded-xl">
                   <SelectValue placeholder="Language" />
                 </SelectTrigger>
                 <SelectContent>
@@ -221,7 +227,7 @@ const AstrologersPage = () => {
               </Select>
 
               <Select value={filters.expertise} onValueChange={(value) => handleFilterChange('expertise', value)}>
-                <SelectTrigger className="w-40 bg-white/20 border-white/30 text-white">
+                <SelectTrigger className="w-40 bg-white border border-[#E5E5E5] text-[#0A1A2F] rounded-xl">
                   <SelectValue placeholder="Expertise" />
                 </SelectTrigger>
                 <SelectContent>
@@ -233,7 +239,7 @@ const AstrologersPage = () => {
               </Select>
 
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-32 bg-white/20 border-white/30 text-white">
+                <SelectTrigger className="w-32 bg-white border border-[#E5E5E5] text-[#0A1A2F] rounded-xl">
                   <SelectValue placeholder="Sort" />
                 </SelectTrigger>
                 <SelectContent>
@@ -247,7 +253,7 @@ const AstrologersPage = () => {
               <Button
                 onClick={clearFilters}
                 variant="outline"
-                className="border-white/30 text-white hover:bg-white/20"
+                className="border-[#0A1A2F] text-[#0A1A2F] hover:bg-[#0A1A2F] hover:text-white rounded-xl"
               >
                 Clear
               </Button>
@@ -257,7 +263,7 @@ const AstrologersPage = () => {
 
         {/* Results Count */}
         <div className="mb-6">
-          <p className="text-white/80">
+          <p className="text-[#0A1A2F]/70">
             Showing {astrologers.length} astrologer{astrologers.length !== 1 ? 's' : ''}
           </p>
         </div>
@@ -265,20 +271,20 @@ const AstrologersPage = () => {
         {/* Astrologers Grid */}
         {error ? (
           <div className="text-center py-12">
-            <p className="text-red-400 text-lg">Error: {error}</p>
+            <p className="text-red-600 text-lg">Error: {error}</p>
             <Button 
               onClick={() => window.location.reload()} 
-              className="mt-4 bg-orange-500 hover:bg-orange-600"
+              className="mt-4 bg-gradient-to-r from-[#FFA726] to-[#FFB300] hover:from-[#FF8F00] hover:to-[#FFA726] text-white rounded-xl"
             >
               Retry
             </Button>
           </div>
         ) : astrologers.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-white/80 text-lg">No astrologers found matching your criteria.</p>
+            <p className="text-[#0A1A2F]/70 text-lg">No astrologers found matching your criteria.</p>
             <Button 
               onClick={clearFilters}
-              className="mt-4 bg-orange-500 hover:bg-orange-600"
+              className="mt-4 bg-gradient-to-r from-[#FFA726] to-[#FFB300] hover:from-[#FF8F00] hover:to-[#FFA726] text-white rounded-xl"
             >
               Clear Filters
             </Button>
@@ -286,30 +292,30 @@ const AstrologersPage = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {astrologers.map((astrologer) => (
-              <Card key={astrologer._id} className={`group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-0 shadow-lg bg-white/10 backdrop-blur-sm astrologer-card ${astrologer.online ? 'glow-border' : ''}`}>
+              <Card key={astrologer._id} className={`group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-[#F1F1F1] shadow-md bg-white rounded-[20px] astrologer-card ${astrologer.online ? 'glow-border' : ''}`}>
                 <CardContent className="p-6">
                   <div className="flex flex-col items-center text-center space-y-4">
                     {/* Avatar and Status */}
                     <div className="relative">
-                      <Avatar className="w-20 h-20 border-4 border-white/20 shadow-lg">
+                      <Avatar className="w-20 h-20 border-4 border-white shadow-lg">
                         <AvatarImage src={astrologer.image} alt={astrologer.name} />
-                        <AvatarFallback className="bg-gradient-to-br from-orange-400 to-red-500 text-white text-lg">
+                        <AvatarFallback className="bg-gradient-to-br from-[#FFA726] to-[#FFB300] text-white text-lg">
                           {astrologer.name.split(' ').map(n => n[0]).join('')}
                         </AvatarFallback>
                       </Avatar>
                       
                       {/* Online Status */}
-                      <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white/20 bg-green-500">
+                      <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white bg-green-500">
                         <div className="w-full h-full rounded-full bg-green-500 animate-pulse"></div>
                       </div>
                     </div>
 
                     {/* Name and Expertise */}
                     <div className="space-y-2">
-                      <h3 className="text-lg font-semibold text-white group-hover:text-orange-400 transition-colors duration-200">
+                      <h3 className="text-lg font-semibold text-[#0A1A2F] group-hover:text-[#FFA726] transition-colors duration-200">
                         {astrologer.name}
                       </h3>
-                      <p className="text-sm text-white/80 leading-relaxed">
+                      <p className="text-sm text-[#0A1A2F]/70 leading-relaxed">
                         {astrologer.expertise}
                       </p>
                     </div>
@@ -317,26 +323,26 @@ const AstrologersPage = () => {
                     {/* Experience and Rating */}
                     <div className="flex items-center justify-center space-x-4 text-sm">
                       <div className="flex items-center space-x-1">
-                        <span className="text-orange-400">⭐</span>
-                        <span className="font-semibold text-white">{astrologer.rating}</span>
-                        <span className="text-white/60">({astrologer.reviews})</span>
+                        <span className="text-[#FFA726]">⭐</span>
+                        <span className="font-semibold text-[#0A1A2F]">{astrologer.rating}</span>
+                        <span className="text-[#0A1A2F]/60">({astrologer.reviews})</span>
                       </div>
-                      <div className="text-white/60">•</div>
-                      <div className="text-white/80">{astrologer.experience} years</div>
+                      <div className="text-[#0A1A2F]/60">•</div>
+                      <div className="text-[#0A1A2F]/70">{astrologer.experience} years</div>
                     </div>
 
                     {/* Languages */}
-                    <div className="text-sm text-white/80">
+                    <div className="text-sm text-[#0A1A2F]/70">
                       {Array.isArray(astrologer.languages) ? astrologer.languages.join(', ') : astrologer.languages}
                     </div>
 
                     {/* Price and Badges */}
                     <div className="flex items-center justify-center space-x-2">
-                      <Badge variant="secondary" className="bg-orange-500/20 text-orange-300 border-orange-500/30">
+                      <Badge variant="secondary" className="bg-[#FFF7E6] text-[#FFA726] border border-[#FFD56B]">
                         ₹{astrologer.pricePerMin}/min
                       </Badge>
                       {astrologer.verified && (
-                        <Badge variant="secondary" className="bg-green-500/20 text-green-300 border-green-500/30">
+                        <Badge variant="secondary" className="bg-green-50 text-green-700 border border-green-200">
                           ✓ Verified
                         </Badge>
                       )}
@@ -346,7 +352,7 @@ const AstrologersPage = () => {
                     <div className="flex space-x-2 w-full">
                       <Button 
                         size="sm" 
-                        className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
+                        className="flex-1 bg-gradient-to-r from-[#FFA726] to-[#FFB300] hover:from-[#FF8F00] hover:to-[#FFA726] text-white rounded-xl"
                       >
                         Call
                       </Button>
@@ -354,7 +360,7 @@ const AstrologersPage = () => {
                         <Button 
                           size="sm" 
                           variant="outline" 
-                          className="flex-1 border-orange-500/50 text-orange-300 hover:bg-orange-500/20"
+                          className="flex-1 border-[#0A1A2F] text-[#0A1A2F] hover:bg-[#0A1A2F] hover:text-white rounded-xl transition-all duration-200"
                         >
                           View Profile
                         </Button>

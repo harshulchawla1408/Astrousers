@@ -3,15 +3,20 @@ import React, { useState } from "react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
-export default function RechargeButton() {
-  const { user } = useUser();
+export default function RechargeButton({ afterSuccess } = {}) {
+  const { user, isLoaded } = useUser();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
+  const backend = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+  const RAZOR_KEY = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+
   const handlePayment = async (amount) => {
-    if (!user) {
+    if (!isLoaded || !user) {
       setError("Please sign in to recharge your wallet");
       return;
     }
@@ -21,79 +26,81 @@ export default function RechargeButton() {
       setError(null);
       setSuccess(null);
 
-      const token = await user.getToken();
-
-      // Step 1: Create Razorpay order
-      const orderResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/payment/create-order`, {
+      // 1) Create order on backend — backend expects clerkId in body
+      const orderResp = await fetch(`${backend}/api/payment/order`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ amount }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount, clerkId: user.id })
       });
 
-      const orderData = await orderResponse.json();
-
-      if (!orderData.success) {
-        throw new Error(orderData.message || "Failed to create order");
+      const orderJson = await orderResp.json();
+      if (!orderResp.ok || !orderJson?.order) {
+        throw new Error(orderJson?.message || "Failed to create order");
       }
 
-      // Step 2: Initialize Razorpay
+      const razorOrder = orderJson.order;
+
+      // 2) Build Razorpay options
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: orderData.order.amount,
-        currency: orderData.order.currency,
+        key: RAZOR_KEY,
+        amount: razorOrder.amount,
+        currency: razorOrder.currency,
         name: "Astrousers",
         description: `Wallet Recharge - ₹${amount}`,
-        order_id: orderData.order.id,
-        handler: async (response) => {
+        order_id: razorOrder.id,
+        handler: async function (response) {
+          // response: { razorpay_payment_id, razorpay_order_id, razorpay_signature }
           try {
-            // Step 3: Verify payment
-            const verifyResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/payment/verify`, {
+            const verifyResp = await fetch(`${backend}/api/payment/verify`, {
               method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-              },
+              headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                ...response,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
                 amount,
-              }),
+                clerkId: user.id
+              })
             });
 
-            const verifyData = await verifyResponse.json();
+            const verifyJson = await verifyResp.json();
 
-            if (verifyData.success) {
-              setSuccess(`Recharge successful! New balance: ₹${verifyData.newBalance}`);
-              // Refresh the page or update balance in parent component
-              setTimeout(() => {
-                window.location.reload();
-              }, 2000);
-            } else {
-              setError(verifyData.message || "Payment verification failed");
+            if (!verifyResp.ok || !verifyJson.success) {
+              throw new Error(verifyJson?.message || "Payment verification failed");
             }
-          } catch (verifyError) {
-            console.error("Payment verification error:", verifyError);
-            setError("Payment verification failed. Please contact support.");
-          }
-        },
-        theme: {
-          color: "#5E17EB",
-        },
-        modal: {
-          ondismiss: () => {
+
+            setSuccess(`Recharge successful! New balance: ${verifyJson.newBalance} coins`);
+            // optionally trigger callback
+            if (afterSuccess) afterSuccess(verifyJson);
+            // refresh page or router to reflect new balance
+            setTimeout(() => {
+              router.replace(window.location.pathname);
+            }, 900);
+          } catch (err) {
+            console.error("Verification error:", err);
+            setError(err.message || "Payment verification failed");
+          } finally {
             setLoading(false);
           }
+        },
+        theme: { color: "#5E17EB" },
+        modal: {
+          ondismiss: () => setLoading(false)
         }
       };
 
-      const razor = new window.Razorpay(options);
-      razor.open();
+      // 3) Open Razorpay modal
+      const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", function (response) {
+        console.error("Razorpay payment failed:", response.error);
+        setError(response.error?.description || "Payment failed");
+        setLoading(false);
+      });
+
+      rzp.open();
     } catch (err) {
       console.error("Payment error:", err);
       setError(err.message || "Payment failed. Please try again.");
-    } finally {
       setLoading(false);
     }
   };
@@ -109,17 +116,15 @@ export default function RechargeButton() {
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>Recharge Your Wallet</CardTitle>
-        <p className="text-sm text-gray-600">
-          Add coins to your wallet to start consulting with astrologers
-        </p>
+        <p className="text-sm text-gray-600">Add coins to your wallet to start consulting with astrologers</p>
       </CardHeader>
+
       <CardContent>
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
             <p className="text-sm text-red-800">{error}</p>
           </div>
         )}
-
         {success && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
             <p className="text-sm text-green-800">{success}</p>
@@ -132,7 +137,7 @@ export default function RechargeButton() {
               key={item.amount}
               onClick={() => handlePayment(item.amount)}
               disabled={loading}
-              className="h-auto p-4 flex flex-col items-center space-y-2 hover:bg-purple-50 hover:border-purple-200 border-2 border-transparent transition-all"
+              className="h-auto p-4 flex flex-col items-center space-y-2 border-2 border-transparent transition-all"
               variant="outline"
             >
               <div className="text-lg font-semibold">{item.label}</div>
@@ -146,8 +151,7 @@ export default function RechargeButton() {
           <ul className="text-sm text-blue-800 space-y-1">
             <li>• 1 INR = 1 Coin</li>
             <li>• Secure payment via Razorpay</li>
-            <li>• Instant coin credit</li>
-            <li>• No transaction fees</li>
+            <li>• Instant coin credit after verification</li>
           </ul>
         </div>
 

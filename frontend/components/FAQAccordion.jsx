@@ -39,10 +39,10 @@ const FAQAccordion = () => {
     <section className="py-20 bg-white">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Frequently Asked <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">Questions</span>
+          <h2 className="text-4xl md:text-5xl font-bold text-[#0A1A2F] mb-4">
+            Frequently Asked <span className="bg-gradient-to-r from-[#FFA726] to-[#FFB300] bg-clip-text text-transparent">Questions</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-[#0A1A2F]/70 max-w-2xl mx-auto">
             Find answers to common questions about our astrology services and platform
           </p>
         </div>
@@ -52,12 +52,12 @@ const FAQAccordion = () => {
             <AccordionItem 
               key={index} 
               value={`item-${index}`}
-              className="border border-gray-200 rounded-lg px-6 py-2 hover:border-orange-300 transition-colors duration-200"
+              className="border border-[#E5E5E5] rounded-xl px-6 py-2 hover:border-[#FFA726] transition-colors duration-200 bg-white"
             >
-              <AccordionTrigger className="text-left hover:no-underline hover:text-orange-600 transition-colors duration-200">
-                <span className="font-semibold text-gray-900">{faq.question}</span>
+              <AccordionTrigger className="text-left hover:no-underline hover:text-[#FFA726] transition-colors duration-200">
+                <span className="font-semibold text-[#0A1A2F]">{faq.question}</span>
               </AccordionTrigger>
-              <AccordionContent className="text-gray-600 leading-relaxed pt-2">
+              <AccordionContent className="text-[#0A1A2F]/70 leading-relaxed pt-2">
                 {faq.answer}
               </AccordionContent>
             </AccordionItem>
@@ -65,19 +65,19 @@ const FAQAccordion = () => {
         </Accordion>
 
         {/* Additional Help */}
-        <div className="mt-16 text-center bg-gradient-to-r from-orange-50 to-yellow-50 rounded-2xl p-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">Still have questions?</h3>
-          <p className="text-gray-600 mb-6">
+        <div className="mt-16 text-center bg-[#FFF7E6] rounded-[20px] p-8 border border-[#FFD56B]/30">
+          <h3 className="text-2xl font-bold text-[#0A1A2F] mb-4">Still have questions?</h3>
+          <p className="text-[#0A1A2F]/70 mb-6">
             Our support team is here to help you 24/7. Get in touch with us for any queries.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button 
-              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="bg-gradient-to-r from-[#FFA726] to-[#FFB300] hover:from-[#FF8F00] hover:to-[#FFA726] text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
             >
               Contact Support
             </button>
             <button 
-              className="border border-orange-500 text-orange-600 hover:bg-orange-50 px-6 py-3 rounded-lg font-semibold transition-all duration-200"
+              className="border border-[#0A1A2F] text-[#0A1A2F] hover:bg-[#0A1A2F] hover:text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200"
             >
               Live Chat
             </button>

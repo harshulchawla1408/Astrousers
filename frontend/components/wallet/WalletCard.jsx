@@ -4,58 +4,51 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 export default function WalletCard() {
   const { user, isLoaded } = useUser();
+  const router = useRouter();
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const backend = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+
   useEffect(() => {
-    if (isLoaded && user) {
-      fetchBalance();
-    }
+    if (isLoaded && user) fetchBalance();
   }, [isLoaded, user]);
 
   const fetchBalance = async () => {
     try {
       setLoading(true);
-      const token = await user.getToken();
-      
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/payment/balance`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      setError(null);
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch balance');
+      const res = await fetch(`${backend}/api/payment/balance?clerkId=${encodeURIComponent(user.id)}`);
+      const json = await res.json();
+
+      if (!res.ok || !json.success) {
+        throw new Error(json.message || "Failed to fetch balance");
       }
 
-      const data = await response.json();
-      if (data.success) {
-        setBalance(data.balance);
-      } else {
-        throw new Error(data.message || 'Failed to fetch balance');
-      }
+      setBalance(json.wallet || 0);
     } catch (err) {
-      console.error('Error fetching balance:', err);
-      setError(err.message);
+      console.error("Error fetching balance:", err);
+      setError(err.message || "Failed to fetch balance");
     } finally {
       setLoading(false);
     }
   };
 
-  const getBalanceColor = (balance) => {
-    if (balance < 50) return "text-red-500";
-    if (balance < 100) return "text-yellow-500";
+  const getBalanceColor = (b) => {
+    if (b < 50) return "text-red-500";
+    if (b < 100) return "text-yellow-500";
     return "text-green-500";
   };
 
-  const getBalanceStatus = (balance) => {
-    if (balance < 50) return "Low Balance";
-    if (balance < 100) return "Medium Balance";
+  const getBalanceStatus = (b) => {
+    if (b < 50) return "Low Balance";
+    if (b < 100) return "Medium Balance";
     return "Good Balance";
   };
 
@@ -93,6 +86,7 @@ export default function WalletCard() {
           </Badge>
         </CardTitle>
       </CardHeader>
+
       <CardContent className="pt-0">
         {loading ? (
           <div className="animate-pulse">
@@ -102,42 +96,26 @@ export default function WalletCard() {
         ) : error ? (
           <div className="text-center">
             <p className="text-red-500 mb-4">{error}</p>
-            <Button onClick={fetchBalance} variant="outline" size="sm">
-              Retry
-            </Button>
+            <Button onClick={fetchBalance} variant="outline" size="sm">Retry</Button>
           </div>
         ) : (
           <>
             <div className="text-center mb-6">
               <div className={`text-4xl font-bold ${getBalanceColor(balance)}`}>
-                {balance.toLocaleString()}
+                {Number(balance || 0).toLocaleString()}
               </div>
               <p className="text-sm text-gray-500 mt-1">Coins Available</p>
             </div>
-            
+
             {balance < 50 && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
-                <p className="text-sm text-yellow-800">
-                  ⚠️ Low balance! Consider recharging your wallet.
-                </p>
+                <p className="text-sm text-yellow-800">⚠️ Low balance! Consider recharging your wallet.</p>
               </div>
             )}
 
             <div className="flex gap-2">
-              <Button 
-                onClick={fetchBalance} 
-                variant="outline" 
-                size="sm" 
-                className="flex-1"
-              >
-                Refresh
-              </Button>
-              <Button 
-                onClick={() => window.location.href = '/wallet/recharge'} 
-                className="flex-1"
-              >
-                Recharge
-              </Button>
+              <Button onClick={fetchBalance} variant="outline" size="sm" className="flex-1">Refresh</Button>
+              <Button onClick={() => router.push("/wallet/recharge")} className="flex-1">Recharge</Button>
             </div>
           </>
         )}

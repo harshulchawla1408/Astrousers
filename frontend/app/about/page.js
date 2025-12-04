@@ -3,26 +3,30 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
 // Local image path (provided in conversation assets)
 const HERO_IMAGE = "/mnt/data/8c390b18-bdfc-4bdc-aa7a-bdc84436a8ce.png";
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900">
+    <div className="min-h-screen bg-[#FFF7E6] text-[#0A1A2F]">
+      <Header />
+      <main>
       {/* HERO */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden pt-16">
         <div className="max-w-7xl mx-auto px-6 py-20 lg:py-28 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-7 space-y-6">
-            <Badge className="bg-violet-100 text-violet-700">About Astrousers</Badge>
-            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">Your personalized portal to moderstrology</h1>
-            <p className="text-lg text-slate-700 max-w-2xl">
+            <Badge className="bg-[#FFB300] text-[#0A1A2F]">About Astrousers</Badge>
+            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-[#0A1A2F]">Your personalized portal to moderstrology</h1>
+            <p className="text-lg text-[#0A1A2F]/70 max-w-2xl">
               We blend timeless Vedic wisdom with modern technology — giving you clear, accurate and actionable insights that help you take better decisions. From instant kundli generation to live consultations with verified experts, Astrousers makes astrology accessible and trustworthy.
             </p>
 
             <div className="flex flex-wrap gap-3">
-              <Button className="bg-gradient-to-r from-orange-500 to-rose-500 hover:opacity-95 text-white">Talk to an Astrologer</Button>
-              <Button variant="ghost" className="border border-slate-200">Generate Your Kundli</Button>
+              <Button className="bg-gradient-to-r from-[#FFA726] to-[#FFB300] hover:from-[#FF8F00] hover:to-[#FFA726] text-white rounded-xl">Talk to an Astrologer</Button>
+              <Button variant="outline" className="border border-[#0A1A2F] text-[#0A1A2F] hover:bg-[#0A1A2F] hover:text-white rounded-xl">Generate Your Kundli</Button>
             </div>
 
             <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -42,7 +46,7 @@ export default function AboutPage() {
       </section>
 
       {/* VISION / MISSION / VALUES */}
-      <section className="bg-white py-16">
+      <section className="bg-white py-16 border-t border-[#E5E5E5]">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <ValueCard title="Our Vision" description="To make astrology a trusted companion for people seeking clarity, direction and emotional balance." iconEmoji="🔭" />
@@ -53,9 +57,9 @@ export default function AboutPage() {
       </section>
 
       {/* FEATURES */}
-      <section className="py-16">
+      <section className="py-16 bg-white border-t border-[#E5E5E5]">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <h2 className="text-2xl font-bold mb-6">What you can do on Astrousers</h2>
+          <h2 className="text-2xl font-bold mb-6 text-[#0A1A2F]">What you can do on Astrousers</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <FeatureCard title="Talk to Astrologers" desc="Instant chat, call or video with verified astrologers." emoji="🗣️" />
             <FeatureCard title="Generate Kundli" desc="Accurate Vedic chart generation and downloadable reports." emoji="🧭" />
@@ -68,9 +72,9 @@ export default function AboutPage() {
       </section>
 
       {/* WORKFLOW */}
-      <section className="bg-gradient-to-b from-slate-50 to-white py-16">
+      <section className="bg-white py-16 border-t border-[#E5E5E5]">
         <div className="max-w-6xl mx-auto px-6 lg:px-8">
-          <h3 className="text-2xl font-semibold mb-8">How Astrousers Works</h3>
+          <h3 className="text-2xl font-semibold mb-8 text-[#0A1A2F]">How Astrousers Works</h3>
           <ol className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <WorkflowStep step="1" title="Create Account" desc="Sign up quickly with email or social providers." />
             <WorkflowStep step="2" title="Add Profile" desc="(Optional) Add birth details for personalized readings." />
@@ -81,22 +85,22 @@ export default function AboutPage() {
       </section>
 
       {/* STORY */}
-      <section className="py-16">
+      <section className="py-16 bg-white border-t border-[#E5E5E5]">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
-            <h3 className="text-2xl font-bold mb-4">Our Story</h3>
-            <p className="text-slate-700 mb-4">Astrousers began with a simple question: Why should astrology be vague and inaccessible? We started building a platform that combines verified astrologers, transparent pricing and tech-first delivery so people can get reliable guidance—fast.</p>
-            <p className="text-slate-700">Today we serve thousands of users every day, focusing on accuracy, trust, and a delightful user experience. Our team blends deep Vedic knowledge with modern engineering to make insights meaningful.</p>
+            <h3 className="text-2xl font-bold mb-4 text-[#0A1A2F]">Our Story</h3>
+            <p className="text-[#0A1A2F]/70 mb-4">Astrousers began with a simple question: Why should astrology be vague and inaccessible? We started building a platform that combines verified astrologers, transparent pricing and tech-first delivery so people can get reliable guidance—fast.</p>
+            <p className="text-[#0A1A2F]/70">Today we serve thousands of users every day, focusing on accuracy, trust, and a delightful user experience. Our team blends deep Vedic knowledge with modern engineering to make insights meaningful.</p>
             <div className="mt-6 flex gap-3">
-              <Button className="bg-emerald-600 text-white">Explore Services</Button>
-              <Button variant="ghost">Meet the Team</Button>
+              <Button className="bg-gradient-to-r from-[#FFA726] to-[#FFB300] hover:from-[#FF8F00] hover:to-[#FFA726] text-white rounded-xl">Explore Services</Button>
+              <Button variant="outline" className="border border-[#0A1A2F] text-[#0A1A2F] hover:bg-[#0A1A2F] hover:text-white rounded-xl">Meet the Team</Button>
             </div>
           </div>
           <div>
-            <Card>
+            <Card className="bg-white border border-[#E5E5E5] shadow-md rounded-[20px]">
               <CardContent>
-                <CardTitle>Verified Experts</CardTitle>
-                <CardDescription>All astrologers on Astrousers go through a verification and interview process to ensure quality and authenticity.</CardDescription>
+                <CardTitle className="text-[#0A1A2F]">Verified Experts</CardTitle>
+                <CardDescription className="text-[#0A1A2F]/70">All astrologers on Astrousers go through a verification and interview process to ensure quality and authenticity.</CardDescription>
               </CardContent>
             </Card>
           </div>
@@ -104,9 +108,9 @@ export default function AboutPage() {
       </section>
 
       {/* TESTIMONIALS */}
-      <section className="py-16 bg-gradient-to-b from-slate-50 to-white">
+      <section className="py-16 bg-[#FFF7E6] border-t border-[#E5E5E5]">
         <div className="max-w-6xl mx-auto px-6 lg:px-8">
-          <h3 className="text-2xl font-semibold mb-8">What our users say</h3>
+          <h3 className="text-2xl font-semibold mb-8 text-[#0A1A2F]">What our users say</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Testimonial name="Ritika" title="Life Coach" quote="Accurate readings and kind guidance. The astrologer recommended steps that really helped me." />
             <Testimonial name="Aman" title="Designer" quote="Fast, clear and trustworthy. I used the kundli generation and shared it with my family." />
@@ -116,29 +120,19 @@ export default function AboutPage() {
       </section>
 
       {/* CALL TO ACTION */}
-      <section className="py-16">
+      <section className="py-16 bg-white border-t border-[#E5E5E5]">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <h3 className="text-3xl font-bold mb-4">Ready to discover your cosmic self?</h3>
-          <p className="text-slate-600 mb-6">Start with a quick kundli or talk to an expert right now. Clear insights, zero guesswork.</p>
+          <h3 className="text-3xl font-bold mb-4 text-[#0A1A2F]">Ready to discover your cosmic self?</h3>
+          <p className="text-[#0A1A2F]/70 mb-6">Start with a quick kundli or talk to an expert right now. Clear insights, zero guesswork.</p>
           <div className="flex items-center justify-center gap-4">
-            <Button className="bg-gradient-to-r from-orange-500 to-rose-500 text-white">Talk to an Astrologer</Button>
-            <Button variant="ghost">Generate Kundli</Button>
+            <Button className="bg-gradient-to-r from-[#FFA726] to-[#FFB300] hover:from-[#FF8F00] hover:to-[#FFA726] text-white rounded-xl">Talk to an Astrologer</Button>
+            <Button variant="outline" className="border border-[#0A1A2F] text-[#0A1A2F] hover:bg-[#0A1A2F] hover:text-white rounded-xl">Generate Kundli</Button>
           </div>
         </div>
       </section>
-
-      {/* FOOTER */}
-      <footer className="border-t border-slate-100 py-8 bg-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="text-sm text-slate-600">© {new Date().getFullYear()} Astrousers. All rights reserved.</div>
-          <div className="flex items-center gap-3">
-            <a className="text-sm text-slate-600">Privacy</a>
-            <a className="text-sm text-slate-600">Terms</a>
-            <a className="text-sm text-slate-600">Contact</a>
-          </div>
-        </div>
-      </footer>
-    </main>
+      </main>
+      <Footer />
+    </div>
   );
 }
 
@@ -146,22 +140,22 @@ export default function AboutPage() {
 
 function StatCard({ number, label }) {
   return (
-    <div className="bg-gradient-to-r from-white to-slate-50 rounded-lg p-4 shadow-sm border border-slate-100 text-center">
-      <div className="text-2xl font-extrabold">{number}</div>
-      <div className="text-sm text-slate-500 mt-1">{label}</div>
+    <div className="bg-white rounded-xl p-4 shadow-md border border-[#E5E5E5] text-center">
+      <div className="text-2xl font-extrabold text-[#0A1A2F]">{number}</div>
+      <div className="text-sm text-[#0A1A2F]/70 mt-1">{label}</div>
     </div>
   );
 }
 
 function ValueCard({ title, description, iconEmoji }) {
   return (
-    <Card>
+    <Card className="bg-white border border-[#E5E5E5] shadow-md rounded-[20px]">
       <CardContent>
         <div className="flex items-start gap-4">
           <div className="text-3xl">{iconEmoji}</div>
           <div>
-            <h4 className="font-semibold">{title}</h4>
-            <p className="text-sm text-slate-600 mt-1">{description}</p>
+            <h4 className="font-semibold text-[#0A1A2F]">{title}</h4>
+            <p className="text-sm text-[#0A1A2F]/70 mt-1">{description}</p>
           </div>
         </div>
       </CardContent>
@@ -171,33 +165,33 @@ function ValueCard({ title, description, iconEmoji }) {
 
 function FeatureCard({ title, desc, emoji }) {
   return (
-    <div className="rounded-2xl p-6 border border-slate-100 shadow-sm bg-white">
+    <div className="rounded-[20px] p-6 border border-[#E5E5E5] shadow-md bg-white">
       <div className="text-3xl mb-4">{emoji}</div>
-      <h4 className="font-semibold mb-1">{title}</h4>
-      <p className="text-sm text-slate-600">{desc}</p>
+      <h4 className="font-semibold mb-1 text-[#0A1A2F]">{title}</h4>
+      <p className="text-sm text-[#0A1A2F]/70">{desc}</p>
     </div>
   );
 }
 
 function WorkflowStep({ step, title, desc }) {
   return (
-    <div className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm text-center">
-      <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-600 mx-auto flex items-center justify-center font-bold mb-3">{step}</div>
-      <h5 className="font-semibold">{title}</h5>
-      <p className="text-sm text-slate-600 mt-1">{desc}</p>
+    <div className="p-4 bg-white rounded-[20px] border border-[#E5E5E5] shadow-md text-center">
+      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#FFA726] to-[#FFB300] text-white mx-auto flex items-center justify-center font-bold mb-3">{step}</div>
+      <h5 className="font-semibold text-[#0A1A2F]">{title}</h5>
+      <p className="text-sm text-[#0A1A2F]/70 mt-1">{desc}</p>
     </div>
   );
 }
 
 function Testimonial({ name, title, quote }) {
   return (
-    <div className="rounded-2xl p-6 bg-white border border-slate-100 shadow-sm">
-      <p className="text-slate-700 mb-4">“{quote}”</p>
+    <div className="rounded-[20px] p-6 bg-white border border-[#E5E5E5] shadow-md">
+      <p className="text-[#0A1A2F]/70 mb-4">"{quote}"</p>
       <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-full bg-slate-100" />
+        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#FFA726] to-[#FFB300]" />
         <div>
-          <div className="font-medium">{name}</div>
-          <div className="text-xs text-slate-500">{title}</div>
+          <div className="font-medium text-[#0A1A2F]">{name}</div>
+          <div className="text-xs text-[#0A1A2F]/60">{title}</div>
         </div>
       </div>
     </div>

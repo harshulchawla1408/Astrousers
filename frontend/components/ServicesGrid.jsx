@@ -72,13 +72,16 @@ const ServicesGrid = () => {
   ];
 
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-[#FFF7E6]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Free Astrology <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">Services</span>
+          <div className="inline-block mb-4">
+            <span className="bg-[#FFB300] text-[#0A1A2F] px-4 py-1 rounded-full text-sm font-semibold">Service</span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold text-[#0A1A2F] mb-4">
+            We Provide Best Astro Services For You
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-[#0A1A2F]/70 max-w-2xl mx-auto">
             Everything you need to navigate life with the wisdom of the stars
           </p>
         </div>
@@ -87,25 +90,25 @@ const ServicesGrid = () => {
           {services.map((service, index) => (
             <Card 
               key={index} 
-              className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-0 shadow-lg bg-gradient-to-br from-white to-gray-50"
+              className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-[#F1F1F1] shadow-md bg-white rounded-[20px]"
             >
               <CardHeader className="pb-4">
-                <div className={`w-16 h-16 bg-gradient-to-br ${service.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                <div className="w-16 h-16 bg-gradient-to-br from-[#FFA726] to-[#FFB300] rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                   <span className="text-2xl">{service.icon}</span>
                 </div>
-                <CardTitle className="text-lg font-semibold text-gray-900 group-hover:text-orange-600 transition-colors duration-200">
+                <CardTitle className="text-lg font-semibold text-[#0A1A2F] group-hover:text-[#FFA726] transition-colors duration-200">
                   {service.title}
                 </CardTitle>
-                <CardDescription className="text-gray-600">
+                <CardDescription className="text-[#0A1A2F]/70">
                   {service.description}
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="flex items-center justify-between">
-                  <div className="text-sm font-medium text-gray-900">
+                  <div className="text-sm font-medium text-[#0A1A2F]">
                     {service.price}
                   </div>
-                  <Badge variant="secondary" className="bg-orange-100 text-orange-700 hover:bg-orange-200">
+                  <Badge variant="secondary" className="bg-[#FFF7E6] text-[#FFA726] border border-[#FFD56B] hover:bg-[#FFD56B]">
                     {service.badge}
                   </Badge>
                 </div>
@@ -116,34 +119,34 @@ const ServicesGrid = () => {
 
         {/* Why Astrousers Section */}
         <div className="mt-20 text-center">
-          <h3 className="text-3xl font-bold text-gray-900 mb-8">Why Astrousers?</h3>
-          <p className="text-lg text-gray-600 mb-12 max-w-3xl mx-auto">
+          <h3 className="text-3xl font-bold text-[#0A1A2F] mb-8">Why Astrousers?</h3>
+          <p className="text-lg text-[#0A1A2F]/70 mb-12 max-w-3xl mx-auto">
             Astrousers blends trusted astrological techniques with modern clarity — delivering personalized, practical guidance for relationships, career, health, and life decisions.
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-6 rounded-2xl shadow-lg bg-gradient-to-br from-yellow-50 to-orange-50 border border-orange-100">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center mx-auto mb-4">
+            <div className="p-6 rounded-[20px] shadow-md bg-white border border-[#F1F1F1]">
+              <div className="w-12 h-12 bg-gradient-to-br from-[#FFA726] to-[#FFB300] rounded-lg flex items-center justify-center mx-auto mb-4">
                 <span className="text-white text-xl">🎯</span>
               </div>
-              <h4 className="text-xl font-semibold text-gray-900 mb-2">Accuracy</h4>
-              <p className="text-gray-600">Precise birth charts using verified astronomical data.</p>
+              <h4 className="text-xl font-semibold text-[#0A1A2F] mb-2">Accuracy</h4>
+              <p className="text-[#0A1A2F]/70">Precise birth charts using verified astronomical data.</p>
             </div>
             
-            <div className="p-6 rounded-2xl shadow-lg bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-100">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center mx-auto mb-4">
+            <div className="p-6 rounded-[20px] shadow-md bg-white border border-[#F1F1F1]">
+              <div className="w-12 h-12 bg-gradient-to-br from-[#FFA726] to-[#FFB300] rounded-lg flex items-center justify-center mx-auto mb-4">
                 <span className="text-white text-xl">👨‍🏫</span>
               </div>
-              <h4 className="text-xl font-semibold text-gray-900 mb-2">Experts</h4>
-              <p className="text-gray-600">Vetted astrologers with decades of experience.</p>
+              <h4 className="text-xl font-semibold text-[#0A1A2F] mb-2">Experts</h4>
+              <p className="text-[#0A1A2F]/70">Vetted astrologers with decades of experience.</p>
             </div>
             
-            <div className="p-6 rounded-2xl shadow-lg bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100">
-              <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg flex items-center justify-center mx-auto mb-4">
+            <div className="p-6 rounded-[20px] shadow-md bg-white border border-[#F1F1F1]">
+              <div className="w-12 h-12 bg-gradient-to-br from-[#FFA726] to-[#FFB300] rounded-lg flex items-center justify-center mx-auto mb-4">
                 <span className="text-white text-xl">⚡</span>
               </div>
-              <h4 className="text-xl font-semibold text-gray-900 mb-2">Actionable</h4>
-              <p className="text-gray-600">Practical remedies and follow-up guidance.</p>
+              <h4 className="text-xl font-semibold text-[#0A1A2F] mb-2">Actionable</h4>
+              <p className="text-[#0A1A2F]/70">Practical remedies and follow-up guidance.</p>
             </div>
           </div>
         </div>

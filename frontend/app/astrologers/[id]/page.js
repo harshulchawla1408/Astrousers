@@ -64,10 +64,10 @@ const AstrologerDetailPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      <div className="min-h-screen bg-[#FFF7E6]">
         <Header />
         <div className="flex justify-center items-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#FFA726]"></div>
         </div>
         <Footer />
       </div>
@@ -76,16 +76,16 @@ const AstrologerDetailPage = () => {
 
   if (error || !astrologer) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      <div className="min-h-screen bg-[#FFF7E6]">
         <Header />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-white mb-4">Astrologer Not Found</h1>
-            <p className="text-white/80 mb-8">
+            <h1 className="text-4xl font-bold text-[#0A1A2F] mb-4">Astrologer Not Found</h1>
+            <p className="text-[#0A1A2F]/70 mb-8">
               {error || 'The astrologer you are looking for does not exist.'}
             </p>
             <Link href="/astrologers">
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+              <Button className="bg-gradient-to-r from-[#FFA726] to-[#FFB300] hover:from-[#FF8F00] hover:to-[#FFA726] text-white rounded-xl">
                 Back to Astrologers
               </Button>
             </Link>
@@ -97,14 +97,14 @@ const AstrologerDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="min-h-screen bg-[#FFF7E6]">
       <Header />
       
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 overflow-visible">
         {/* Back Button */}
         <div className="mb-8">
           <Link href="/astrologers">
-            <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+            <Button variant="outline" className="border-[#0A1A2F] text-[#0A1A2F] hover:bg-[#0A1A2F] hover:text-white rounded-xl">
               ← Back to Astrologers
             </Button>
           </Link>
@@ -113,30 +113,30 @@ const AstrologerDetailPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Profile */}
           <div className="lg:col-span-1">
-            <Card className="bg-white/10 backdrop-blur-sm border-0 shadow-xl">
+            <Card className="bg-white border border-[#E5E5E5] shadow-md rounded-[20px]">
               <CardContent className="p-8">
                 <div className="text-center space-y-6">
                   {/* Avatar and Status */}
                   <div className="relative mx-auto w-32 h-32">
-                    <Avatar className="w-32 h-32 border-4 border-white/20 shadow-2xl">
+                    <Avatar className="w-32 h-32 border-4 border-white shadow-2xl">
                       <AvatarImage src={astrologer.image} alt={astrologer.name} />
-                      <AvatarFallback className="bg-gradient-to-br from-orange-400 to-red-500 text-white text-2xl">
+                      <AvatarFallback className="bg-gradient-to-br from-[#FFA726] to-[#FFB300] text-white text-2xl">
                         {astrologer.name.split(' ').map(n => n[0]).join('')}
                       </AvatarFallback>
                     </Avatar>
                     
                     {/* Online Status */}
-                    <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full border-4 border-white/20 bg-green-500">
+                    <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full border-4 border-white bg-green-500">
                       <div className="w-full h-full rounded-full bg-green-500 animate-pulse"></div>
                     </div>
                   </div>
 
                   {/* Name and Title */}
                   <div>
-                    <h1 className="text-2xl font-bold text-white mb-2">{astrologer.name}</h1>
-                    <p className="text-orange-400 text-lg font-semibold">{astrologer.expertise}</p>
+                    <h1 className="text-2xl font-bold text-[#0A1A2F] mb-2">{astrologer.name}</h1>
+                    <p className="text-[#FFA726] text-lg font-semibold">{astrologer.expertise}</p>
                     {astrologer.verified && (
-                      <Badge className="mt-2 bg-green-500/20 text-green-300 border-green-500/30">
+                      <Badge className="mt-2 bg-green-50 text-green-700 border border-green-200">
                         ✓ Verified Astrologer
                       </Badge>
                     )}
@@ -145,23 +145,25 @@ const AstrologerDetailPage = () => {
                   {/* Rating and Reviews */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-center space-x-2">
-                      <span className="text-3xl">⭐</span>
-                      <span className="text-2xl font-bold text-white">{astrologer.rating}</span>
-                      <span className="text-white/80">({astrologer.reviews} reviews)</span>
+                      <span className="text-3xl text-[#FFA726]">⭐</span>
+                      <span className="text-2xl font-bold text-[#0A1A2F]">{astrologer.rating}</span>
+                      <span className="text-[#0A1A2F]/70">({astrologer.reviews} reviews)</span>
                     </div>
-                    <p className="text-white/80">{astrologer.experience} years of experience</p>
+                    <p className="text-[#0A1A2F]/70">{astrologer.experience} years of experience</p>
                   </div>
 
                   {/* Languages */}
                   <div>
-                    <h3 className="text-white font-semibold mb-2">Languages</h3>
+                    <h3 className="text-[#0A1A2F] font-semibold mb-2">Languages</h3>
                     <div className="flex flex-wrap gap-2 justify-center">
-                      {Array.isArray(astrologer.languages) ? astrologer.languages.map((lang, index) => (
-                        <Badge key={index} variant="secondary" className="bg-white/20 text-white border-white/30">
-                          {lang}
-                        </Badge>
-                      )) : (
-                        <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                      {Array.isArray(astrologer.languages) ? (
+                        astrologer.languages.map((lang, index) => (
+                          <Badge key={index} variant="secondary" className="bg-[#FFF7E6] text-[#FFA726] border border-[#FFD56B]">
+                            {lang}
+                          </Badge>
+                        ))
+                      ) : (
+                        <Badge variant="secondary" className="bg-[#FFF7E6] text-[#FFA726] border border-[#FFD56B]">
                           {astrologer.languages}
                         </Badge>
                       )}
@@ -169,9 +171,9 @@ const AstrologerDetailPage = () => {
                   </div>
 
                   {/* Price */}
-                  <div className="bg-orange-500/20 rounded-lg p-4 border border-orange-500/30">
-                    <p className="text-white/80 text-sm">Price per minute</p>
-                    <p className="text-3xl font-bold text-orange-400">₹{astrologer.pricePerMin}</p>
+                  <div className="bg-gradient-to-br from-[#FFA726] to-[#FFB300] rounded-xl p-4 border border-[#FFD56B]">
+                    <p className="text-white/90 text-sm">Price per minute</p>
+                    <p className="text-3xl font-bold text-white">₹{astrologer.pricePerMin}</p>
                   </div>
 
 
@@ -180,7 +182,7 @@ const AstrologerDetailPage = () => {
                     <Button 
                       size="lg" 
                       onClick={() => handleCommunication('chat')}
-                      className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg btn-glow"
+                      className="w-full bg-gradient-to-r from-[#FFA726] to-[#FFB300] hover:from-[#FF8F00] hover:to-[#FFA726] text-white shadow-lg hover:shadow-xl rounded-xl btn-glow"
                     >
                       💬 Start Chat
                     </Button>
@@ -189,7 +191,7 @@ const AstrologerDetailPage = () => {
                       size="lg" 
                       variant="outline" 
                       onClick={() => handleCommunication('audio')}
-                      className="w-full border-orange-500/50 text-orange-300 hover:bg-orange-500/20"
+                      className="w-full border-[#0A1A2F] text-[#0A1A2F] hover:bg-[#0A1A2F] hover:text-white rounded-xl transition-all duration-200"
                     >
                       🎧 Audio Call
                     </Button>
@@ -198,7 +200,7 @@ const AstrologerDetailPage = () => {
                       size="lg" 
                       variant="outline" 
                       onClick={() => handleCommunication('video')}
-                      className="w-full border-orange-500/50 text-orange-300 hover:bg-orange-500/20"
+                      className="w-full border-[#0A1A2F] text-[#0A1A2F] hover:bg-[#0A1A2F] hover:text-white rounded-xl transition-all duration-200"
                     >
                       📹 Video Call
                     </Button>
@@ -211,10 +213,10 @@ const AstrologerDetailPage = () => {
           {/* Right Column - Details */}
           <div className="lg:col-span-2 space-y-8">
             {/* About Section */}
-            <Card className="bg-white/10 backdrop-blur-sm border-0 shadow-xl">
+            <Card className="bg-white border border-[#E5E5E5] shadow-md rounded-[20px]">
               <CardContent className="p-8">
-                <h2 className="text-2xl font-bold text-white mb-6">About {astrologer.name}</h2>
-                <p className="text-white/90 leading-relaxed text-lg">
+                <h2 className="text-2xl font-bold text-[#0A1A2F] mb-6">About {astrologer.name}</h2>
+                <p className="text-[#0A1A2F]/70 leading-relaxed text-lg">
                   {astrologer.description || `Meet ${astrologer.name}, a highly experienced ${astrologer.expertise} specialist with ${astrologer.experience} years of dedicated practice. ${astrologer.name} has helped thousands of clients find clarity and guidance in their lives through expert astrological consultations.`}
                 </p>
               </CardContent>
@@ -222,14 +224,14 @@ const AstrologerDetailPage = () => {
 
             {/* Specialties */}
             {astrologer.specialties && astrologer.specialties.length > 0 && (
-              <Card className="bg-white/10 backdrop-blur-sm border-0 shadow-xl">
+              <Card className="bg-white border border-[#E5E5E5] shadow-md rounded-[20px]">
                 <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold text-white mb-6">Specialties</h2>
+                  <h2 className="text-2xl font-bold text-[#0A1A2F] mb-6">Specialties</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {astrologer.specialties.map((specialty, index) => (
                       <div key={index} className="flex items-center space-x-3">
-                        <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                        <span className="text-white/90">{specialty}</span>
+                        <div className="w-2 h-2 bg-[#FFA726] rounded-full"></div>
+                        <span className="text-[#0A1A2F]/70">{specialty}</span>
                       </div>
                     ))}
                   </div>
@@ -238,62 +240,62 @@ const AstrologerDetailPage = () => {
             )}
 
             {/* Availability */}
-            <Card className="bg-white/10 backdrop-blur-sm border-0 shadow-xl">
+            <Card className="bg-white border border-[#E5E5E5] shadow-md rounded-[20px]">
               <CardContent className="p-8">
-                <h2 className="text-2xl font-bold text-white mb-6">Availability</h2>
+                <h2 className="text-2xl font-bold text-[#0A1A2F] mb-6">Availability</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="text-center">
-                    <div className="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center bg-green-500/20 border-2 border-green-500/50">
+                    <div className="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center bg-green-50 border-2 border-green-200">
                       <span className="text-2xl">💬</span>
                     </div>
-                    <h3 className="text-white font-semibold mb-1">Chat</h3>
-                    <p className="text-sm text-green-400">Available</p>
+                    <h3 className="text-[#0A1A2F] font-semibold mb-1">Chat</h3>
+                    <p className="text-sm text-green-600">Available</p>
                   </div>
                   
                   <div className="text-center">
-                    <div className="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center bg-green-500/20 border-2 border-green-500/50">
+                    <div className="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center bg-green-50 border-2 border-green-200">
                       <span className="text-2xl">📞</span>
                     </div>
-                    <h3 className="text-white font-semibold mb-1">Call</h3>
-                    <p className="text-sm text-green-400">Available</p>
+                    <h3 className="text-[#0A1A2F] font-semibold mb-1">Call</h3>
+                    <p className="text-sm text-green-600">Available</p>
                   </div>
                   
                   <div className="text-center">
-                    <div className="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center bg-green-500/20 border-2 border-green-500/50">
+                    <div className="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center bg-green-50 border-2 border-green-200">
                       <span className="text-2xl">📹</span>
                     </div>
-                    <h3 className="text-white font-semibold mb-1">Video</h3>
-                    <p className="text-sm text-green-400">Available</p>
+                    <h3 className="text-[#0A1A2F] font-semibold mb-1">Video</h3>
+                    <p className="text-sm text-green-600">Available</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Reviews Section */}
-            <Card className="bg-white/10 backdrop-blur-sm border-0 shadow-xl">
+            <Card className="bg-white border border-[#E5E5E5] shadow-md rounded-[20px]">
               <CardContent className="p-8">
-                <h2 className="text-2xl font-bold text-white mb-6">Client Reviews</h2>
+                <h2 className="text-2xl font-bold text-[#0A1A2F] mb-6">Client Reviews</h2>
                 <div className="space-y-4">
-                  <div className="bg-white/5 rounded-lg p-4">
+                  <div className="bg-[#FFF7E6] rounded-xl p-4 border border-[#FFD56B]/30">
                     <div className="flex items-center space-x-2 mb-2">
-                      <span className="text-yellow-400">⭐⭐⭐⭐⭐</span>
-                      <span className="text-white font-semibold">Excellent Service</span>
+                      <span className="text-[#FFD56B]">⭐⭐⭐⭐⭐</span>
+                      <span className="text-[#0A1A2F] font-semibold">Excellent Service</span>
                     </div>
-                    <p className="text-white/80">
+                    <p className="text-[#0A1A2F]/70">
                       "Very accurate predictions and helpful guidance. Highly recommended!"
                     </p>
-                    <p className="text-white/60 text-sm mt-2">- Anonymous Client</p>
+                    <p className="text-[#0A1A2F]/50 text-sm mt-2">- Anonymous Client</p>
                   </div>
                   
-                  <div className="bg-white/5 rounded-lg p-4">
+                  <div className="bg-[#FFF7E6] rounded-xl p-4 border border-[#FFD56B]/30">
                     <div className="flex items-center space-x-2 mb-2">
-                      <span className="text-yellow-400">⭐⭐⭐⭐⭐</span>
-                      <span className="text-white font-semibold">Great Experience</span>
+                      <span className="text-[#FFD56B]">⭐⭐⭐⭐⭐</span>
+                      <span className="text-[#0A1A2F] font-semibold">Great Experience</span>
                     </div>
-                    <p className="text-white/80">
+                    <p className="text-[#0A1A2F]/70">
                       "Professional and insightful consultation. Will definitely consult again."
                     </p>
-                    <p className="text-white/60 text-sm mt-2">- Anonymous Client</p>
+                    <p className="text-[#0A1A2F]/50 text-sm mt-2">- Anonymous Client</p>
                   </div>
                 </div>
               </CardContent>

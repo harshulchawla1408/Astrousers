@@ -105,61 +105,71 @@ export default function KundliPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black px-4">
-      <div className="w-full max-w-xl p-6 rounded-2xl shadow-xl bg-gray-900 border border-gray-800">
-        <h1 className="text-2xl font-bold text-center text-purple-400">Kundli Generator</h1>
-        <p className="text-gray-400 text-center mt-1">Generate your personalized Kundli PDF</p>
+    <div className="min-h-screen flex items-center justify-center bg-[#FFF7E6] px-4 py-20">
+      <div className="w-full max-w-xl p-8 rounded-[30px] shadow-lg bg-white border border-[#E5E5E5]">
+        <div className="text-center mb-6">
+          <div className="inline-block mb-3">
+            <span className="bg-[#FFB300] text-[#0A1A2F] px-4 py-1 rounded-full text-sm font-semibold">Free Kundali</span>
+          </div>
+          <h1 className="text-3xl font-bold text-[#0A1A2F]">Get Personalised Kundli</h1>
+        </div>
 
-        <form onSubmit={handleSubmit} className="mt-6 grid grid-cols-1 gap-4">
+        <form onSubmit={handleSubmit} className="mt-6 grid grid-cols-1 gap-5">
           <div>
-            <label className="block text-sm text-gray-300 mb-1">Name</label>
+            <label className="block text-sm font-medium text-[#0A1A2F] mb-2">Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter your full name"
-              className="w-full rounded-lg bg-gray-800 border border-gray-700 px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+              placeholder="Name"
+              className="w-full rounded-lg bg-white border border-[#E5E5E5] px-4 py-3 text-[#333] placeholder-[#999] focus:outline-none focus:ring-2 focus:ring-[#FFA726] focus:border-transparent transition"
               required
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm text-gray-300 mb-1">Date of Birth</label>
-              <input
-                type="date"
-                value={dob}
-                onChange={(e) => setDob(e.target.value)}
-                className="w-full rounded-lg bg-gray-800 border border-gray-700 px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                required
-              />
+              <label className="block text-sm font-medium text-[#0A1A2F] mb-2">Date</label>
+              <div className="relative">
+                <input
+                  type="date"
+                  value={dob}
+                  onChange={(e) => setDob(e.target.value)}
+                  className="w-full rounded-lg bg-white border border-[#E5E5E5] px-4 py-3 text-[#333] focus:outline-none focus:ring-2 focus:ring-[#FFA726] focus:border-transparent transition"
+                  required
+                />
+                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#0A1A2F]/50">📅</span>
+              </div>
             </div>
             <div>
-              <label className="block text-sm text-gray-300 mb-1">Time of Birth</label>
-              <input
-                type="time"
-                value={tob}
-                onChange={(e) => setTob(e.target.value)}
-                className="w-full rounded-lg bg-gray-800 border border-gray-700 px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                required
-              />
+              <label className="block text-sm font-medium text-[#0A1A2F] mb-2">Time</label>
+              <div className="relative">
+                <input
+                  type="time"
+                  value={tob}
+                  onChange={(e) => setTob(e.target.value)}
+                  className="w-full rounded-lg bg-white border border-[#E5E5E5] px-4 py-3 text-[#333] focus:outline-none focus:ring-2 focus:ring-[#FFA726] focus:border-transparent transition"
+                  required
+                />
+                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#0A1A2F]/50">🕐</span>
+              </div>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm text-gray-300 mb-1">City</label>
+            <label className="block text-sm font-medium text-[#0A1A2F] mb-2">Location</label>
             <input
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              placeholder="Enter birth city"
-              className="w-full rounded-lg bg-gray-800 border border-gray-700 px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+              placeholder="Delhi"
+              className="w-full rounded-lg bg-white border border-[#E5E5E5] px-4 py-3 text-[#333] placeholder-[#999] focus:outline-none focus:ring-2 focus:ring-[#FFA726] focus:border-transparent transition"
               required
             />
           </div>
 
           {error && (
-            <div className="rounded-lg border border-red-900 bg-red-950/40 text-red-300 px-3 py-2">
+            <div className="rounded-lg border border-red-200 bg-red-50 text-red-700 px-4 py-3">
               {error}
             </div>
           )}
@@ -167,7 +177,7 @@ export default function KundliPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="mt-2 inline-flex items-center justify-center rounded-lg bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white font-semibold py-2.5 px-4 transition focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="mt-2 inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#FFA726] to-[#FFB300] hover:from-[#FF8F00] hover:to-[#FFA726] disabled:opacity-50 text-white font-semibold py-3 px-6 transition-all duration-200 shadow-md hover:shadow-lg"
           >
             {submitting && (
               <svg className="mr-2 h-5 w-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -175,20 +185,20 @@ export default function KundliPage() {
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
               </svg>
             )}
-            {submitting ? "Generating..." : "Generate Kundli"}
+            {submitting ? "Generating..." : "Get Kundli"}
           </button>
         </form>
 
         {successMsg && (
-          <div className="mt-6 rounded-xl border border-green-900 bg-green-950/40 p-4">
-            <p className="text-green-300 text-sm">{successMsg}</p>
-            <div className="mt-4 flex flex-col sm:flex-row gap-3">
+          <div className="mt-6 rounded-xl border border-green-200 bg-green-50 p-6">
+            <p className="text-green-700 text-sm mb-4">{successMsg}</p>
+            <div className="flex flex-col sm:flex-row gap-3">
               {pdfUrl && (
                 <a
                   href={pdfUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center rounded-lg bg-gray-800 hover:bg-gray-700 text-white font-medium py-2 px-4 border border-gray-700 transition"
+                  className="inline-flex items-center justify-center rounded-xl bg-[#0A1A2F] hover:bg-[#081423] text-white font-medium py-2.5 px-4 transition-all duration-200"
                 >
                   Download PDF
                 </a>
@@ -196,7 +206,7 @@ export default function KundliPage() {
 
               <button
                 type="button"
-                className="inline-flex items-center justify-center rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 transition focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#FFA726] to-[#FFB300] hover:from-[#FF8F00] hover:to-[#FFA726] text-white font-semibold py-2.5 px-4 transition-all duration-200"
                 onClick={() => { /* Payment integration to be added later */ }}
               >
                 Get Full Report for ₹249/-

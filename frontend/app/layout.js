@@ -14,7 +14,7 @@ export default function RootLayout({ children }) {
           <meta name="keywords" content="astrology, birth chart, kundli, horoscope, astrologer consultation, vedic astrology, numerology, tarot" />
           <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
         </head>
-        <body className="antialiased bg-white text-gray-900">
+        <body className="antialiased bg-[#FFF7E6] text-[#0A1A2F]">
           <UserSync />
           {children}
         </body>

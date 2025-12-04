@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useSocket } from "@/lib/socketClient";
 import { Button } from "@/components/ui/button";
@@ -7,10 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { useRouter } from "next/navigation";
 
 export default function AstrologerDashboard() {
   const { user, isLoaded } = useUser();
   const { socket, isConnected } = useSocket();
+  const router = useRouter();
+
   const [astrologerData, setAstrologerData] = useState(null);
   const [isOnline, setIsOnline] = useState(false);
   const [pendingSessions, setPendingSessions] = useState([]);
@@ -21,256 +24,314 @@ export default function AstrologerDashboard() {
     call: true,
     video: false
   });
-  const [loading, setLoading] = useState(false);
+  const [loadingIds, setLoadingIds] = useState({}); // map sessionId => loading boolean
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
+  // Utility to set per-session loading
+  const setSessionLoading = (sessionId, value) => {
+    setLoadingIds((prev) => ({ ...prev, [sessionId]: value }));
+  };
 
-  // Fetch astrologer data
+  // Fetch astrologer profile (if this Clerk user is an astrologer)
   useEffect(() => {
     if (!isLoaded || !user) return;
 
-    const fetchAstrologerData = async () => {
+    const fetchAstrologer = async () => {
       try {
-        // Check if user is astrologer
         const checkRes = await fetch(`${backendUrl}/api/v1/astrologers/check/${user.id}`);
         const checkData = await checkRes.json();
-        
         if (checkData.exists && checkData.astrologer) {
-          // Fetch full astrologer data
           const res = await fetch(`${backendUrl}/api/v1/astrologers/${checkData.astrologer._id}`);
           const data = await res.json();
-          
-          if (data.success) {
+          if (data.success && data.data) {
             setAstrologerData(data.data);
-            setIsOnline(data.data.online || false);
+            setIsOnline(Boolean(data.data.online));
             setAvailability(data.data.availability || { chat: true, call: true, video: false });
           }
+        } else {
+          setAstrologerData(null);
         }
-      } catch (error) {
-        console.error('Error fetching astrologer data:', error);
+      } catch (err) {
+        console.error("Failed to fetch astrologer:", err);
       }
     };
 
-    fetchAstrologerData();
+    fetchAstrologer();
   }, [isLoaded, user, backendUrl]);
 
-  // Fetch today's earnings and active sessions
-  useEffect(() => {
+  // Fetch sessions & earnings for this astrologer
+  const fetchSessionStats = useCallback(async () => {
     if (!astrologerData) return;
+    try {
+      const res = await fetch(`${backendUrl}/api/v1/sessions/astrologer/${astrologerData._id}`);
+      const data = await res.json();
+      if (data.success) {
+        const sessions = data.sessions || [];
+        const active = sessions.filter((s) => s.status === "active");
+        setActiveSessions(active);
 
-    const fetchSessionData = async () => {
-      try {
-        const res = await fetch(`${backendUrl}/api/v1/sessions/astrologer/${astrologerData._id}`);
-        const data = await res.json();
-        
-        if (data.success) {
-          const sessions = data.sessions || [];
-          const active = sessions.filter(s => s.status === 'active');
-          setActiveSessions(active);
-
-          // Calculate today's earnings
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          const todaySessions = sessions.filter(s => {
-            const sessionDate = new Date(s.endTime || s.startTime);
-            return sessionDate >= today && s.status === 'ended';
-          });
-          
-          const earnings = todaySessions.reduce((sum, s) => sum + (s.coinsUsed || 0), 0);
-          setTodayEarnings(earnings);
-        }
-      } catch (error) {
-        console.error('Error fetching session data:', error);
+        // Today's earnings: ended sessions with endTime today
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
+        const todaySessions = sessions.filter((s) => {
+          const dt = new Date(s.endTime || s.startTime);
+          return dt >= startOfToday && s.status === "ended";
+        });
+        const earnings = todaySessions.reduce((sum, s) => sum + (s.coinsUsed || 0), 0);
+        setTodayEarnings(earnings);
       }
-    };
-
-    fetchSessionData();
-    const interval = setInterval(fetchSessionData, 30000); // Refresh every 30s
-    return () => clearInterval(interval);
+    } catch (err) {
+      console.error("Failed fetching session stats:", err);
+    }
   }, [astrologerData, backendUrl]);
 
-  // Listen for incoming session requests
   useEffect(() => {
-    if (!socket) return;
+    fetchSessionStats();
+    const id = setInterval(fetchSessionStats, 30000);
+    return () => clearInterval(id);
+  }, [fetchSessionStats]);
 
-    socket.on('incoming_request', (data) => {
-      console.log('New session request:', data);
+  // SOCKET: incoming_request, session:accepted, session:rejected
+  useEffect(() => {
+    if (!socket || !astrologerData) return;
+
+    const onIncoming = (data) => {
+      // data expected: { sessionId, userId, userName, mode, channelName, astrologerId }
+      if (!data || !data.sessionId) return;
+      // Only accept requests targeted to this astrologer
+      if (data.astrologerId && data.astrologerId !== astrologerData._id) return;
+
       setPendingSessions((prev) => {
-        // Avoid duplicates
-        if (prev.find(s => s.sessionId === data.sessionId)) return prev;
-        return [...prev, data];
+        if (prev.some((p) => p.sessionId === data.sessionId)) return prev;
+        return [data, ...prev];
       });
-    });
+    };
 
-    socket.on('session:accepted', (data) => {
-      setPendingSessions((prev) => prev.filter(s => s.sessionId !== data.sessionId));
-    });
+    const onAccepted = (data) => {
+      // Remove from pending, add to active
+      if (!data?.sessionId) return;
+      setPendingSessions((prev) => prev.filter((p) => p.sessionId !== data.sessionId));
+      // Optionally fetch updated sessions
+      fetchSessionStats();
+    };
+
+    const onRejected = (data) => {
+      if (!data?.sessionId) return;
+      setPendingSessions((prev) => prev.filter((p) => p.sessionId !== data.sessionId));
+    };
+
+    socket.on("incoming_request", onIncoming);
+    socket.on("session:accepted", onAccepted);
+    socket.on("session:rejected", onRejected);
 
     return () => {
-      socket.off('incoming_request');
-      socket.off('session:accepted');
+      socket.off("incoming_request", onIncoming);
+      socket.off("session:accepted", onAccepted);
+      socket.off("session:rejected", onRejected);
     };
-  }, [socket]);
+  }, [socket, astrologerData, fetchSessionStats]);
 
+  // Toggle online/offline
   const toggleOnlineStatus = async () => {
     if (!user || !astrologerData) return;
-
+    const endpoint = isOnline ? "offline" : "online";
     try {
-      setLoading(true);
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
-      const endpoint = isOnline ? 'offline' : 'online';
-      
-      const response = await fetch(`${backendUrl}/api/v1/astrologers/${astrologerData._id}/${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': user.id
-        }
+      const res = await fetch(`${backendUrl}/api/v1/astrologers/${astrologerData._id}/${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-user-id": user.id }
       });
-
-      const data = await response.json();
+      const data = await res.json();
       if (data.success) {
         setIsOnline(!isOnline);
-        // Update astrologer data
-        setAstrologerData(prev => ({ ...prev, online: !isOnline }));
-        // Emit socket event
-        if (socket) {
-          socket.emit(isOnline ? 'presence:off' : 'presence:on');
-        }
+        setAstrologerData((prev) => ({ ...prev, online: !isOnline }));
+        if (socket) socket.emit(isOnline ? "presence:off" : "presence:on");
       } else {
-        alert(data.message || 'Failed to update status');
+        alert(data.message || "Failed to update status");
       }
-    } catch (error) {
-      console.error('Error toggling online status:', error);
-      alert('Failed to update online status');
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      console.error("Toggle online error:", err);
+      alert("Failed to update online status");
     }
   };
 
+  // Update availability preferences
   const updateAvailability = async (field, value) => {
     if (!user || !astrologerData) return;
-
-    const newAvailability = { ...availability, [field]: value };
-    setAvailability(newAvailability);
-
+    const prev = availability;
+    const next = { ...availability, [field]: value };
+    setAvailability(next);
     try {
-      const response = await fetch(`${backendUrl}/api/v1/astrologers/${astrologerData._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': user.id
-        },
-        body: JSON.stringify({ availability: newAvailability })
+      const res = await fetch(`${backendUrl}/api/v1/astrologers/${astrologerData._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "x-user-id": user.id },
+        body: JSON.stringify({ availability: next })
       });
-
-      const data = await response.json();
+      const data = await res.json();
       if (!data.success) {
-        // Revert on error
-        setAvailability(availability);
-        alert(data.message || 'Failed to update availability');
+        setAvailability(prev);
+        alert(data.message || "Failed to update availability");
       }
-    } catch (error) {
-      console.error('Error updating availability:', error);
-      setAvailability(availability);
-      alert('Failed to update availability');
+    } catch (err) {
+      console.error("Availability update failed:", err);
+      setAvailability(prev);
+      alert("Failed to update availability");
     }
   };
 
+  // Accept session: core flow
   const acceptSession = async (sessionData) => {
-    if (!user || !socket) return;
-
+    if (!user || !sessionData) return;
+    const sid = sessionData.sessionId;
     try {
-      setLoading(true);
-      const response = await fetch(`${backendUrl}/api/v1/sessions/accept`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': user.id
-        },
-        body: JSON.stringify({ 
-          sessionId: sessionData.sessionId,
+      setSessionLoading(sid, true);
+
+      // 1) Tell backend astrologer accepts (server will update session status)
+      const acceptRes = await fetch(`${backendUrl}/api/v1/sessions/accept`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-user-id": user.id },
+        body: JSON.stringify({
+          sessionId: sid,
           astrologerClerkId: user.id
         })
       });
-
-      const data = await response.json();
-      if (!data.success) {
-        throw new Error(data.message || 'Failed to accept session');
+      const acceptJson = await acceptRes.json();
+      if (!acceptJson.success) {
+        throw new Error(acceptJson.message || "Failed to accept session");
       }
 
-      // Emit socket event
-      socket.emit('session:accept', { sessionId: sessionData.sessionId });
-      socket.emit('join-session', { sessionId: sessionData.sessionId });
+      // 2) Emit socket accept so server and user clients are notified, and join session room
+      if (socket) {
+        socket.emit("session:accept", { sessionId: sid });
+        socket.emit("session:join", { sessionId: sid });
+      }
 
-      // Remove from pending, add to active
-      setPendingSessions((prev) => prev.filter(s => s.sessionId !== sessionData.sessionId));
-      setActiveSessions((prev) => [...prev, { ...sessionData, status: 'active' }]);
-
-      // If call mode, get Agora token
-      if (sessionData.mode === 'audio' || sessionData.mode === 'video') {
+      // 3) If it's a call (audio/video) -> get Agora token and redirect to call page
+      const mode = sessionData.mode || sessionData.sessionType;
+      if (mode === "audio" || mode === "video") {
+        // Request Agora token using sessionId & astrologer mongo id (astrologerData._id)
         const tokenRes = await fetch(`${backendUrl}/api/v1/agora/token`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-user-id': user.id
-          },
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-user-id": user.id },
           body: JSON.stringify({
-            channelName: sessionData.channelName,
-            uid: user.id,
-            role: 'publisher'
+            sessionId: sid,
+            requesterId: astrologerData._id // pass mongo id so server can validate session membership
           })
         });
-
-        const tokenData = await tokenRes.json();
-        if (tokenData.success) {
-          // Emit token to user via socket
-          socket.emit('agora:token', {
-            sessionId: sessionData.sessionId,
-            token: tokenData.token,
-            appId: tokenData.appId,
-            channelName: tokenData.channelName
-          });
+        const tokenJson = await tokenRes.json();
+        if (!tokenJson.success) {
+          // still allow chat fallback: join session and stay on dashboard
+          alert(tokenJson.message || "Failed to get Agora token — remain in dashboard");
+          fetchSessionStats();
+          return;
         }
-      }
 
-      alert(`Session accepted!`);
-    } catch (error) {
-      console.error('Error accepting session:', error);
-      alert(error.message || 'Failed to accept session');
+        const { token, channelName, appId, uid } = tokenJson;
+
+        // Build redirect params
+        const params = new URLSearchParams({
+          sessionId: sid,
+          channelName,
+          token,
+          appId: appId || tokenJson.appId || "",
+          uid: String(uid || ""),
+          role: "astrologer"
+        });
+
+        // Redirect to the corresponding call page (your existing components should read these params)
+        if (mode === "audio") {
+          router.replace(`/audio-call?${params.toString()}`);
+        } else {
+          router.replace(`/video-call?${params.toString()}`);
+        }
+      } else {
+        // Chat mode: join session room and keep dashboard; optionally open chat panel
+        if (socket) socket.emit("session:join", { sessionId: sid });
+        // Move pending -> active locally
+        setPendingSessions((prev) => prev.filter((p) => p.sessionId !== sid));
+        setActiveSessions((prev) => [{ ...sessionData, sessionId: sid, status: "active" }, ...prev]);
+        fetchSessionStats();
+      }
+    } catch (err) {
+      console.error("Accept session failed:", err);
+      alert(err.message || "Failed to accept session");
     } finally {
-      setLoading(false);
+      setSessionLoading(sid, false);
     }
   };
 
+  // Reject session
   const rejectSession = async (sessionId) => {
-    if (!user) return;
-
+    if (!user || !sessionId) return;
     try {
-      const response = await fetch(`${backendUrl}/api/v1/sessions/reject`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': user.id
-        },
-        body: JSON.stringify({ 
-          sessionId,
-          astrologerClerkId: user.id
-        })
+      setSessionLoading(sessionId, true);
+      const res = await fetch(`${backendUrl}/api/v1/sessions/reject`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-user-id": user.id },
+        body: JSON.stringify({ sessionId, astrologerClerkId: user.id })
       });
-
-      const data = await response.json();
-      if (data.success) {
-        setPendingSessions((prev) => prev.filter(s => s.sessionId !== sessionId));
-        if (socket) {
-          socket.emit('session:reject', { sessionId });
-        }
+      const json = await res.json();
+      if (json.success) {
+        setPendingSessions((prev) => prev.filter((p) => p.sessionId !== sessionId));
+        if (socket) socket.emit("session:reject", { sessionId });
+      } else {
+        throw new Error(json.message || "Reject failed");
       }
-    } catch (error) {
-      console.error('Error rejecting session:', error);
+    } catch (err) {
+      console.error("Reject failed:", err);
+      alert(err.message || "Failed to reject");
+    } finally {
+      setSessionLoading(sessionId, false);
     }
   };
 
+  // UI: loading states
+  const renderIncomingList = () => {
+    if (!pendingSessions.length) {
+      return <p className="text-white/60">No pending session requests</p>;
+    }
+
+    return (
+      <div className="space-y-3">
+        {pendingSessions.map((session) => {
+          const sid = session.sessionId;
+          const loading = !!loadingIds[sid];
+          return (
+            <Card key={sid} className="bg-white/5 border-white/20">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white font-medium">{session.userName || session.userId}</p>
+                    <p className="text-white/60 text-sm">Type: {session.mode || session.sessionType}</p>
+                    <p className="text-white/60 text-sm">Channel: {session.channelName}</p>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      onClick={() => acceptSession(session)}
+                      disabled={loading}
+                      className="bg-green-500 hover:bg-green-600 text-white"
+                      size="sm"
+                    >
+                      {loading ? "Accepting..." : "Accept"}
+                    </Button>
+                    <Button
+                      onClick={() => rejectSession(sid)}
+                      disabled={loading}
+                      variant="destructive"
+                      size="sm"
+                    >
+                      {loading ? "Rejecting..." : "Reject"}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    );
+  };
+
+  // Loading initial states
   if (!isLoaded) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
@@ -348,7 +409,7 @@ export default function AstrologerDashboard() {
           </Card>
         </div>
 
-        {/* Online Status & Availability */}
+        {/* Status & Availability */}
         <Card className="bg-white/10 backdrop-blur-sm border-0 shadow-xl mb-6">
           <CardHeader>
             <CardTitle className="text-white text-xl">Status & Availability</CardTitle>
@@ -363,14 +424,10 @@ export default function AstrologerDashboard() {
               </div>
               <Button
                 onClick={toggleOnlineStatus}
-                disabled={loading || !isConnected}
-                className={`${
-                  isOnline
-                    ? "bg-red-500 hover:bg-red-600"
-                    : "bg-green-500 hover:bg-green-600"
-                } text-white`}
+                disabled={!isConnected}
+                className={`${isOnline ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"} text-white`}
               >
-                {loading ? "Updating..." : isOnline ? "Go Offline" : "Go Online"}
+                {isOnline ? "Go Offline" : "Go Online"}
               </Button>
             </div>
 
@@ -378,30 +435,15 @@ export default function AstrologerDashboard() {
               <p className="text-white/80 mb-3">Availability</p>
               <div className="space-y-2">
                 <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={availability.chat}
-                    onChange={(e) => updateAvailability('chat', e.target.checked)}
-                    className="w-4 h-4"
-                  />
+                  <input type="checkbox" checked={availability.chat} onChange={(e) => updateAvailability("chat", e.target.checked)} className="w-4 h-4"/>
                   <span className="text-white">Chat</span>
                 </label>
                 <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={availability.call}
-                    onChange={(e) => updateAvailability('call', e.target.checked)}
-                    className="w-4 h-4"
-                  />
+                  <input type="checkbox" checked={availability.call} onChange={(e) => updateAvailability("call", e.target.checked)} className="w-4 h-4"/>
                   <span className="text-white">Audio Call</span>
                 </label>
                 <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={availability.video}
-                    onChange={(e) => updateAvailability('video', e.target.checked)}
-                    className="w-4 h-4"
-                  />
+                  <input type="checkbox" checked={availability.video} onChange={(e) => updateAvailability("video", e.target.checked)} className="w-4 h-4"/>
                   <span className="text-white">Video Call</span>
                 </label>
               </div>
@@ -412,56 +454,12 @@ export default function AstrologerDashboard() {
         {/* Incoming Requests */}
         <Card className="bg-white/10 backdrop-blur-sm border-0 shadow-xl">
           <CardHeader>
-            <CardTitle className="text-white text-xl">
-              Incoming Requests ({pendingSessions.length})
-            </CardTitle>
+            <CardTitle className="text-white text-xl">Incoming Requests ({pendingSessions.length})</CardTitle>
           </CardHeader>
-          <CardContent>
-            {pendingSessions.length === 0 ? (
-              <p className="text-white/60">No pending session requests</p>
-            ) : (
-              <div className="space-y-3">
-                {pendingSessions.map((session) => (
-                  <Card key={session.sessionId} className="bg-white/5 border-white/20">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-white font-medium">
-                            {session.userName || session.userId}
-                          </p>
-                          <p className="text-white/60 text-sm">
-                            Type: {session.mode || session.sessionType}
-                          </p>
-                        </div>
-                        <div className="flex space-x-2">
-                          <Button
-                            onClick={() => acceptSession(session)}
-                            disabled={loading}
-                            className="bg-green-500 hover:bg-green-600 text-white"
-                            size="sm"
-                          >
-                            Accept
-                          </Button>
-                          <Button
-                            onClick={() => rejectSession(session.sessionId)}
-                            disabled={loading}
-                            variant="destructive"
-                            size="sm"
-                          >
-                            Reject
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </CardContent>
+          <CardContent>{renderIncomingList()}</CardContent>
         </Card>
       </main>
       <Footer />
     </div>
   );
 }
-
