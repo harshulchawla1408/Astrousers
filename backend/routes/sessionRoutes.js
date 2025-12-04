@@ -11,25 +11,33 @@ import {
 
 const router = express.Router();
 
-// Start a new consultation session
+/**
+ * IMPORTANT:
+ * Clerk is used only on the frontend.
+ * Backend gets userId (clerkId) from headers or body.
+ *
+ * We keep backend routes open and validate inside controllers.
+ */
+
+// START SESSION (User → Astrologer)
 router.post("/start", createSession);
 
-// Astrologer accepts session
+// ACCEPT SESSION (Astrologer)
 router.post("/accept", acceptSession);
 
-// Astrologer rejects session
+// REJECT SESSION (Astrologer)
 router.post("/reject", rejectSession);
 
-// End session (user or astrologer)
+// END SESSION (User or Astrologer)
 router.post("/end", endSession);
 
-// Get session by ID
-router.get("/:sessionId", getSession);
-
-// Get user's sessions
+// Get ALL sessions for a User
 router.get("/user/:userId", getUserSessions);
 
-// Get astrologer's sessions
+// Get ALL sessions for an Astrologer
 router.get("/astrologer/:astrologerId", getAstrologerSessions);
+
+// Get specific session BY ID
+router.get("/details/:sessionId", getSession);
 
 export default router;

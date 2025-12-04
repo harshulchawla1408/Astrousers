@@ -1,153 +1,153 @@
+// backend/routes/agoraRoutes.js
 import express from "express";
 import pkg from "agora-access-token";
-import { requireAuth } from "../middleware/clerkAuth.js";
+import Session from "../models/sessionModel.js";
 
 const router = express.Router();
 const { RtcTokenBuilder, RtcRole } = pkg;
 
-// Generate Agora token for video/audio calls (POST /api/v1/agora/token)
-router.post("/token", (req, res) => {
+const APP_ID = process.env.AGORA_APP_ID;
+const APP_CERT = process.env.AGORA_APP_CERTIFICATE;
+
+// Helper to generate random Agora UID
+const randomUID = () => Math.floor(100000 + Math.random() * 900000);
+
+/**
+ * ----------------------------------------------------------
+ *  🔥 GENERATE AGORA TOKEN FOR ACTIVE SESSION
+ *  POST /api/v1/agora/token
+ * ----------------------------------------------------------
+ */
+router.post("/token", async (req, res) => {
   try {
-    const appID = process.env.AGORA_APP_ID;
-    const appCertificate = process.env.AGORA_APP_CERTIFICATE;
-    const { channelName, uid } = req.body;
-    const role = req.body.role === 'subscriber' ? RtcRole.SUBSCRIBER : RtcRole.PUBLISHER;
-    const expirationTimeInSeconds = 3600; // 1 hour
-    const currentTimestamp = Math.floor(Date.now() / 1000);
-    const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
+    const { sessionId, requesterId } = req.body;
 
-    if (!appID || !appCertificate) {
-      return res.status(500).json({ 
+    if (!APP_ID || !APP_CERT) {
+      return res.status(500).json({
         success: false,
-        error: "Agora credentials not configured" 
+        message: "Agora credentials missing"
       });
     }
 
-    if (!channelName) {
-      return res.status(400).json({ 
+    if (!sessionId || !requesterId) {
+      return res.status(400).json({
         success: false,
-        error: "Channel name is required" 
+        message: "sessionId and requesterId are required"
       });
     }
 
-    const tokenUid = uid || Math.floor(Math.random() * 100000);
-    const token = RtcTokenBuilder.buildTokenWithUid(
-      appID,
-      appCertificate,
-      channelName,
-      tokenUid,
-      role,
-      privilegeExpiredTs
-    );
-
-    res.json({ 
-      success: true,
-      token,
-      appId: appID,
-      channelName,
-      uid: tokenUid
-    });
-  } catch (error) {
-    console.error("Error generating Agora token:", error);
-    res.status(500).json({ 
-      success: false,
-      error: "Failed to generate token" 
-    });
-  }
-});
-
-// Keep GET endpoint for backward compatibility
-router.get("/token", (req, res) => {
-  try {
-    const appID = process.env.AGORA_APP_ID;
-    const appCertificate = process.env.AGORA_APP_CERTIFICATE;
-    const channelName = req.query.channel;
-    const uid = req.query.uid || 0;
-    const role = req.query.role === 'subscriber' ? RtcRole.SUBSCRIBER : RtcRole.PUBLISHER;
-    const expirationTimeInSeconds = 3600;
-    const currentTimestamp = Math.floor(Date.now() / 1000);
-    const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
-
-    if (!appID || !appCertificate) {
-      return res.status(500).json({ 
+    const session = await Session.findById(sessionId);
+    if (!session) {
+      return res.status(404).json({
         success: false,
-        error: "Agora credentials not configured" 
+        message: "Session not found"
       });
     }
 
-    if (!channelName) {
-      return res.status(400).json({ 
+    // Check that requester is either user or astrologer
+    const isUser = session.userId === requesterId;
+    const isAstro = session.astrologerId === requesterId;
+
+    if (!isUser && !isAstro) {
+      return res.status(403).json({
         success: false,
-        error: "Channel name is required" 
+        message: "Unauthorized for this session"
       });
     }
+
+    const channelName = session.channelName;
+
+    // Assign uids
+    let uidUser = session.agora?.uidUser || randomUID();
+    let uidAstrologer = session.agora?.uidAstrologer || randomUID();
+
+    const uid = isUser ? uidUser : uidAstrologer;
+
+    const role = RtcRole.PUBLISHER;
+    const expireSeconds = 3600;
+    const ts = Math.floor(Date.now() / 1000) + expireSeconds;
 
     const token = RtcTokenBuilder.buildTokenWithUid(
-      appID,
-      appCertificate,
+      APP_ID,
+      APP_CERT,
       channelName,
       uid,
       role,
-      privilegeExpiredTs
+      ts
     );
 
-    res.json({ 
+    // Save Agora info in DB only once
+    if (!session.agora || !session.agora.uidUser) {
+      session.agora = {
+        channel: channelName,
+        uidUser,
+        uidAstrologer,
+        token
+      };
+      await session.save();
+    }
+
+    return res.json({
       success: true,
       token,
-      appId: appID,
       channelName,
-      uid: uid
+      appId: APP_ID,
+      uid,
+      role: isUser ? "user" : "astrologer"
     });
-  } catch (error) {
-    console.error("Error generating Agora token:", error);
-    res.status(500).json({ 
+  } catch (err) {
+    console.error("Agora token error:", err);
+    return res.status(500).json({
       success: false,
-      error: "Failed to generate token" 
+      message: "Could not generate token",
+      error: err.message
     });
   }
 });
 
-// Generate token for chat (using Agora RTM for messaging)
+/**
+ * ----------------------------------------------------------
+ *  🔥 RTM TOKEN GENERATION (SAFE WAY)
+ *  GET /api/v1/agora/rtm-token?uid=xxx
+ * ----------------------------------------------------------
+ */
 router.get("/rtm-token", (req, res) => {
   try {
-    const appID = process.env.AGORA_APP_ID;
-    const appCertificate = process.env.AGORA_APP_CERTIFICATE;
-    const userId = req.query.userId;
-    const expirationTimeInSeconds = 3600;
-    const currentTimestamp = Math.floor(Date.now() / 1000);
-    const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
+    const { uid } = req.query;
 
-    if (!appID || !appCertificate) {
-      return res.status(500).json({ 
-        error: "Agora credentials not configured" 
+    if (!APP_ID || !APP_CERT) {
+      return res.status(500).json({ message: "Agora credentials missing" });
+    }
+
+    if (!uid) {
+      return res.status(400).json({
+        message: "UID is required for RTM"
       });
     }
 
-    if (!userId) {
-      return res.status(400).json({ 
-        error: "User ID is required" 
-      });
-    }
+    const expireSeconds = 3600;
+    const ts = Math.floor(Date.now() / 1000) + expireSeconds;
 
-    // For RTM, we use a different token builder
+    // RTM token uses PUBLISHER role
     const token = RtcTokenBuilder.buildTokenWithUid(
-      appID,
-      appCertificate,
-      userId,
-      userId,
+      APP_ID,
+      APP_CERT,
+      uid,
+      Number(uid),
       RtcRole.PUBLISHER,
-      privilegeExpiredTs
+      ts
     );
 
-    res.json({ 
+    return res.json({
+      success: true,
       token,
-      appId: appID,
-      userId: userId
+      uid
     });
   } catch (error) {
-    console.error("Error generating RTM token:", error);
-    res.status(500).json({ 
-      error: "Failed to generate RTM token" 
+    console.error("RTM token error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to create RTM token"
     });
   }
 });

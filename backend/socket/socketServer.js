@@ -1,316 +1,223 @@
-import { Server } from 'socket.io';
-import { verifyToken } from '@clerk/clerk-sdk-node';
-import User from '../models/user.js';
-import Astrologer from '../models/astrologerModel.js';
-import Session from '../models/sessionModel.js';
-import Message from '../models/messageModel.js';
+// backend/socket/socketServer.js
+import { Server } from "socket.io";
+import User from "../models/user.js";
+import Astrologer from "../models/astrologerModel.js";
+import Session from "../models/sessionModel.js";
+import Message from "../models/messageModel.js";
 
 let io;
 
+// Format helper
+const getUserRoom = (id) => `user:${id}`;
+const getAstroRoom = (id) => `astrologer:${id}`;
+const getSessionRoom = (id) => `session:${id}`;
+
 export const initializeSocket = (server) => {
   io = new Server(server, {
-    cors: {
-      origin: process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || '*',
-      methods: ['GET', 'POST'],
-      credentials: true
-    }
+    cors: { origin: "*", credentials: true }
   });
 
-  // Socket authentication middleware
-  io.use(async (socket, next) => {
+  io.on("connection", async (socket) => {
     try {
-      const token = socket.handshake.auth.token;
-      
-      if (!token) {
-        return next(new Error('Authentication error: No token provided'));
+      const clerkId = socket.handshake.auth?.clerkId;
+      if (!clerkId) {
+        socket.disconnect();
+        return;
       }
 
-      const verified = await verifyToken(token, {
-        audience: process.env.CLERK_JWT_AUD || undefined,
-        issuer: process.env.CLERK_JWT_ISSUER || undefined
-      });
+      // ℹ Fetch user or astrologer
+      let user = await User.findOne({ clerkId });
+      let astrologer = await Astrologer.findOne({ clerkId });
 
-      const userId = verified.sub;
-      if (!userId) {
-        return next(new Error('Authentication error: Invalid token'));
-      }
-
-      // Find or create user
-      let user = await User.findOne({ clerkId: userId });
       if (!user) {
+        // create minimum user profile if not exist
         user = await User.create({
-          clerkId: userId,
-          email: verified.email || '',
-          name: verified.name || '',
-          profileImage: verified.picture || '',
-          wallet: 100
+          clerkId,
+          wallet: 0,
+          name: "New User"
         });
       }
 
-      socket.userId = userId;
-      socket.user = user;
-      next();
-    } catch (error) {
-      console.error('Socket auth error:', error);
-      next(new Error('Authentication failed'));
-    }
-  });
+      // Attach to socket object
+      socket.clerkId = clerkId;
+      socket.mongoUserId = user._id.toString();
+      socket.role = astrologer ? "astrologer" : "user";
 
-  io.on('connection', async (socket) => {
-    console.log(`✅ User connected: ${socket.userId}`);
-
-    // Update user socketId and set online
-    await User.findOneAndUpdate(
-      { clerkId: socket.userId },
-      { 
-        socketId: socket.id,
-        isOnline: true,
-        lastSeen: new Date()
-      }
-    );
-
-    // Join user's personal room
-    socket.join(`user:${socket.userId}`);
-
-    // If user is astrologer, join astrologer room and update astrologers collection
-    const currentUser = await User.findOne({ clerkId: socket.userId });
-    if (currentUser && currentUser.role === 'astrologer') {
-      socket.join('astrologers');
-      // Update astrologers collection if clerkId matches
-      await Astrologer.findOneAndUpdate(
-        { clerkId: socket.userId },
-        { online: true },
-        { upsert: false }
-      );
-      // Broadcast updated online list
-      const onlineAstrologers = await Astrologer.find({ online: true })
-        .select('_id name image rating pricePerMin availability');
-      io.emit('presence:online-list', { astrologers: onlineAstrologers });
-    }
-
-    // Handle presence:on
-    socket.on('presence:on', async () => {
-      const currentUser = await User.findOne({ clerkId: socket.userId });
+      // Bind socket to user document
       await User.findOneAndUpdate(
-        { clerkId: socket.userId },
-        { isOnline: true, lastSeen: new Date() }
+        { clerkId },
+        { socketId: socket.id, isOnline: true, lastSeen: new Date() }
       );
-      
-      if (currentUser && currentUser.role === 'astrologer') {
-        // Update astrologers collection
-        await Astrologer.findOneAndUpdate(
-          { clerkId: socket.userId },
-          { online: true },
-          { upsert: false }
-        );
-        const onlineAstrologers = await Astrologer.find({ online: true })
-          .select('_id name image rating pricePerMin availability');
-        io.emit('presence:online-list', { astrologers: onlineAstrologers });
-      }
-    });
 
-    // Handle presence:off
-    socket.on('presence:off', async () => {
-      const currentUser = await User.findOne({ clerkId: socket.userId });
-      await User.findOneAndUpdate(
-        { clerkId: socket.userId },
-        { isOnline: false, lastSeen: new Date() }
+      // Update astrologer online
+      if (socket.role === "astrologer") {
+        await Astrologer.findOneAndUpdate(
+          { clerkId },
+          { online: true }
+        );
+      }
+
+      // Join personal rooms
+      socket.join(getUserRoom(user._id.toString()));
+      if (astrologer) {
+        socket.join(getAstroRoom(astrologer._id.toString()));
+        socket.join("astrologers"); // for dashboards
+      }
+
+      console.log("⚡ Connected:", clerkId, "Role:", socket.role);
+
+      // BROADCAST updated astrologer presence
+      const onlineAstros = await Astrologer.find({ online: true }).select(
+        "_id name pricePerMin rating image availability"
       );
-      
-      if (currentUser && currentUser.role === 'astrologer') {
-        // Update astrologers collection
-        await Astrologer.findOneAndUpdate(
-          { clerkId: socket.userId },
-          { online: false },
-          { upsert: false }
-        );
-        const onlineAstrologers = await Astrologer.find({ online: true })
-          .select('_id name image rating pricePerMin availability');
-        io.emit('presence:online-list', { astrologers: onlineAstrologers });
-      }
-    });
+      io.emit("presence:online-list", onlineAstros);
 
-    // Handle join-session
-    socket.on('join-session', async (data) => {
-      const { sessionId } = data;
-      if (sessionId) {
-        socket.join(`session:${sessionId}`);
-        console.log(`User ${socket.userId} joined session ${sessionId}`);
-      }
-    });
+      /*
+      ---------------------------------------------------------
+        📌 1) JOIN SESSION ROOM
+      ---------------------------------------------------------
+      */
+      socket.on("session:join", ({ sessionId }) => {
+        socket.join(getSessionRoom(sessionId));
+      });
 
-    // Handle leave-session
-    socket.on('leave-session', async (data) => {
-      const { sessionId } = data;
-      if (sessionId) {
-        socket.leave(`session:${sessionId}`);
-        console.log(`User ${socket.userId} left session ${sessionId}`);
-      }
-    });
+      socket.on("session:leave", ({ sessionId }) => {
+        socket.leave(getSessionRoom(sessionId));
+      });
 
-    // Handle message:send (chat messages)
-    socket.on('message:send', async (data) => {
-      try {
-        const { sessionId, text } = data;
-        
-        if (!sessionId || !text) {
-          socket.emit('message:error', { message: 'Session ID and text are required' });
-          return;
-        }
+      /*
+      ---------------------------------------------------------
+        📌 2) CHAT: SEND MESSAGE
+      ---------------------------------------------------------
+      */
+      socket.on("message:send", async ({ sessionId, text }) => {
+        if (!text || !sessionId) return;
 
         const session = await Session.findById(sessionId);
-        if (!session) {
-          socket.emit('message:error', { message: 'Session not found' });
-          return;
-        }
+        if (!session || session.status !== "active") return;
 
-        // Verify session is active
-        if (session.status !== 'active') {
-          socket.emit('message:error', { message: 'Session is not active' });
-          return;
-        }
+        const fromUserId = socket.mongoUserId;
+        const isUser = session.userId === fromUserId;
+        const isAstro = session.astrologerId === fromUserId;
 
-        // Verify user is part of this session
-        const isUser = session.userId === socket.userId;
-        const astrologer = await Astrologer.findById(session.astrologerId);
-        const isAstrologer = astrologer && astrologer.clerkId === socket.userId;
+        if (!isUser && !isAstro) return;
 
-        if (!isUser && !isAstrologer) {
-          socket.emit('message:error', { message: 'Unauthorized' });
-          return;
-        }
-
-        // Determine recipient
         const toUserId = isUser ? session.astrologerId : session.userId;
 
-        // Save message to DB (using chatmessages collection)
-        const message = new Message({
+        const msg = await Message.create({
           sessionId,
-          fromUserId: socket.userId,
+          fromUserId,
           toUserId,
           text,
           timestamp: new Date()
         });
-        await message.save();
 
-        // Emit to session room
-        io.to(`session:${sessionId}`).emit('message:receive', {
-          _id: message._id,
-          sessionId,
-          fromUserId: socket.userId,
-          toUserId,
-          text,
-          timestamp: message.timestamp
-        });
-      } catch (error) {
-        console.error('Error sending message:', error);
-        socket.emit('message:error', { message: 'Failed to send message' });
-      }
-    });
+        io.to(getSessionRoom(sessionId)).emit("message:receive", msg);
+      });
 
-    // Handle session:accept (astrologer accepts)
-    socket.on('session:accept', async (data) => {
-      try {
-        const { sessionId } = data;
+      /*
+      ---------------------------------------------------------
+        📌 3) REAL-TIME INCOMING REQUEST (controller triggers)
+      ---------------------------------------------------------
+      */
+      socket.on("session:incoming", (data) => {
+        // No internal logic needed. Controller emits this.
+      });
+
+      /*
+      ---------------------------------------------------------
+        📌 4) CALL SIGNALING (WebRTC / Agora)
+      ---------------------------------------------------------
+      */
+      socket.on("call:signal", async ({ sessionId, signal }) => {
         const session = await Session.findById(sessionId);
-        
-        if (!session) {
-          socket.emit('session:error', { message: 'Session not found' });
-          return;
-        }
+        if (!session) return;
 
-        // Notify user
-        io.to(`user:${session.userId}`).emit('session:accepted', {
-          sessionId: session._id.toString(),
+        const fromId = socket.mongoUserId;
+        const toId = fromId === session.userId ? session.astrologerId : session.userId;
+
+        io.to(getUserRoom(toId)).emit("call:signal", {
+          sessionId,
+          signal,
+          from: fromId
+        });
+      });
+
+      /*
+      ---------------------------------------------------------
+        📌 5) SESSION ACCEPT
+      ---------------------------------------------------------
+      */
+      socket.on("session:accept", async ({ sessionId }) => {
+        const session = await Session.findById(sessionId);
+        if (!session) return;
+
+        io.to(getUserRoom(session.userId)).emit("session:accepted", {
+          sessionId,
           channelName: session.channelName,
           sessionType: session.sessionType
         });
-      } catch (error) {
-        console.error('Error handling session accept:', error);
-        socket.emit('session:error', { message: 'Failed to accept session' });
-      }
-    });
+      });
 
-    // Handle session:reject (astrologer rejects)
-    socket.on('session:reject', async (data) => {
-      try {
-        const { sessionId } = data;
+      /*
+      ---------------------------------------------------------
+        📌 6) SESSION REJECT
+      ---------------------------------------------------------
+      */
+      socket.on("session:reject", async ({ sessionId }) => {
         const session = await Session.findById(sessionId);
-        
-        if (!session) {
-          socket.emit('session:error', { message: 'Session not found' });
-          return;
-        }
+        if (!session) return;
 
-        // Notify user
-        io.to(`user:${session.userId}`).emit('session:rejected', {
-          sessionId: session._id.toString(),
-          message: 'Astrologer declined your consultation request'
-        });
-      } catch (error) {
-        console.error('Error handling session reject:', error);
-        socket.emit('session:error', { message: 'Failed to reject session' });
-      }
-    });
-
-    // Handle call signaling (for audio/video calls)
-    socket.on('call:signal', async (data) => {
-      try {
-        const { sessionId, signal, type } = data;
-        const session = await Session.findById(sessionId);
-        
-        if (!session) {
-          socket.emit('call:error', { message: 'Session not found' });
-          return;
-        }
-
-        // Forward signal to other party in session
-        const targetUserId = socket.userId === session.userId 
-          ? session.astrologerId 
-          : session.userId;
-        
-        io.to(`user:${targetUserId}`).emit('call:signal', {
+        io.to(getUserRoom(session.userId)).emit("session:rejected", {
           sessionId,
-          signal,
-          type,
-          from: socket.userId
+          message: "Astrologer rejected your request"
         });
-      } catch (error) {
-        console.error('Error handling call signal:', error);
-        socket.emit('call:error', { message: 'Failed to send signal' });
-      }
-    });
+      });
 
-    // Handle disconnect
-    socket.on('disconnect', async () => {
-      console.log(`❌ User disconnected: ${socket.userId}`);
-      
-      const currentUser = await User.findOne({ clerkId: socket.userId });
-      await User.findOneAndUpdate(
-        { clerkId: socket.userId },
-        { 
-          isOnline: false,
-          socketId: null,
-          lastSeen: new Date()
-        }
-      );
+      /*
+      ---------------------------------------------------------
+        📌 7) BILLING PING (EVERY 60 SEC)
+      ---------------------------------------------------------
+      */
+      socket.on("billing:tick", async ({ sessionId }) => {
+        const s = await Session.findById(sessionId);
+        if (!s || s.status !== "active") return;
 
-      if (currentUser && currentUser.role === 'astrologer') {
-        // Update astrologers collection
-        await Astrologer.findOneAndUpdate(
-          { clerkId: socket.userId },
-          { online: false },
-          { upsert: false }
+        io.to(getSessionRoom(sessionId)).emit("billing:update", {});
+      });
+
+      /*
+      ---------------------------------------------------------
+        ❌ DISCONNECT LOGIC
+      ---------------------------------------------------------
+      */
+      socket.on("disconnect", async () => {
+        console.log("❌ Disconnected:", clerkId);
+
+        await User.findOneAndUpdate(
+          { clerkId },
+          { isOnline: false, socketId: null, lastSeen: new Date() }
         );
-        const onlineAstrologers = await Astrologer.find({ online: true })
-          .select('_id name image rating pricePerMin availability');
-        io.emit('presence:online-list', { astrologers: onlineAstrologers });
-      }
-    });
+
+        if (socket.role === "astrologer") {
+          await Astrologer.findOneAndUpdate(
+            { clerkId },
+            { online: false }
+          );
+
+          const onlineAstros = await Astrologer.find({ online: true }).select(
+            "_id name image pricePerMin rating availability"
+          );
+          io.emit("presence:online-list", onlineAstros);
+        }
+      });
+    } catch (err) {
+      console.log("🔥 Socket error:", err);
+      socket.disconnect();
+    }
   });
 
   return io;
 };
 
 export const getIO = () => io;
-

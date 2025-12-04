@@ -1,7 +1,8 @@
-// server.js
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from "express";
 import mongoose from "mongoose";
-import dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -17,8 +18,6 @@ import chatRoutes from "./routes/chatRoutes.js";
 import sessionRoutes from "./routes/sessionRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import { initializeSocket } from "./socket/socketServer.js";
-
-dotenv.config();
 
 const app = express();
 const httpServer = createServer(app);
