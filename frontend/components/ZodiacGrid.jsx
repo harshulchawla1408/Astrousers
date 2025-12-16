@@ -80,36 +80,48 @@ const ZodiacGrid = () => {
           ))}
         </div>
 
-{/* ---------- Services Section (Full Image Cards, No White Borders) ---------- */}
-<div className="mt-20 px-2 sm:px-4">
-  <h3 className="text-3xl md:text-4xl font-bold text-center text-[#0A1A2F] mb-8">
-    Our Expert Services
-  </h3>
+        {/* ---------- Services Section (Professional, Image-Fit Cards) ---------- */}
+        <div className="mt-20 px-2 sm:px-4">
+          <h3 className="text-3xl md:text-4xl font-bold text-center text-[#0A1A2F] mb-10">
+            Our Expert Services
+          </h3>
 
-  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-6xl mx-auto">
-    {services.map((service, idx) => (
-      <Link
-        key={idx}
-        href={`/services/${service.title.toLowerCase().replace(/ /g, "-")}`}
-        className="block"
-      >
-        <div className="relative w-full h-80 rounded-[20px] overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer">
-          <Image
-            src={service.img}
-            alt={service.title}
-            fill
-            className="object-cover"
-          />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {services.map((service, idx) => (
+              <Link
+                key={idx}
+                href={`/services/${service.title
+                  .toLowerCase()
+                  .replace(/ /g, "-")}`}
+                className="group block"
+              >
+                <div className="bg-white rounded-[20px] shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+                  {/* Image Container – fits full image */}
+                  <div className="relative w-full aspect-[3/2] bg-[#F9F9F9]">
+                    <Image
+                      src={service.img}
+                      alt={service.title}
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+
+                  {/* Service Name BELOW image */}
+                  <div className="py-4 text-center px-3">
+                    <h4 className="text-base md:text-lg font-semibold text-[#0A1A2F] group-hover:text-[#FFA726] transition-colors duration-200">
+                      {service.title}
+                    </h4>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <p className="text-md text-center text-[#0A1A2F]/70 mt-8 max-w-2xl mx-auto">
+            Trusted guidance from experienced astrologers — accurate insights
+            with complete privacy.
+          </p>
         </div>
-      </Link>
-    ))}
-  </div>
-
-  <p className="text-md text-center text-[#0A1A2F]/70 mt-6 max-w-2xl mx-auto">
-    Trusted guidance from experienced astrologers — accurate insights with complete privacy.
-  </p>
-</div>
-
       </div>
     </section>
   );

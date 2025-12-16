@@ -1,176 +1,185 @@
-'use client';
+"use client";
 
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 const ReviewsCarousel = () => {
   const reviews = [
     {
       id: 1,
-      name: "Ananya R.",
-      location: "Mumbai, India",
+      name: "Ritika Sharma",
+      location: "Delhi, India",
       rating: 5,
-      review: "Astrousers gave me the clarity I needed to switch careers. The reading was precise and the remedies worked.",
-      category: "Career",
-      avatar: "/login.jpg"
+      review:
+        "The guidance felt genuine and calming. I received clear direction instead of generic predictions.",
+      category: "Career Guidance",
+      avatar: "/avatars/user1.png",
     },
     {
       id: 2,
-      name: "Anushka P.",
-      location: "Srinagar, India",
+      name: "Aman Verma",
+      location: "Noida, India",
       rating: 5,
-      review: "I had a 3-month consultation and my relationship improved dramatically. Grateful for the practical suggestions.",
-      category: "Relationship",
-      avatar: "/signup.jpg"
+      review:
+        "Very patient explanation and accurate insights. The session helped clear my confusion.",
+      category: "Career",
+      avatar: "/avatars/user2.png",
     },
     {
       id: 3,
-      name: "Meera S.",
-      location: "Bangalore, India",
+      name: "Neha Kapoor",
+      location: "Jaipur, India",
       rating: 5,
-      review: "Fast, accurate chart & a caring astrologer. Their gemstone advice was spot on.",
-      category: "Remedies",
-      avatar: "/slider-01.jpg"
+      review:
+        "Accurate kundli analysis with practical advice. It felt reassuring and balanced.",
+      category: "Kundli",
+      avatar: "/avatars/user3.png",
     },
     {
       id: 4,
-      name: "Arjun P.",
-      location: "Chennai, India",
+      name: "Rahul Mehta",
+      location: "Ahmedabad, India",
       rating: 5,
-      review: "The Vastu consultation helped transform my home energy. Highly recommend their services.",
-      category: "Vastu",
-      avatar: "/slider-02.png"
+      review:
+        "Simple, honest, and not fear-driven. The astrologer explained everything clearly.",
+      category: "General",
+      avatar: "/avatars/user4.png",
     },
     {
       id: 5,
-      name: "Priya M.",
-      location: "Kolkata, India",
+      name: "Pooja Malhotra",
+      location: "Chandigarh, India",
       rating: 5,
-      review: "Amazing numerology reading that helped me understand my life path better.",
-      category: "Numerology",
-      avatar: "/logo.jpg"
+      review:
+        "The consultation helped me emotionally and mentally. Very calming experience.",
+      category: "Wellness",
+      avatar: "/avatars/user5.png",
     },
     {
       id: 6,
-      name: "Vikram S.",
-      location: "Pune, India",
+      name: "Kunal Arora",
+      location: "Gurgaon, India",
       rating: 5,
-      review: "Professional service with detailed explanations. The astrologer was very patient and knowledgeable.",
-      category: "General",
-      avatar: "/login.jpg"
-    }
+      review:
+        "Professional service with clear remedies and realistic expectations.",
+      category: "Life Guidance",
+      avatar: "/avatars/user6.png",
+    },
   ];
 
-  const renderStars = (rating) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <span key={i} className={`text-lg ${i < rating ? 'text-[#FFD56B]' : 'text-white/30'}`}>
+  const renderStars = (rating) =>
+    Array.from({ length: 5 }, (_, i) => (
+      <span
+        key={i}
+        className={`text-base ${
+          i < rating ? "text-[#FFD56B]" : "text-[#E5E5E5]"
+        }`}
+      >
         ★
       </span>
     ));
-  };
 
   return (
-    <section className="py-20 bg-gradient-to-r from-[#FFA726] to-[#FFB300] relative overflow-hidden">
-      {/* Subtle pattern overlay */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-10 left-10 text-4xl">⭐</div>
-        <div className="absolute top-20 right-20 text-3xl">🌙</div>
-        <div className="absolute bottom-10 left-1/4 text-3xl">☀️</div>
-      </div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            CUSTOMERS REVIEWS
+    <section className="py-20 bg-[#FFF7E6]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Heading */}
+        <div className="text-center mb-14">
+          <h2 className="text-4xl md:text-5xl font-bold text-[#0A1A2F] mb-4">
+            What Our Early Users Say
           </h2>
-          <p className="text-xl text-white/90 mb-2">
-            Top Astrologers. 24x7 customer support. Happy to help.
+          <p className="text-lg text-[#0A1A2F]/70 max-w-2xl mx-auto">
+            Honest feedback from users who trusted Astrousers for guidance.
           </p>
         </div>
 
-        <div className="relative">
-          <Carousel
-            opts={{
-              align: "start",
-              loop: true,
-            }}
-            className="w-full"
-          >
-            <CarouselContent className="-ml-2 md:-ml-4">
-              {reviews.map((review) => (
-                <CarouselItem key={review.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
-                  <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-[#F1F1F1] shadow-md bg-white h-full rounded-[20px]">
-                    <CardContent className="p-6 flex flex-col h-full">
-                      {/* Quote Mark */}
-                      <div className="text-6xl text-[#E5E5E5] font-serif leading-none mb-4">
-                        "
-                      </div>
-                      
-                      {/* Review Content */}
-                      <div className="flex-1 flex flex-col">
-                        <p className="text-[#0A1A2F]/70 leading-relaxed mb-6 flex-1">
-                          {review.review}
-                        </p>
-                        
-                        {/* Rating */}
-                        <div className="flex items-center justify-center mb-4">
-                          {renderStars(review.rating)}
-                        </div>
-                        
-                        {/* User Info */}
-                        <div className="flex items-center justify-center space-x-3 mb-4">
-                          <Avatar className="w-12 h-12 border-2 border-[#FFD56B]">
-                            <AvatarImage src={review.avatar} alt={review.name} />
-                            <AvatarFallback className="bg-gradient-to-br from-[#FFA726] to-[#FFB300] text-white">
-                              {review.name.split(' ').map(n => n[0]).join('')}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="text-center">
-                            <div className="font-semibold text-[#0A1A2F]">{review.name}</div>
-                            <div className="text-sm text-[#0A1A2F]/60">{review.location}</div>
-                          </div>
-                        </div>
-                        
-                        {/* Category Badge */}
-                        <div className="flex justify-center">
-                          <Badge variant="secondary" className="bg-[#FFF7E6] text-[#FFA726] border border-[#FFD56B]">
-                            {review.category}
-                          </Badge>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="left-4 bg-white/90 hover:bg-white text-[#0A1A2F] border-[#E5E5E5] rounded-xl" />
-            <CarouselNext className="right-4 bg-white/90 hover:bg-white text-[#0A1A2F] border-[#E5E5E5] rounded-xl" />
-          </Carousel>
-        </div>
+        {/* Carousel */}
+        <Carousel opts={{ align: "start", loop: true }} className="w-full">
+          <CarouselContent className="-ml-4">
+            {reviews.map((review) => (
+              <CarouselItem
+                key={review.id}
+                className="pl-4 md:basis-1/2 lg:basis-1/3"
+              >
+                <Card className="bg-white rounded-[24px] shadow-md hover:shadow-xl transition-all duration-300 h-full">
+                  <CardContent className="p-6 flex flex-col h-full">
+                    {/* Review */}
+                    <p className="text-[#0A1A2F]/70 leading-relaxed mb-6 flex-1">
+                      “{review.review}”
+                    </p>
 
-        {/* Trust Stats */}
+                    {/* Rating */}
+                    <div className="flex justify-center mb-4">
+                      {renderStars(review.rating)}
+                    </div>
+
+                    {/* User */}
+                    <div className="flex items-center justify-center gap-3 mb-3">
+                      <Avatar className="w-12 h-12 border border-[#FFD56B]">
+                        <AvatarImage src={review.avatar} />
+                        <AvatarFallback className="bg-[#FFF7E6] text-[#0A1A2F] font-semibold">
+                          {review.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+
+                      <div className="text-center">
+                        <div className="font-semibold text-[#0A1A2F]">
+                          {review.name}
+                        </div>
+                        <div className="text-sm text-[#0A1A2F]/60">
+                          {review.location}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Category */}
+                    <div className="flex justify-center">
+                      <Badge className="bg-[#FFF7E6] text-[#FFA726] border border-[#FFD56B]">
+                        {review.category}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+
+          <CarouselPrevious className="left-2 bg-white text-[#0A1A2F]" />
+          <CarouselNext className="right-2 bg-white text-[#0A1A2F]" />
+        </Carousel>
+
+        {/* Early Trust Stats */}
         <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-          <div className="bg-white/20 backdrop-blur-sm rounded-[20px] p-6">
-            <div className="text-3xl font-bold text-white mb-2">2000+</div>
-            <div className="text-white/90">Verified Astrologers</div>
+          <div className="bg-white rounded-[20px] p-6 shadow-sm">
+            <div className="text-3xl font-bold text-[#0A1A2F] mb-2">50+</div>
+            <div className="text-[#0A1A2F]/70">Verified Astrologers</div>
           </div>
-          <div className="bg-white/20 backdrop-blur-sm rounded-[20px] p-6">
-            <div className="text-3xl font-bold text-white mb-2">15Cr+</div>
-            <div className="text-white/90">Call/Chat Minutes</div>
+          <div className="bg-white rounded-[20px] p-6 shadow-sm">
+            <div className="text-3xl font-bold text-[#0A1A2F] mb-2">1,200+</div>
+            <div className="text-[#0A1A2F]/70">Consultations Completed</div>
           </div>
-          <div className="bg-white/20 backdrop-blur-sm rounded-[20px] p-6">
-            <div className="text-3xl font-bold text-white mb-2">1Cr+</div>
-            <div className="text-white/90">Happy Customers</div>
+          <div className="bg-white rounded-[20px] p-6 shadow-sm">
+            <div className="text-3xl font-bold text-[#0A1A2F] mb-2">98%</div>
+            <div className="text-[#0A1A2F]/70">Positive Feedback</div>
           </div>
         </div>
 
-        {/* Call to Action */}
+        {/* CTA */}
         <div className="text-center mt-12">
-          <p className="text-white/90 mb-4">See more success stories</p>
-          <button className="text-white underline hover:text-white/80 transition-colors duration-200">
-            All Reviews →
-          </button>
+          <p className="text-[#0A1A2F]/70 mb-3">
+            More reviews coming as our community grows
+          </p>
         </div>
       </div>
     </section>

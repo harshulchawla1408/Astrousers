@@ -1,6 +1,12 @@
-'use client';
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+"use client";
+import Image from "next/image";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 const ServicesGrid = () => {
@@ -11,7 +17,7 @@ const ServicesGrid = () => {
       description: "Your AstroTip everyday",
       price: "Free",
       badge: "Updated Daily",
-      color: "from-yellow-400 to-orange-500"
+      color: "from-yellow-400 to-orange-500",
     },
     {
       icon: "🔮",
@@ -19,7 +25,7 @@ const ServicesGrid = () => {
       description: "Free summary + Paid full report",
       price: "₹249",
       badge: "Premium Report",
-      color: "from-blue-400 to-purple-500"
+      color: "from-blue-400 to-purple-500",
     },
     {
       icon: "💬",
@@ -27,7 +33,7 @@ const ServicesGrid = () => {
       description: "Verified experts with chat/call/video",
       price: "Live Sessions",
       badge: "24/7",
-      color: "from-pink-400 to-red-500"
+      color: "from-pink-400 to-red-500",
     },
     {
       icon: "💰",
@@ -35,7 +41,7 @@ const ServicesGrid = () => {
       description: "Recharge coins easily, first chat free",
       price: "3 min free",
       badge: "Easy Recharge",
-      color: "from-green-400 to-emerald-500"
+      color: "from-green-400 to-emerald-500",
     },
     {
       icon: "💕",
@@ -43,7 +49,7 @@ const ServicesGrid = () => {
       description: "Compatibility analysis and relationship guidance",
       price: "₹199",
       badge: "Popular",
-      color: "from-rose-400 to-pink-500"
+      color: "from-rose-400 to-pink-500",
     },
     {
       icon: "💼",
@@ -51,7 +57,7 @@ const ServicesGrid = () => {
       description: "Professional growth and job opportunities",
       price: "₹299",
       badge: "Expert Advice",
-      color: "from-indigo-400 to-blue-500"
+      color: "from-indigo-400 to-blue-500",
     },
     {
       icon: "🏠",
@@ -59,7 +65,7 @@ const ServicesGrid = () => {
       description: "Home and office energy optimization",
       price: "₹399",
       badge: "Home Visit",
-      color: "from-amber-400 to-yellow-500"
+      color: "from-amber-400 to-yellow-500",
     },
     {
       icon: "🔢",
@@ -67,8 +73,8 @@ const ServicesGrid = () => {
       description: "Life path numbers and destiny analysis",
       price: "₹149",
       badge: "Quick Report",
-      color: "from-purple-400 to-violet-500"
-    }
+      color: "from-purple-400 to-violet-500",
+    },
   ];
 
   return (
@@ -76,7 +82,9 @@ const ServicesGrid = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <div className="inline-block mb-4">
-            <span className="bg-[#FFB300] text-[#0A1A2F] px-4 py-1 rounded-full text-sm font-semibold">Service</span>
+            <span className="bg-[#FFB300] text-[#0A1A2F] px-4 py-1 rounded-full text-sm font-semibold">
+              Service
+            </span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold text-[#0A1A2F] mb-4">
             We Provide Best Astro Services For You
@@ -88,8 +96,8 @@ const ServicesGrid = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {services.map((service, index) => (
-            <Card 
-              key={index} 
+            <Card
+              key={index}
               className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-[#F1F1F1] shadow-md bg-white rounded-[20px]"
             >
               <CardHeader className="pb-4">
@@ -108,7 +116,10 @@ const ServicesGrid = () => {
                   <div className="text-sm font-medium text-[#0A1A2F]">
                     {service.price}
                   </div>
-                  <Badge variant="secondary" className="bg-[#FFF7E6] text-[#FFA726] border border-[#FFD56B] hover:bg-[#FFD56B]">
+                  <Badge
+                    variant="secondary"
+                    className="bg-[#FFF7E6] text-[#FFA726] border border-[#FFD56B] hover:bg-[#FFD56B]"
+                  >
                     {service.badge}
                   </Badge>
                 </div>
@@ -118,35 +129,76 @@ const ServicesGrid = () => {
         </div>
 
         {/* Why Astrousers Section */}
-        <div className="mt-20 text-center">
-          <h3 className="text-3xl font-bold text-[#0A1A2F] mb-8">Why Astrousers?</h3>
-          <p className="text-lg text-[#0A1A2F]/70 mb-12 max-w-3xl mx-auto">
-            Astrousers blends trusted astrological techniques with modern clarity — delivering personalized, practical guidance for relationships, career, health, and life decisions.
+        <div className="mt-24">
+          <h3 className="text-3xl md:text-4xl font-bold text-center text-[#0A1A2F] mb-6">
+            Why Astrousers?
+          </h3>
+
+          <p className="text-lg text-center text-[#0A1A2F]/70 mb-12 max-w-3xl mx-auto">
+            Astrousers blends time-tested astrological wisdom with modern
+            clarity — helping you make confident decisions in love, career,
+            health, and life.
           </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-6 rounded-[20px] shadow-md bg-white border border-[#F1F1F1]">
-              <div className="w-12 h-12 bg-gradient-to-br from-[#FFA726] to-[#FFB300] rounded-lg flex items-center justify-center mx-auto mb-4">
-                <span className="text-white text-xl">🎯</span>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Accuracy */}
+            <div className="group bg-white rounded-[24px] p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-[#F1F1F1] text-center">
+              <div className="w-16 h-16 mx-auto mb-5 rounded-xl bg-[#FFF7E6] flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Image
+                  src="/social/accuracy.png"
+                  alt="Astrology Accuracy"
+                  width={36}
+                  height={36}
+                  className="object-contain"
+                />
               </div>
-              <h4 className="text-xl font-semibold text-[#0A1A2F] mb-2">Accuracy</h4>
-              <p className="text-[#0A1A2F]/70">Precise birth charts using verified astronomical data.</p>
+              <h4 className="text-xl font-semibold text-[#0A1A2F] mb-2">
+                High Accuracy
+              </h4>
+              <p className="text-[#0A1A2F]/70 text-sm leading-relaxed">
+                Precise birth chart calculations using verified astronomical
+                data and proven astrological methods.
+              </p>
             </div>
-            
-            <div className="p-6 rounded-[20px] shadow-md bg-white border border-[#F1F1F1]">
-              <div className="w-12 h-12 bg-gradient-to-br from-[#FFA726] to-[#FFB300] rounded-lg flex items-center justify-center mx-auto mb-4">
-                <span className="text-white text-xl">👨‍🏫</span>
+
+            {/* Experts */}
+            <div className="group bg-white rounded-[24px] p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-[#F1F1F1] text-center">
+              <div className="w-16 h-16 mx-auto mb-5 rounded-xl bg-[#FFF7E6] flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Image
+                  src="/social/experts.png"
+                  alt="Experienced Astrologers"
+                  width={36}
+                  height={36}
+                  className="object-contain"
+                />
               </div>
-              <h4 className="text-xl font-semibold text-[#0A1A2F] mb-2">Experts</h4>
-              <p className="text-[#0A1A2F]/70">Vetted astrologers with decades of experience.</p>
+              <h4 className="text-xl font-semibold text-[#0A1A2F] mb-2">
+                Trusted Experts
+              </h4>
+              <p className="text-[#0A1A2F]/70 text-sm leading-relaxed">
+                Consult with carefully vetted astrologers having years of
+                real-world experience and deep domain expertise.
+              </p>
             </div>
-            
-            <div className="p-6 rounded-[20px] shadow-md bg-white border border-[#F1F1F1]">
-              <div className="w-12 h-12 bg-gradient-to-br from-[#FFA726] to-[#FFB300] rounded-lg flex items-center justify-center mx-auto mb-4">
-                <span className="text-white text-xl">⚡</span>
+
+            {/* Actionable */}
+            <div className="group bg-white rounded-[24px] p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-[#F1F1F1] text-center">
+              <div className="w-16 h-16 mx-auto mb-5 rounded-xl bg-[#FFF7E6] flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Image
+                  src="/social/actionable.png"
+                  alt="Actionable Guidance"
+                  width={36}
+                  height={36}
+                  className="object-contain"
+                />
               </div>
-              <h4 className="text-xl font-semibold text-[#0A1A2F] mb-2">Actionable</h4>
-              <p className="text-[#0A1A2F]/70">Practical remedies and follow-up guidance.</p>
+              <h4 className="text-xl font-semibold text-[#0A1A2F] mb-2">
+                Actionable Guidance
+              </h4>
+              <p className="text-[#0A1A2F]/70 text-sm leading-relaxed">
+                Clear remedies, practical steps, and follow-up guidance that you
+                can apply in daily life.
+              </p>
             </div>
           </div>
         </div>

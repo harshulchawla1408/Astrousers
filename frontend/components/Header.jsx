@@ -1,6 +1,12 @@
 "use client";
 
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  SignUpButton,
+  UserButton,
+} from "@clerk/nextjs";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -14,7 +20,7 @@ const Header = () => {
       setIsScrolled(window.scrollY > 50);
     };
 
-    // store originals for restoration
+    // Original scroll behaviour saving
     const origScrollRestoration =
       typeof history !== "undefined" && "scrollRestoration" in history
         ? history.scrollRestoration
@@ -22,33 +28,24 @@ const Header = () => {
     const origScrollTo = window.scrollTo?.bind(window);
     const origScrollIntoView = Element.prototype.scrollIntoView;
 
-    // attach normal scroll listener for header appearance
     window.addEventListener("scroll", handleScroll);
 
-    // set manual scroll restoration to avoid browser restoring previous scroll automatically
     try {
       if (typeof history !== "undefined" && "scrollRestoration" in history) {
         history.scrollRestoration = "manual";
       }
     } catch (e) {}
 
-    // disable CSS smooth scrolling
     try {
       document.documentElement.style.scrollBehavior = "auto";
       document.body.style.scrollBehavior = "auto";
     } catch (e) {}
 
-    // override programmatic scrolls to prevent auto-jump (restore on cleanup)
     try {
-      window.scrollTo = (..._args) => {
-        /* suppressed to prevent auto-scroll */
-      };
-      Element.prototype.scrollIntoView = function (_arg) {
-        /* suppressed to prevent auto-scroll */
-      };
+      window.scrollTo = (..._args) => {};
+      Element.prototype.scrollIntoView = function (_arg) {};
     } catch (e) {}
 
-    // ensure hash changes don't trigger smooth scroll
     const handleHashChange = () => {
       try {
         document.documentElement.style.scrollBehavior = "auto";
@@ -57,15 +54,16 @@ const Header = () => {
     };
     window.addEventListener("hashchange", handleHashChange);
 
-    // cleanup + restore originals
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("hashchange", handleHashChange);
+
       try {
         if (origScrollTo) window.scrollTo = origScrollTo;
         if (origScrollIntoView)
           Element.prototype.scrollIntoView = origScrollIntoView;
       } catch (e) {}
+
       try {
         if (
           typeof history !== "undefined" &&
@@ -110,39 +108,38 @@ const Header = () => {
               href="/"
               scroll={false}
               className="text-[#0A1A2F] hover:text-[#FFA726] font-medium transition-colors duration-200"
-              data-cursor="pointer"
             >
               Home
             </Link>
+
             <Link
               href="/services"
               scroll={false}
               className="text-[#0A1A2F] hover:text-[#FFA726] font-medium transition-colors duration-200"
-              data-cursor="pointer"
             >
               Services
             </Link>
+
             <Link
               href="/kundli"
               scroll={false}
               className="text-[#0A1A2F] hover:text-[#FFA726] font-medium transition-colors duration-200"
-              data-cursor="pointer"
             >
               Kundli
             </Link>
+
             <Link
               href="/astrologers"
               scroll={false}
               className="text-[#0A1A2F] hover:text-[#FFA726] font-medium transition-colors duration-200"
-              data-cursor="pointer"
             >
               Astrologers
             </Link>
+
             <Link
               href="/about"
               scroll={false}
               className="text-[#0A1A2F] hover:text-[#FFA726] font-medium transition-colors duration-200"
-              data-cursor="pointer"
             >
               About
             </Link>
@@ -151,23 +148,25 @@ const Header = () => {
           {/* CTAs */}
           <div className="flex items-center gap-4">
             <SignedOut>
-              <a href="/register">
+              {/* REGISTER POPUP */}
+              <SignUpButton mode="modal">
                 <Button
                   variant="ghost"
                   className="text-[#0A1A2F] hover:text-[#FFA726]"
                 >
                   Register
                 </Button>
-              </a>
+              </SignUpButton>
 
-              <a href="/login">
+              {/* LOGIN POPUP */}
+              <SignInButton mode="modal">
                 <Button
                   variant="ghost"
                   className="text-[#0A1A2F] hover:text-[#FFA726]"
                 >
                   Login
                 </Button>
-              </a>
+              </SignInButton>
             </SignedOut>
 
             <SignedIn>
