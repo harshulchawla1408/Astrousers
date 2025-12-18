@@ -37,4 +37,4 @@ astrologerSchema.pre('save', function(next) {
   next();
 });
 
-export default mongoose.model("Astrologer", astrologerSchema);
+export default mongoose.model("Astrologer", astrologerSchema); 

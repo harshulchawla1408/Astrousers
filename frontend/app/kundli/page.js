@@ -1,220 +1,153 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 
 export default function KundliPage() {
-  const [name, setName] = useState("");
-  const [dob, setDob] = useState("");
-  const [tob, setTob] = useState("");
-  const [city, setCity] = useState("");
+  const router = useRouter();
 
-  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({ dob: "", tob: "", lat: "", lon: "" });
+  const [loading, setLoading] = useState(false);
+  const [kundli, setKundli] = useState(null);
   const [error, setError] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
-  const [pdfUrl, setPdfUrl] = useState("");
 
-  // Helper: basic validators
-  const isFutureDate = (dateStr) => {
-    if (!dateStr) return false;
-    const today = new Date();
-    const date = new Date(dateStr);
-    return date > today;
-  };
-
-  const isValidTime = (timeStr) => {
-    if (!timeStr) return false;
-    // Accepts HH:MM (24h)
-    const match = /^([01]\d|2[0-3]):([0-5]\d)$/.test(timeStr);
-    return match;
-  };
-
-  const formInvalidReason = useMemo(() => {
-    if (!name || !dob || !tob || !city) return "All fields are required.";
-    if (isFutureDate(dob)) return "DOB cannot be in the future.";
-    if (!isValidTime(tob)) return "Enter a valid time in 24h format (HH:MM).";
-    return "";
-  }, [name, dob, tob, city]);
-
-  // Submission handler
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const submitKundli = async () => {
+    setLoading(true);
     setError("");
-    setSuccessMsg("");
-    setPdfUrl("");
+    setKundli(null);
 
-    if (formInvalidReason) {
-      setError(formInvalidReason);
-      return;
-    }
-
-    setSubmitting(true);
     try {
-      // Normalize city to Title Case to match backend cityMap keys
-      const normalizedCity = city
-        .trim()
-        .replace(/\s+/g, " ")
-        .split(" ")
-        .map((w) => (w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w))
-        .join(" ");
-
-      // Try JSON first to see if backend returns an URL; if not, fallback to blob
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/kundli/generate`, {
+      const res = await fetch("/api/astrology/kundli", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, dob, tob, city: normalizedCity }),
+        body: JSON.stringify(form),
       });
 
-      if (!response.ok) {
-        // Attempt to read JSON error
-        try {
-          const errJson = await response.json();
-          throw new Error(errJson?.message || errJson?.error || "Failed to generate Kundli.");
-        } catch {
-          throw new Error("Failed to generate Kundli.");
-        }
-      }
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.message || "Failed");
 
-      // Many backends either return { pdfUrl } JSON or a PDF blob
-      let url = "";
-      const contentType = response.headers.get("content-type") || "";
-      if (contentType.includes("application/json")) {
-        const data = await response.json();
-        url = data?.pdfUrl || "";
-        if (!url && data?.buffer) {
-          // In case buffer/base64 is returned
-          const blob = new Blob([Uint8Array.from(atob(data.buffer), (c) => c.charCodeAt(0))], {
-            type: "application/pdf",
-          });
-          url = URL.createObjectURL(blob);
-        }
-      } else if (contentType.includes("application/pdf")) {
-        const blob = await response.blob();
-        url = URL.createObjectURL(blob);
-      } else {
-        // Fallback: try blob
-        const blob = await response.blob();
-        url = URL.createObjectURL(blob);
-      }
-
-      setPdfUrl(url);
-      setSuccessMsg("Kundli Generated Successfully! Click below to download the PDF.");
+      // ✅ correct unwrap
+      setKundli(json?.data?.data || null);
     } catch (err) {
-      setError(err?.message || "Something went wrong. Please try again.");
+      setError(err.message || "Something went wrong");
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   };
 
+  const goToAdvancedKundli = () => {
+    const query = new URLSearchParams(form).toString();
+    router.push(`/kundli/advanced?${query}`);
+  };
+
+  const nakshatra = kundli?.nakshatra_details;
+  const mangal = kundli?.mangal_dosha;
+  const yogas = Array.isArray(kundli?.yoga_details)
+    ? kundli.yoga_details
+    : [];
+
+  const row = (label, value) => (
+    <div className="flex justify-between py-2 text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium">{value ?? "—"}</span>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FFF7E6] px-4 py-20">
-      <div className="w-full max-w-xl p-8 rounded-[30px] shadow-lg bg-white border border-[#E5E5E5]">
-        <div className="text-center mb-6">
-          <div className="inline-block mb-3">
-            <span className="bg-[#FFB300] text-[#0A1A2F] px-4 py-1 rounded-full text-sm font-semibold">Free Kundali</span>
-          </div>
-          <h1 className="text-3xl font-bold text-[#0A1A2F]">Get Personalised Kundli</h1>
-        </div>
+    <div className="min-h-screen bg-[#FFF7E6]">
+      <Header />
+      <main className="max-w-6xl mx-auto px-4 py-14 space-y-10">
 
-        <form onSubmit={handleSubmit} className="mt-6 grid grid-cols-1 gap-5">
-          <div>
-            <label className="block text-sm font-medium text-[#0A1A2F] mb-2">Name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Name"
-              className="w-full rounded-lg bg-white border border-[#E5E5E5] px-4 py-3 text-[#333] placeholder-[#999] focus:outline-none focus:ring-2 focus:ring-[#FFA726] focus:border-transparent transition"
-              required
-            />
-          </div>
+        {/* FORM */}
+        <Card className="rounded-2xl">
+          <CardHeader>
+            <CardTitle>Kundli Details</CardTitle>
+          </CardHeader>
+          <CardContent className="grid md:grid-cols-2 gap-4">
+            <Input type="date" value={form.dob} onChange={e => setForm({ ...form, dob: e.target.value })} />
+            <Input type="time" value={form.tob} onChange={e => setForm({ ...form, tob: e.target.value })} />
+            <Input placeholder="Latitude" value={form.lat} onChange={e => setForm({ ...form, lat: e.target.value })} />
+            <Input placeholder="Longitude" value={form.lon} onChange={e => setForm({ ...form, lon: e.target.value })} />
+            <Button onClick={submitKundli} className="md:col-span-2" disabled={loading}>
+              {loading ? "Generating..." : "Generate Kundli"}
+            </Button>
+          </CardContent>
+        </Card>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-sm font-medium text-[#0A1A2F] mb-2">Date</label>
-              <div className="relative">
-                <input
-                  type="date"
-                  value={dob}
-                  onChange={(e) => setDob(e.target.value)}
-                  className="w-full rounded-lg bg-white border border-[#E5E5E5] px-4 py-3 text-[#333] focus:outline-none focus:ring-2 focus:ring-[#FFA726] focus:border-transparent transition"
-                  required
-                />
-                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#0A1A2F]/50">📅</span>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[#0A1A2F] mb-2">Time</label>
-              <div className="relative">
-                <input
-                  type="time"
-                  value={tob}
-                  onChange={(e) => setTob(e.target.value)}
-                  className="w-full rounded-lg bg-white border border-[#E5E5E5] px-4 py-3 text-[#333] focus:outline-none focus:ring-2 focus:ring-[#FFA726] focus:border-transparent transition"
-                  required
-                />
-                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#0A1A2F]/50">🕐</span>
-              </div>
-            </div>
-          </div>
+        {error && <p className="text-red-600 text-sm">{error}</p>}
 
-          <div>
-            <label className="block text-sm font-medium text-[#0A1A2F] mb-2">Location</label>
-            <input
-              type="text"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              placeholder="Delhi"
-              className="w-full rounded-lg bg-white border border-[#E5E5E5] px-4 py-3 text-[#333] placeholder-[#999] focus:outline-none focus:ring-2 focus:ring-[#FFA726] focus:border-transparent transition"
-              required
-            />
-          </div>
+        {/* RESULT */}
+        {kundli && nakshatra && (
+          <div className="space-y-6">
 
-          {error && (
-            <div className="rounded-lg border border-red-200 bg-red-50 text-red-700 px-4 py-3">
-              {error}
-            </div>
-          )}
+            {/* CTA TO ADVANCED */}
+            <Card className="border border-yellow-300 bg-yellow-50">
+              <CardContent className="flex flex-col md:flex-row justify-between items-center gap-4 py-6">
+                <div>
+                  <h3 className="text-lg font-semibold">
+                    Want deeper astrological insights?
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Get dasha periods, advanced yogas, remedies & exceptions.
+                  </p>
+                </div>
+                <Button onClick={goToAdvancedKundli}>
+                  View Advanced Kundli →
+                </Button>
+              </CardContent>
+            </Card>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="mt-2 inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#FFA726] to-[#FFB300] hover:from-[#FF8F00] hover:to-[#FFA726] disabled:opacity-50 text-white font-semibold py-3 px-6 transition-all duration-200 shadow-md hover:shadow-lg"
-          >
-            {submitting && (
-              <svg className="mr-2 h-5 w-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-              </svg>
+            {/* NAKSHATRA */}
+            <Card>
+              <CardHeader><CardTitle>Nakshatra Details</CardTitle></CardHeader>
+              <CardContent>
+                {row("Nakshatra", nakshatra.nakshatra?.name)}
+                {row("Pada", nakshatra.nakshatra?.pada)}
+                {row("Lord", nakshatra.nakshatra?.lord?.vedic_name)}
+                {row("Chandra Rasi", nakshatra.chandra_rasi?.name)}
+                {row("Surya Rasi", nakshatra.soorya_rasi?.name)}
+                {row("Gana", nakshatra.additional_info?.ganam)}
+                {row("Nadi", nakshatra.additional_info?.nadi)}
+              </CardContent>
+            </Card>
+
+            {/* MANGAL DOSHA */}
+            {mangal && (
+              <Card>
+                <CardHeader><CardTitle>Mangal Dosha</CardTitle></CardHeader>
+                <CardContent className="space-y-2">
+                  <Badge>{mangal.has_dosha ? "Present" : "Not Present"}</Badge>
+                  <Separator />
+                  <p>{mangal.description}</p>
+                </CardContent>
+              </Card>
             )}
-            {submitting ? "Generating..." : "Get Kundli"}
-          </button>
-        </form>
 
-        {successMsg && (
-          <div className="mt-6 rounded-xl border border-green-200 bg-green-50 p-6">
-            <p className="text-green-700 text-sm mb-4">{successMsg}</p>
-            <div className="flex flex-col sm:flex-row gap-3">
-              {pdfUrl && (
-                <a
-                  href={pdfUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center rounded-xl bg-[#0A1A2F] hover:bg-[#081423] text-white font-medium py-2.5 px-4 transition-all duration-200"
-                >
-                  Download PDF
-                </a>
-              )}
+            {/* YOGAS */}
+            {yogas.length > 0 && (
+              <Card>
+                <CardHeader><CardTitle>Yogas</CardTitle></CardHeader>
+                <CardContent className="grid md:grid-cols-2 gap-3">
+                  {yogas.map((y, i) => (
+                    <div key={i} className="p-3 border rounded">
+                      <p className="font-medium">{y.name}</p>
+                      <p className="text-sm text-muted-foreground">{y.description}</p>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
 
-              <button
-                type="button"
-                className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#FFA726] to-[#FFB300] hover:from-[#FF8F00] hover:to-[#FFA726] text-white font-semibold py-2.5 px-4 transition-all duration-200"
-                onClick={() => { /* Payment integration to be added later */ }}
-              >
-                Get Full Report for ₹249/-
-              </button>
-            </div>
           </div>
         )}
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 }

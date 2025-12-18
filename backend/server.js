@@ -11,8 +11,8 @@ import xss from "xss"; // modern XSS sanitizer
 import { createServer } from "http";
 
 import userRoutes from "./routes/userRoutes.js";
-import kundliRoutes from "./routes/kundliRoutes.js";
 import astrologerRoutes from "./routes/astrologerRoutes.js";
+import astrologyRoutes from "./routes/astrologyRoutes.js";
 import agoraRoutes from "./routes/agoraRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import sessionRoutes from "./routes/sessionRoutes.js";
@@ -114,13 +114,14 @@ app.get("/api/health", (req, res) => {
 
 app.use("/api/users", userRoutes);
 app.use("/api/v1/user", userRoutes); // Primary route for user creation/update
-app.use("/api/v1/kundli", kundliRoutes);
 app.use("/api/v1/astrologers", astrologerRoutes);
 app.use("/api/agora", agoraRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/v1/sessions", sessionRoutes); // Primary route for sessions
 app.use("/api/payment", paymentRoutes);
+app.use("/api/astrology", astrologyRoutes);
+
 
 // -------------------- MongoDB Connection --------------------
 const connectDB = async () => {
