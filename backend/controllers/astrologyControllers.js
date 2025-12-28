@@ -2,56 +2,61 @@ import { fetchKundli } from "../services/kundliService.js";
 import { fetchAdvancedKundli } from "../services/advancedKundliService.js";
 import { fetchAdvancedKundliMatching } from "../services/kundliMatchingAdvancedService.js";
 import { fetchPanchang } from "../services/panchangService.js";
+import { geocodeLocation } from "../services/geocodingService.js";
+
+/**
+ * Helper: resolve latitude & longitude
+ * Supports BOTH:
+ * 1. Direct lat/lon
+ * 2. city/state/country
+ */
+const resolveCoordinates = async ({
+  lat,
+  lon,
+  city,
+  state,
+  country,
+}) => {
+  if (lat && lon) {
+    return { lat, lon };
+  }
+
+  if (city && country) {
+    return await geocodeLocation({ city, state, country });
+  }
+
+  throw new Error("Location information is missing");
+};
+
+/* ---------------- PANCHANG ---------------- */
 
 export const getPanchang = async (req, res) => {
   try {
-    const { date, time, lat, lon } = req.body;
+    const { date, time, lat, lon, city, state, country } = req.body;
 
-    if (!date || !time || !lat || !lon) {
+    if (!date || !time) {
       return res.status(400).json({
         success: false,
-        message: "Missing required fields",
+        message: "Date and time are required",
       });
     }
+
+    const coords = await resolveCoordinates({
+      lat,
+      lon,
+      city,
+      state,
+      country,
+    });
 
     const dateTime = `${date}T${time}:00+05:30`;
 
     const result = await fetchPanchang({
       dateTime,
-      latitude: lat,
-      longitude: lon,
+      latitude: coords.lat,
+      longitude: coords.lon,
     });
 
-    res.json({
-      success: true,
-      data: result.data, // 👈 unwrap once here
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-export const getAdvancedKundli = async (req, res) => {
-  try {
-    const { dob, tob, lat, lon, language } = req.body;
-
-    if (!dob || !tob || !lat || !lon) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
-
-    const dateTime = `${dob}T${tob}:00+05:30`;
-
-    const result = await fetchAdvancedKundli({
-      dateTime,
-      latitude: lat,
-      longitude: lon,
-      language,
-    });
-
-    // IMPORTANT: unwrap data here (same mistake avoided)
     res.json({
       success: true,
       data: result.data,
@@ -64,41 +69,109 @@ export const getAdvancedKundli = async (req, res) => {
   }
 };
 
-export const getKundli = async (req, res) => {
+/* ---------------- ADVANCED KUNDLI ---------------- */
+
+export const getAdvancedKundli = async (req, res) => {
   try {
     const {
-      dob,   // YYYY-MM-DD
-      tob,   // HH:mm
+      dob,
+      tob,
       lat,
       lon,
-      language
+      city,
+      state,
+      country,
+      language,
     } = req.body;
 
-    if (!dob || !tob || !lat || !lon) {
-      return res.status(400).json({ message: "Missing required fields" });
+    if (!dob || !tob) {
+      return res.status(400).json({
+        success: false,
+        message: "DOB and Time of Birth are required",
+      });
     }
 
-    // ISO 8601 format
-    const dateTime = `${dob}T${tob}:00+05:30`;
-
-    const kundli = await fetchKundli({
-      dateTime,
-      latitude: lat,
-      longitude: lon,
-      language
+    const coords = await resolveCoordinates({
+      lat,
+      lon,
+      city,
+      state,
+      country,
     });
 
-    res.status(200).json({
+    const dateTime = `${dob}T${tob}:00+05:30`;
+
+    const result = await fetchAdvancedKundli({
+      dateTime,
+      latitude: coords.lat,
+      longitude: coords.lon,
+      language,
+    });
+
+    res.json({
       success: true,
-      data: kundli
+      data: result.data,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
+
+/* ---------------- BASIC KUNDLI ---------------- */
+
+export const getKundli = async (req, res) => {
+  try {
+    const {
+      dob,
+      tob,
+      lat,
+      lon,
+      city,
+      state,
+      country,
+      language,
+    } = req.body;
+
+    if (!dob || !tob) {
+      return res.status(400).json({
+        success: false,
+        message: "DOB and Time of Birth are required",
+      });
+    }
+
+    const coords = await resolveCoordinates({
+      lat,
+      lon,
+      city,
+      state,
+      country,
+    });
+
+    const dateTime = `${dob}T${tob}:00+05:30`;
+
+    const kundli = await fetchKundli({
+      dateTime,
+      latitude: coords.lat,
+      longitude: coords.lon,
+      language,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: kundli,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+/* ---------------- KUNDLI MATCHING (ADVANCED) ---------------- */
 
 export const getAdvancedKundliMatching = async (req, res) => {
   try {
@@ -106,37 +179,52 @@ export const getAdvancedKundliMatching = async (req, res) => {
       girlDob,
       girlLat,
       girlLon,
+      girlCity,
+      girlState,
+      girlCountry,
       boyDob,
       boyLat,
       boyLon,
+      boyCity,
+      boyState,
+      boyCountry,
     } = req.body;
 
-    if (
-      !girlDob ||
-      !girlLat ||
-      !girlLon ||
-      !boyDob ||
-      !boyLat ||
-      !boyLon
-    ) {
+    if (!girlDob || !boyDob) {
       return res.status(400).json({
         success: false,
-        message: "Missing required fields",
+        message: "Birth details for both profiles are required",
       });
     }
 
+    const girlCoords = await resolveCoordinates({
+      lat: girlLat,
+      lon: girlLon,
+      city: girlCity,
+      state: girlState,
+      country: girlCountry,
+    });
+
+    const boyCoords = await resolveCoordinates({
+      lat: boyLat,
+      lon: boyLon,
+      city: boyCity,
+      state: boyState,
+      country: boyCountry,
+    });
+
     const result = await fetchAdvancedKundliMatching({
       girlDob,
-      girlLat,
-      girlLon,
+      girlLat: girlCoords.lat,
+      girlLon: girlCoords.lon,
       boyDob,
-      boyLat,
-      boyLon,
+      boyLat: boyCoords.lat,
+      boyLon: boyCoords.lon,
     });
 
     res.json({
       success: true,
-      data: result.data, // 👈 unwrap once here
+      data: result.data,
     });
   } catch (error) {
     res.status(500).json({

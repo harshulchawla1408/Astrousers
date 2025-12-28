@@ -37,7 +37,7 @@ const Footer = () => {
             <div className="space-y-6">
               <div className="flex items-center">
                 <Image
-                  src="/logo.jpg"
+                  src="/logo.png"
                   alt="Astrousers"
                   width={170}
                   height={100}
@@ -249,11 +249,10 @@ const Footer = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-white/70 text-sm">
-              Copyright © {new Date().getFullYear()} astrousers.com / Powered by
-              Burger Software
+              Copyright © {new Date().getFullYear()} astrousers.com 
             </div>
             <div className="flex items-center space-x-4 text-sm text-white/70">
-              <span>Made with ❤️ for astrology lovers</span>
+              <span>Powered by <a href="www.nxtquik.com">NxtQuik.com</a></span>
             </div>
           </div>
         </div>

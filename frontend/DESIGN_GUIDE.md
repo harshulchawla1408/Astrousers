@@ -8,7 +8,7 @@ The Astrousers homepage has been completely redesigned with a professional, warm
 
 ### 1. Professional Header
 - **Sticky navigation** with glass/blur effect on scroll
-- **Logo integration** using existing logo.jpg from public folder
+- **Logo integration** using existing logo.png from public folder
 - **Clean navigation** with hover effects
 - **CTA buttons** for "Generate Chart" and "Talk to Astrologer"
 
@@ -130,7 +130,7 @@ frontend/
 │   ├── page.js                 # Homepage
 │   └── globals.css             # Global styles
 └── public/
-    ├── logo.jpg                # Company logo
+    ├── logo.png               # Company logo
     ├── slider-01.jpg           # Hero image 1
     └── slider-02.png           # Hero image 2
 ```

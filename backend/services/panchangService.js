@@ -8,22 +8,41 @@ export const fetchPanchang = async ({
   language = "en",
   ayanamsa = 1,
 }) => {
+  if (!dateTime || latitude == null || longitude == null) {
+    throw new Error("Missing required parameters for Panchang");
+  }
+
   const token = await getProkeralaToken();
 
-  const response = await axios.get(
-    "https://api.prokerala.com/v2/astrology/panchang/advanced",
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      params: {
-        ayanamsa,
-        coordinates: `${latitude},${longitude}`,
-        datetime: dateTime,
-        la: language,
-      },
-    }
-  );
+  try {
+    const response = await axios.get(
+      "https://api.prokerala.com/v2/astrology/panchang/advanced",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          ayanamsa,
+          coordinates: `${Number(latitude)},${Number(longitude)}`,
+          datetime: dateTime,
+          la: language,
+        },
+      }
+    );
 
-  return response.data;
+    return response.data;
+  } catch (error) {
+    console.error("❌ PANCHANG API ERROR");
+
+    if (error.response) {
+      console.error("Status:", error.response.status);
+      console.error("Data:", error.response.data);
+    } else {
+      console.error(error.message);
+    }
+
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch Panchang"
+    );
+  }
 };

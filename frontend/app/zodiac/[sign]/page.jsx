@@ -3,15 +3,13 @@
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { zodiacs } from "@/data/zodiacs";
 import {
-  Sparkles,
   CheckCircle2,
   XCircle,
   Heart,
@@ -19,7 +17,27 @@ import {
   Flame,
   Orbit,
   ArrowLeft,
+  Lightbulb,
 } from "lucide-react";
+
+// Helper function to get Hindi name for zodiac sign
+const getHindiName = (slug) => {
+  const hindiNames = {
+    aries: "मेष",
+    taurus: "वृषभ",
+    gemini: "मिथुन",
+    cancer: "कर्क",
+    leo: "सिंह",
+    virgo: "कन्या",
+    libra: "तुला",
+    scorpio: "वृश्चिक",
+    sagittarius: "धनु",
+    capricorn: "मकर",
+    aquarius: "कुम्भ",
+    pisces: "मीन",
+  };
+  return hindiNames[slug] || "";
+};
 
 // Helper function to get element and ruling planet
 const getZodiacInfo = (slug) => {
@@ -50,6 +68,97 @@ const extractCompatibleSigns = (text) => {
     .split(/[,\s]+and\s+|,\s+/)
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
+};
+
+// Helper function to get tips for each zodiac sign
+const getZodiacTips = (slug) => {
+  const tipsMap = {
+    aries: [
+      "Channel your leadership energy into team projects and initiatives",
+      "Practice patience and mindfulness to balance your impulsive nature",
+      "Set clear goals and break them into manageable steps",
+      "Take time to listen before making quick decisions",
+      "Use your courage to help others overcome their fears"
+    ],
+    taurus: [
+      "Embrace change gradually rather than resisting it completely",
+      "Create a comfortable workspace that inspires productivity",
+      "Practice flexibility in relationships and daily routines",
+      "Indulge in self-care but maintain healthy boundaries",
+      "Trust your instincts while staying open to new perspectives"
+    ],
+    gemini: [
+      "Focus on one task at a time to improve productivity",
+      "Use your communication skills to build meaningful connections",
+      "Create a routine that includes time for learning and exploration",
+      "Practice decision-making by setting small deadlines",
+      "Balance social activities with quiet reflection time"
+    ],
+    cancer: [
+      "Set healthy emotional boundaries to protect your energy",
+      "Express your feelings openly with trusted loved ones",
+      "Create a peaceful home environment that nurtures your soul",
+      "Trust your intuition but verify facts before acting",
+      "Practice self-care to maintain emotional balance"
+    ],
+    leo: [
+      "Share the spotlight and celebrate others' achievements",
+      "Use your creativity to inspire and motivate others",
+      "Balance confidence with humility in interactions",
+      "Take time for self-reflection and personal growth",
+      "Channel your passion into meaningful projects"
+    ],
+    virgo: [
+      "Accept that perfection is not always necessary",
+      "Practice self-compassion and reduce self-criticism",
+      "Delegate tasks to others and trust their abilities",
+      "Take breaks to prevent burnout and maintain health",
+      "Celebrate small wins and progress, not just final results"
+    ],
+    libra: [
+      "Make decisions based on your own values, not just others' opinions",
+      "Balance social activities with personal time for reflection",
+      "Practice assertiveness while maintaining your diplomatic nature",
+      "Create harmony in your environment through organization",
+      "Trust your judgment and avoid overthinking choices"
+    ],
+    scorpio: [
+      "Open up gradually to build trust in relationships",
+      "Channel your intensity into creative or professional pursuits",
+      "Practice forgiveness to release emotional burdens",
+      "Balance your need for privacy with meaningful connections",
+      "Use your intuition to guide important life decisions"
+    ],
+    sagittarius: [
+      "Balance adventure with stability in your life",
+      "Complete projects before starting new ones",
+      "Practice active listening in conversations",
+      "Set realistic expectations for yourself and others",
+      "Use your optimism to inspire and motivate others"
+    ],
+    capricorn: [
+      "Schedule time for relaxation and fun activities",
+      "Celebrate achievements and acknowledge your progress",
+      "Express emotions openly with close friends and family",
+      "Balance work responsibilities with personal relationships",
+      "Allow yourself to make mistakes and learn from them"
+    ],
+    aquarius: [
+      "Connect with others on an emotional level, not just intellectual",
+      "Balance your independence with collaboration",
+      "Take breaks from technology to reconnect with nature",
+      "Express your unique ideas while respecting others' perspectives",
+      "Practice patience when others don't understand your vision"
+    ],
+    pisces: [
+      "Set clear boundaries to protect your emotional energy",
+      "Ground yourself in reality while maintaining your dreams",
+      "Express your creativity through art, music, or writing",
+      "Practice self-care to avoid emotional overwhelm",
+      "Trust your intuition but verify important information"
+    ],
+  };
+  return tipsMap[slug] || [];
 };
 
 // Helper function to get color class from color name
@@ -94,8 +203,14 @@ const getColorClass = (colorName) => {
 export default function ZodiacDetailPage() {
   const params = useParams();
   const sign = params.sign?.toLowerCase();
+  const [imageError, setImageError] = useState(false);
 
   const zodiac = zodiacs.find((z) => z.slug === sign);
+
+  // Reset image error when zodiac changes
+  useEffect(() => {
+    setImageError(false);
+  }, [sign]);
 
   if (!zodiac) {
     return (
@@ -122,20 +237,20 @@ export default function ZodiacDetailPage() {
   const luckyColors = Array.isArray(zodiac.luckyColors)
     ? zodiac.luckyColors
     : [];
+  const tips = getZodiacTips(sign);
 
   return (
     <div className="min-h-screen bg-[#FFF7E6]">
       <Header />
-      <main className="pt-16">
-        {/* Hero Section */}
-        <section className="py-12 bg-white relative overflow-hidden border-b border-[#E5E5E5]">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.1),transparent)]"></div>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <main className="pt-20">
+        {/* Header Section */}
+        <section className="bg-white border-b border-[#E5E5E5]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Back Button */}
             <Link href="/">
               <Button
-                variant="outline"
-                className="mb-6 group hover:bg-[#FFF7E6] border-[#E5E5E5] text-[#0A1A2F] rounded-xl"
+                variant="ghost"
+                className="mb-6 group text-[#0A1A2F] hover:text-[#FFA726] hover:bg-[#FFF7E6]"
               >
                 <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform duration-200" />
                 Back to Zodiac Signs
@@ -143,58 +258,51 @@ export default function ZodiacDetailPage() {
             </Link>
 
             {/* Zodiac Header */}
-            {/* Zodiac Header */}
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-8">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
               {/* Icon */}
-              <Card
-                className={`w-40 h-40 rounded-full overflow-hidden shadow-2xl border-0 p-0 flex items-center justify-center bg-white`}
-              >
-                <div className="w-full h-full flex items-center justify-center">
-                  <Image
-                    src={`/icons/${zodiac.name.toLowerCase()}.png`}
-                    alt={zodiac.name}
-                    width={180}
-                    height={180}
-                    className="object-contain p-4"
-                  />
-                </div>
-              </Card>
+              <div className="w-24 h-24 rounded-full overflow-hidden bg-white shadow-lg flex items-center justify-center flex-shrink-0">
+                <Image
+                  src={`/icons/${zodiac.name.toLowerCase()}.png`}
+                  alt={zodiac.name}
+                  width={96}
+                  height={96}
+                  className="object-contain p-2"
+                />
+              </div>
 
-              {/* Title and Date */}
+              {/* Title and Metadata */}
               <div className="flex-1 text-center md:text-left">
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                  {zodiac.name}
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#0A1A2F] mb-2">
+                  {zodiac.name} {getHindiName(sign) && (
+                    <span className="text-3xl md:text-4xl lg:text-5xl text-[#FFA726] font-normal">
+                      ({getHindiName(sign)})
+                    </span>
+                  )}
                 </h1>
-                <p className="text-xl md:text-2xl text-gray-600 mb-4 font-medium">
+                <p className="text-xl text-[#0A1A2F]/70 mb-6 font-medium">
                   {zodiac.dates}
                 </p>
 
-                {/* Info Panel */}
-                <div className="flex flex-wrap gap-4 mt-6">
-                  <Card className="px-4 py-2 bg-white/60 backdrop-blur-sm border-gray-200 shadow-md hover:shadow-lg transition-shadow duration-300">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-orange-600" />
-                      <span className="text-sm font-semibold text-gray-700">
-                        {zodiac.dates}
-                      </span>
-                    </div>
-                  </Card>
-                  <Card className="px-4 py-2 bg-white/60 backdrop-blur-sm border-gray-200 shadow-md hover:shadow-lg transition-shadow duration-300">
-                    <div className="flex items-center gap-2">
-                      <Flame className="w-4 h-4 text-orange-600" />
-                      <span className="text-sm font-semibold text-gray-700">
-                        {element}
-                      </span>
-                    </div>
-                  </Card>
-                  <Card className="px-4 py-2 bg-white/60 backdrop-blur-sm border-gray-200 shadow-md hover:shadow-lg transition-shadow duration-300">
-                    <div className="flex items-center gap-2">
-                      <Orbit className="w-4 h-4 text-orange-600" />
-                      <span className="text-sm font-semibold text-gray-700">
-                        {planet}
-                      </span>
-                    </div>
-                  </Card>
+                {/* Metadata Chips */}
+                <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-[#FFF7E6] rounded-full border border-[#E5E5E5]">
+                    <Calendar className="w-4 h-4 text-[#FFA726]" />
+                    <span className="text-sm font-semibold text-[#0A1A2F]">
+                      {zodiac.dates}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-[#FFF7E6] rounded-full border border-[#E5E5E5]">
+                    <Flame className="w-4 h-4 text-[#FFA726]" />
+                    <span className="text-sm font-semibold text-[#0A1A2F]">
+                      {element}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-[#FFF7E6] rounded-full border border-[#E5E5E5]">
+                    <Orbit className="w-4 h-4 text-[#FFA726]" />
+                    <span className="text-sm font-semibold text-[#0A1A2F]">
+                      {planet}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -204,201 +312,188 @@ export default function ZodiacDetailPage() {
         {/* Main Content */}
         <section className="py-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Left Column */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-8">
+              {/* Left Column - Content */}
               <div className="space-y-6">
-                {/* Overview Card */}
-                <Card className="border border-[#E5E5E5] shadow-md bg-white hover:shadow-xl transition-all duration-300 hover:scale-[1.01] rounded-[20px] border-l-4 border-l-[#FFA726]">
-                  <CardHeader className="flex flex-row items-center gap-3">
-                    <div
-                      className={`p-2 rounded-lg bg-gradient-to-br from-[#FFA726] to-[#FFB300] bg-opacity-20`}
-                    >
-                      <Sparkles className={`w-5 h-5 text-[#FFA726]`} />
-                    </div>
-                    <CardTitle className="text-2xl font-bold text-[#0A1A2F]">
-                      Overview
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-[#0A1A2F]/70 leading-relaxed text-base">
-                      {zodiac.overview}
-                    </p>
-                  </CardContent>
-                </Card>
+                {/* Overview */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                  <h2 className="text-2xl font-bold text-[#0A1A2F] mb-4">
+                    Overview
+                  </h2>
+                  <p className="text-[#0A1A2F]/80 leading-relaxed text-base text-justify">
+                    {zodiac.overview}
+                  </p>
+                </div>
 
-                {/* Personality Card */}
-                <Card className="border border-[#E5E5E5] shadow-md bg-white hover:shadow-xl transition-all duration-300 hover:scale-[1.01] rounded-[20px]">
-                  <CardHeader>
-                    <CardTitle className="text-2xl font-bold text-[#0A1A2F]">
-                      Personality
-                    </CardTitle>
-                    <Separator className="my-3" />
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-[#0A1A2F]/70 leading-relaxed text-base">
-                      {zodiac.personality}
-                    </p>
-                  </CardContent>
-                </Card>
+                {/* Personality */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                  <h2 className="text-2xl font-bold text-[#0A1A2F] mb-4">
+                    Personality
+                  </h2>
+                  <p className="text-[#0A1A2F]/80 leading-relaxed text-base text-justify">
+                    {zodiac.personality}
+                  </p>
+                </div>
 
-                {/* Strengths / Weaknesses Grid */}
+                {/* Strengths & Weaknesses */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Strengths Card */}
-                  <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-xl transition-all duration-300 hover:scale-[1.01] border-l-4 border-l-green-500">
-                    <CardHeader>
-                      <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                        <CheckCircle2 className="w-5 h-5 text-green-600" />
-                        Strengths
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-3">
-                        {strengths.map((strength, index) => (
-                          <li key={index} className="flex items-start gap-2">
-                            <CheckCircle2 className="w-4 h-4 text-green-600 mt-1 flex-shrink-0" />
-                            <span className="text-gray-700 text-sm">
-                              {strength}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
+                  {/* Strengths */}
+                  <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 border-l-4 border-l-green-500">
+                    <h3 className="text-xl font-bold text-[#0A1A2F] mb-4 flex items-center gap-2">
+                      <CheckCircle2 className="w-5 h-5 text-green-600" />
+                      Strengths
+                    </h3>
+                    <ul className="space-y-3">
+                      {strengths.map((strength, index) => (
+                        <li key={index} className="flex items-start gap-3">
+                          <CheckCircle2 className="w-4 h-4 text-green-600 mt-1 flex-shrink-0" />
+                          <span className="text-[#0A1A2F]/80 text-sm leading-relaxed">
+                            {strength}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
 
-                  {/* Weaknesses Card */}
-                  <Card className="border-0 shadow-lg bg-gradient-to-br from-red-50 to-rose-50 hover:shadow-xl transition-all duration-300 hover:scale-[1.01] border-l-4 border-l-red-500">
-                    <CardHeader>
-                      <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                        <XCircle className="w-5 h-5 text-red-600" />
-                        Weaknesses
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-3">
-                        {weaknesses.map((weakness, index) => (
-                          <li key={index} className="flex items-start gap-2">
-                            <XCircle className="w-4 h-4 text-red-600 mt-1 flex-shrink-0" />
-                            <span className="text-gray-700 text-sm">
-                              {weakness}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
+                  {/* Weaknesses */}
+                  <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 border-l-4 border-l-orange-500">
+                    <h3 className="text-xl font-bold text-[#0A1A2F] mb-4 flex items-center gap-2">
+                      <XCircle className="w-5 h-5 text-orange-600" />
+                      Weaknesses
+                    </h3>
+                    <ul className="space-y-3">
+                      {weaknesses.map((weakness, index) => (
+                        <li key={index} className="flex items-start gap-3">
+                          <XCircle className="w-4 h-4 text-orange-600 mt-1 flex-shrink-0" />
+                          <span className="text-[#0A1A2F]/80 text-sm leading-relaxed">
+                            {weakness}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Tips Section */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 border-l-4 border-l-[#FFA726]">
+                  <h3 className="text-xl font-bold text-[#0A1A2F] mb-4 flex items-center gap-2">
+                    <Lightbulb className="w-5 h-5 text-[#FFA726]" />
+                    Tips for {zodiac.name}
+                  </h3>
+                  <ul className="space-y-3">
+                    {tips.map((tip, index) => (
+                      <li key={index} className="flex items-start gap-3">
+                        <div className="w-2 h-2 rounded-full bg-[#FFA726] mt-2 flex-shrink-0"></div>
+                        <span className="text-[#0A1A2F]/80 text-sm leading-relaxed">
+                          {tip}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
 
-              {/* Right Column */}
+              {/* Right Column - Image & Compact Info */}
               <div className="space-y-6">
-                {/* Image Card */}
-                <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300 overflow-hidden">
-                  <CardContent className="p-0">
-                    <div className="relative w-full h-80 bg-gradient-to-br from-gray-100 to-gray-200">
-                      {zodiac.image && zodiac.image !== "/placeholder.png" ? (
-                        <Image
-                          src={zodiac.image}
-                          alt={zodiac.name}
-                          fill
-                          className="object-contain p-4"
-                          sizes="(max-width: 768px) 100vw, 50vw"
-                        />
-                      ) : (
-                        <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                          <div
-                            className={`w-32 h-32 bg-gradient-to-br ${zodiac.color} rounded-full flex items-center justify-center mb-4 shadow-lg`}
-                          >
-                            <span className="text-6xl text-white">
-                              {zodiac.symbol}
-                            </span>
-                          </div>
-                          <span className="text-sm font-medium">
-                            Zodiac Illustration
-                          </span>
-                        </div>
-                      )}
+                {/* Zodiac Image - Hero Style */}
+                <div className="relative w-full h-[500px] md:h-[550px] rounded-2xl overflow-hidden shadow-lg">
+                  {zodiac.image &&
+                  zodiac.image !== "/placeholder.png" &&
+                  typeof zodiac.image === "string" &&
+                  zodiac.image.trim() !== "" &&
+                  !imageError ? (
+                    <Image
+                      src={
+                        zodiac.image.startsWith("/")
+                          ? zodiac.image
+                          : `/${zodiac.image}`
+                      }
+                      alt={zodiac.name}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      onError={() => setImageError(true)}
+                      priority
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full bg-gradient-to-br from-gray-100 to-gray-200">
+                      <div
+                        className={`w-32 h-32 bg-gradient-to-br ${zodiac.color} rounded-full flex items-center justify-center mb-4 shadow-lg`}
+                      >
+                        <span className="text-6xl text-white">
+                          {zodiac.symbol}
+                        </span>
+                      </div>
+                      <span className="text-sm font-medium text-gray-500">
+                        Zodiac Illustration
+                      </span>
                     </div>
-                  </CardContent>
-                </Card>
+                  )}
+                </div>
 
-                {/* Compatibility Card */}
-                <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300 hover:scale-[1.01]">
-                  <CardHeader>
-                    <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                      <Heart className="w-5 h-5 text-pink-500" />
-                      Compatibility
-                    </CardTitle>
-                    <Separator className="my-3" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="mb-4">
-                      {compatibleSigns.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {compatibleSigns.map((signName, index) => (
-                            <Badge
-                              key={index}
-                              className="bg-gradient-to-r from-pink-500 to-purple-500 text-white border-0 shadow-md hover:scale-105 transition-transform duration-200"
-                            >
-                              {signName}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-gray-700 leading-relaxed text-sm whitespace-pre-line">
-                      {zodiac.compatibility.replace(/\*\*/g, "")}
-                    </p>
-                  </CardContent>
-                </Card>
-
-                {/* Lucky Numbers Card */}
-                <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300 hover:scale-[1.01]">
-                  <CardHeader>
-                    <CardTitle className="text-2xl font-bold text-gray-900">
-                      Lucky Numbers
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-3">
-                      {luckyNumbers.map((number, index) => (
-                        <div
+                {/* Compatibility */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                  <h3 className="text-xl font-bold text-[#0A1A2F] mb-4 flex items-center gap-2">
+                    <Heart className="w-5 h-5 text-pink-500" />
+                    Compatibility
+                  </h3>
+                  {compatibleSigns.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {compatibleSigns.map((signName, index) => (
+                        <Badge
                           key={index}
-                          className={`px-6 py-3 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 text-white font-bold text-lg shadow-md hover:scale-105 transition-transform duration-200 cursor-default`}
+                          className="bg-gradient-to-r from-pink-500 to-purple-500 text-white border-0 px-3 py-1 text-sm font-medium hover:scale-105 transition-transform duration-200"
                         >
-                          {number}
-                        </div>
+                          {signName}
+                        </Badge>
                       ))}
                     </div>
-                  </CardContent>
-                </Card>
+                  )}
+                  <p className="text-[#0A1A2F]/70 leading-relaxed text-sm whitespace-pre-line text-justify">
+                    {zodiac.compatibility.replace(/\*\*/g, "")}
+                  </p>
+                </div>
 
-                {/* Lucky Colors Card */}
-                <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300 hover:scale-[1.01]">
-                  <CardHeader>
-                    <CardTitle className="text-2xl font-bold text-gray-900">
-                      Lucky Colors
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-3">
-                      {luckyColors.map((color, index) => (
+                {/* Lucky Numbers */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                  <h3 className="text-xl font-bold text-[#0A1A2F] mb-4">
+                    Lucky Numbers
+                  </h3>
+                  <div className="flex flex-wrap gap-3">
+                    {luckyNumbers.map((number, index) => (
+                      <div
+                        key={index}
+                        className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 text-white font-bold text-lg flex items-center justify-center shadow-md hover:scale-110 transition-transform duration-200"
+                      >
+                        {number}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Lucky Colors */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                  <h3 className="text-xl font-bold text-[#0A1A2F] mb-4">
+                    Lucky Colors
+                  </h3>
+                  <div className="flex flex-wrap gap-3">
+                    {luckyColors.map((color, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#FFF7E6] hover:bg-[#FFE0A3] transition-colors duration-200"
+                      >
                         <div
-                          key={index}
-                          className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
-                        >
-                          <div
-                            className={`w-8 h-8 rounded-full ${getColorClass(
-                              color
-                            )} shadow-md flex-shrink-0`}
-                          ></div>
-                          <span className="text-gray-700 font-medium text-sm">
-                            {color}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                          className={`w-8 h-8 rounded-full ${getColorClass(
+                            color
+                          )} shadow-sm flex-shrink-0`}
+                        ></div>
+                        <span className="text-[#0A1A2F] font-medium text-sm whitespace-nowrap">
+                          {color}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>

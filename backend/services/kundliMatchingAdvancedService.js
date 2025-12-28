@@ -11,22 +11,19 @@ export const fetchAdvancedKundliMatching = async ({
   ayanamsa = 1,
   language = "en",
 }) => {
+  // ✅ Strict validation (do NOT use !value for coordinates)
   if (
     !girlDob ||
-    !girlLat ||
-    !girlLon ||
+    girlLat == null ||
+    girlLon == null ||
     !boyDob ||
-    !boyLat ||
-    !boyLon
+    boyLat == null ||
+    boyLon == null
   ) {
     throw new Error("Missing required kundli matching parameters");
   }
 
   const token = await getProkeralaToken();
-
-  // ✅ CRITICAL FIX: encode datetime
-  const encodedGirlDob = encodeURIComponent(girlDob);
-  const encodedBoyDob = encodeURIComponent(boyDob);
 
   try {
     const response = await axios.get(
@@ -37,10 +34,10 @@ export const fetchAdvancedKundliMatching = async ({
         },
         params: {
           ayanamsa,
-          girl_coordinates: `${girlLat},${girlLon}`,
-          girl_dob: encodedGirlDob,
-          boy_coordinates: `${boyLat},${boyLon}`,
-          boy_dob: encodedBoyDob,
+          girl_coordinates: `${Number(girlLat)},${Number(girlLon)}`,
+          girl_dob: girlDob, // axios encodes automatically
+          boy_coordinates: `${Number(boyLat)},${Number(boyLon)}`,
+          boy_dob: boyDob,   // axios encodes automatically
           la: language,
         },
       }

@@ -9,6 +9,10 @@ export const fetchAdvancedKundli = async ({
   ayanamsa = 1,
   yearLength = 1,
 }) => {
+  if (!dateTime || latitude == null || longitude == null) {
+    throw new Error("Missing required parameters for Advanced Kundli");
+  }
+
   const token = await getProkeralaToken();
 
   const url = "https://api.prokerala.com/v2/astrology/kundli/advanced";
@@ -19,7 +23,7 @@ export const fetchAdvancedKundli = async ({
     },
     params: {
       ayanamsa,
-      coordinates: `${latitude},${longitude}`,
+      coordinates: `${Number(latitude)},${Number(longitude)}`,
       datetime: dateTime,
       la: language,
       year_length: yearLength,

@@ -24,7 +24,7 @@ export const zodiacs = [
     compatibility: "Aries forms best romantic and emotional compatibility with **Leo, Sagittarius and Gemini**. Their fire blends perfectly with Leo and Sagittarius, while Gemini adds adventure and intellectual spark. Aries may face challenges with Capricorn or Cancer due to differences in emotional expression and speed of life.",
     luckyNumbers: ["1", "9", "18"],
     luckyColors: ["Red", "Scarlet", "Bright Yellow"],
-    image: "/aries.png"
+    image: "icons/aries1.png"
   },
   {
     slug: "taurus",
@@ -51,7 +51,7 @@ export const zodiacs = [
     compatibility: "Taurus matches beautifully with **Virgo, Capricorn, and Cancer**. Virgo and Capricorn share Taurus’ practicality and dedication, while Cancer offers emotional depth and nurturing energy. Taurus may feel challenged by Aquarius or Leo due to differences in pace and approach to life.",
     luckyNumbers: ["6", "15", "24"],
     luckyColors: ["Green", "Pink", "Earthy Brown"],
-    image: "/taurus.png"
+    image: "icons/taurus1.png"
   },
   {
     slug: "gemini",
@@ -83,7 +83,7 @@ Gemini shares the strongest compatibility with **Libra, Aquarius, and Aries**. L
 
     luckyNumbers: ["5", "14", "23"],
     luckyColors: ["Yellow", "Light Green", "Sky Blue"],
-    image: "/gemini.png"
+    image: "icons/gemini1.png"
   },
   {
     slug: "cancer",
@@ -121,7 +121,7 @@ Cancer forms wonderful compatibility with **Scorpio, Pisces, and Taurus**. Scorp
 
     luckyNumbers: ["2", "7", "11"],
     luckyColors: ["White", "Silver", "Sea Blue"],
-    image: "/cancer.png"
+    image: "icons/cancer1.png"
   },
   {
     slug: "leo",
@@ -159,7 +159,7 @@ Leo shares powerful compatibility with **Aries, Sagittarius, and Gemini**. Aries
 
     luckyNumbers: ["1", "10", "19"],
     luckyColors: ["Gold", "Orange", "Sunset Yellow"],
-    image: "/leo.png"
+    image: "icons/leo1.png"
   },
   {
     slug: "virgo",
@@ -196,7 +196,7 @@ Virgo forms harmonious compatibility with **Taurus, Capricorn, and Cancer**. Tau
 
     luckyNumbers: ["5", "14", "32"],
     luckyColors: ["Beige", "Olive Green", "Soft Grey"],
-    image: "/placeholder.png"
+    image: "icons/placeholder1.png"
   },
   {
     slug: "libra",
@@ -234,7 +234,7 @@ Libra shares strong compatibility with **Gemini, Aquarius, and Leo**. Gemini and
 
     luckyNumbers: ["6", "15", "27"],
     luckyColors: ["Pink", "Lavender", "Sky Blue"],
-    image: "/libra.png"
+    image: "icons/libra1.png"
   },
   {
     slug: "scorpio",
@@ -272,7 +272,7 @@ Scorpio connects deeply with **Cancer, Pisces, and Virgo**. These signs understa
 
     luckyNumbers: ["8", "21", "29"],
     luckyColors: ["Maroon", "Black", "Dark Red"],
-    image: "/scorpio.png"
+    image: "icons/scorpio1.png"
   },
   {
     slug: "sagittarius",
@@ -310,7 +310,7 @@ Sagittarius pairs beautifully with **Aries, Leo, and Libra**. Aries and Leo matc
 
     luckyNumbers: ["3", "12", "33"],
     luckyColors: ["Purple", "Royal Blue", "Deep Red"],
-    image: "/sagittarius.png"
+    image: "icons/sagittarius1.png"
   },
   {
     slug: "capricorn",
@@ -348,7 +348,7 @@ Capricorn matches well with **Taurus, Virgo, and Scorpio**. These signs support 
 
     luckyNumbers: ["4", "22", "31"],
     luckyColors: ["Black", "Grey", "Dark Green"],
-    image: "/capricorn.png"
+    image: "icons/capricorn1.png"
   },
   {
     slug: "aquarius",
@@ -386,7 +386,7 @@ Aquarius forms strong compatibility with **Gemini, Libra, and Sagittarius**. The
 
     luckyNumbers: ["7", "17", "22"],
     luckyColors: ["Electric Blue", "Turquoise", "Silver"],
-    image: "/aquarius.png"
+    image: "icons/aquarius1.png"
   },
   {
     slug: "pisces",
@@ -424,7 +424,7 @@ Pisces forms beautiful compatibility with **Cancer, Scorpio, and Capricorn**. Th
 
     luckyNumbers: ["3", "9", "12"],
     luckyColors: ["Sea Green", "Lilac", "Aquamarine"],
-    image: "/pisces.png"
+    image: "icons/pisces1.png"
   }
 ];
 

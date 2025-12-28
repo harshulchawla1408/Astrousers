@@ -219,7 +219,7 @@ export default function ServicesPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-[#0A1A2F]/80 leading-relaxed">
-              <p>
+              <p className="text-justify">
                 Online Puja is a modern approach to traditional Vedic rituals
                 that allows devotees to participate in sacred ceremonies
                 remotely while maintaining the authenticity and spiritual essence
@@ -228,7 +228,7 @@ export default function ServicesPage() {
                 designated sacred locations, following all traditional protocols
                 and mantras.
               </p>
-              <p>
+              <p className="text-justify">
                 The pandit performs the complete puja with proper rituals,
                 chanting of mantras, and offerings, while you can witness the
                 ceremony live through video streaming or receive detailed updates
@@ -236,7 +236,7 @@ export default function ServicesPage() {
                 time constraints do not prevent you from seeking divine
                 blessings and spiritual remedies.
               </p>
-              <p>
+              <p className="text-justify">
                 Our online puja services are conducted with the same devotion,
                 precision, and adherence to Vedic scriptures as traditional
                 in-person ceremonies, ensuring that the spiritual benefits and
@@ -253,14 +253,14 @@ export default function ServicesPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-[#0A1A2F]/80 leading-relaxed">
-              <p>
+              <p className="text-justify">
                 In today's fast-paced world, online puja has emerged as a
                 significant solution for maintaining spiritual practices while
                 balancing modern life commitments. The importance of online puja
                 extends beyond convenience—it represents a bridge between ancient
                 wisdom and contemporary needs.
               </p>
-              <p>
+              <p className="text-justify">
                 According to Vedic philosophy, the power of puja lies in the
                 intention, devotion, and the proper execution of rituals by
                 qualified priests. The physical presence of the devotee, while
@@ -269,7 +269,7 @@ export default function ServicesPage() {
                 experienced pandits, online pujas carry the same spiritual
                 significance and divine blessings as traditional ceremonies.
               </p>
-              <p>
+              <p className="text-justify">
                 Online puja is particularly valuable for those who cannot travel
                 to specific temples or sacred sites, have health constraints, or
                 live in areas where access to qualified pandits is limited. It
@@ -289,60 +289,60 @@ export default function ServicesPage() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-3 text-[#0A1A2F]/80 leading-relaxed">
-                <li className="flex items-start gap-3">
-                  <span className="text-[#FFA726] font-bold mt-1">•</span>
-                  <span>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#FFA726] font-bold">•</span>
+                  <span className="text-justify">
                     <strong className="text-[#0A1A2F]">Accessibility:</strong>{" "}
                     Access authentic Vedic rituals from anywhere in the world,
                     eliminating geographical barriers and travel expenses.
                   </span>
                 </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-[#FFA726] font-bold mt-1">•</span>
-                  <span>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#FFA726] font-bold">•</span>
+                  <span className="text-justify">
                     <strong className="text-[#0A1A2F]">Expert Pandits:</strong>{" "}
                     All pujas are performed by qualified, experienced pandits
                     who follow traditional Vedic protocols and mantras with
                     utmost devotion.
                   </span>
                 </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-[#FFA726] font-bold mt-1">•</span>
-                  <span>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#FFA726] font-bold">•</span>
+                  <span className="text-justify">
                     <strong className="text-[#0A1A2F]">Time Flexibility:</strong>{" "}
                     Book pujas at your convenience, with flexible scheduling
                     options that fit your busy lifestyle.
                   </span>
                 </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-[#FFA726] font-bold mt-1">•</span>
-                  <span>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#FFA726] font-bold">•</span>
+                  <span className="text-justify">
                     <strong className="text-[#0A1A2F]">Live Participation:</strong>{" "}
                     Witness the puja ceremony in real-time through live video
                     streaming, allowing you to participate spiritually from
                     wherever you are.
                   </span>
                 </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-[#FFA726] font-bold mt-1">•</span>
-                  <span>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#FFA726] font-bold">•</span>
+                  <span className="text-justify">
                     <strong className="text-[#0A1A2F]">Documentation:</strong>{" "}
                     Receive detailed photos, videos, and certificates of the
                     performed puja for your records and peace of mind.
                   </span>
                 </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-[#FFA726] font-bold mt-1">•</span>
-                  <span>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#FFA726] font-bold">•</span>
+                  <span className="text-justify">
                     <strong className="text-[#0A1A2F]">Spiritual Benefits:</strong>{" "}
                     Experience the same divine blessings, positive energy, and
                     spiritual remedies as traditional in-person pujas, as
                     the power lies in proper rituals and devotion.
                   </span>
                 </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-[#FFA726] font-bold mt-1">•</span>
-                  <span>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#FFA726] font-bold">•</span>
+                  <span className="text-justify">
                     <strong className="text-[#0A1A2F]">Cost-Effective:</strong>{" "}
                     Save on travel expenses, accommodation, and other associated
                     costs while still receiving authentic spiritual services.
@@ -365,7 +365,7 @@ export default function ServicesPage() {
                   <AccordionTrigger className="text-left font-semibold text-[#0A1A2F] hover:text-[#FFA726]">
                     Is online puja effective?
                   </AccordionTrigger>
-                  <AccordionContent className="text-[#0A1A2F]/80 leading-relaxed">
+                  <AccordionContent className="text-[#0A1A2F]/80 leading-relaxed text-justify">
                     Yes, online puja is absolutely effective. According to Vedic
                     scriptures, the power of puja comes from proper execution of
                     rituals, correct chanting of mantras, and genuine devotion.
@@ -381,7 +381,7 @@ export default function ServicesPage() {
                   <AccordionTrigger className="text-left font-semibold text-[#0A1A2F] hover:text-[#FFA726]">
                     How do I participate in an online puja?
                   </AccordionTrigger>
-                  <AccordionContent className="text-[#0A1A2F]/80 leading-relaxed">
+                  <AccordionContent className="text-[#0A1A2F]/80 leading-relaxed text-justify">
                     Participating in an online puja is simple. After booking a
                     puja service, you will receive a confirmation with the date
                     and time. On the scheduled day, you can join the live video
@@ -397,7 +397,7 @@ export default function ServicesPage() {
                   <AccordionTrigger className="text-left font-semibold text-[#0A1A2F] hover:text-[#FFA726]">
                     Who performs the puja?
                   </AccordionTrigger>
-                  <AccordionContent className="text-[#0A1A2F]/80 leading-relaxed">
+                  <AccordionContent className="text-[#0A1A2F]/80 leading-relaxed text-justify">
                     All pujas are performed by qualified, experienced, and
                     verified pandits who have extensive knowledge of Vedic
                     scriptures, mantras, and rituals. Our pandits are carefully
@@ -413,7 +413,7 @@ export default function ServicesPage() {
                   <AccordionTrigger className="text-left font-semibold text-[#0A1A2F] hover:text-[#FFA726]">
                     Is prasad provided after the puja?
                   </AccordionTrigger>
-                  <AccordionContent className="text-[#0A1A2F]/80 leading-relaxed">
+                  <AccordionContent className="text-[#0A1A2F]/80 leading-relaxed text-justify">
                     Yes, prasad (blessed offerings) is an integral part of our
                     online puja services. After the puja is completed, the
                     prasad is prepared and blessed during the ceremony. Depending
@@ -429,7 +429,7 @@ export default function ServicesPage() {
                   <AccordionTrigger className="text-left font-semibold text-[#0A1A2F] hover:text-[#FFA726]">
                     Can I book a customized puja?
                   </AccordionTrigger>
-                  <AccordionContent className="text-[#0A1A2F]/80 leading-relaxed">
+                  <AccordionContent className="text-[#0A1A2F]/80 leading-relaxed text-justify">
                     Absolutely! We offer "Puja on Demand" service that allows you
                     to request customized pujas based on your specific needs,
                     intentions, or astrological requirements. You can specify

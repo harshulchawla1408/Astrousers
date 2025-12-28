@@ -11,144 +11,60 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { Menu, X } from "lucide-react";
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-
-    // Original scroll behaviour saving
-    const origScrollRestoration =
-      typeof history !== "undefined" && "scrollRestoration" in history
-        ? history.scrollRestoration
-        : undefined;
-    const origScrollTo = window.scrollTo?.bind(window);
-    const origScrollIntoView = Element.prototype.scrollIntoView;
-
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
-
-    try {
-      if (typeof history !== "undefined" && "scrollRestoration" in history) {
-        history.scrollRestoration = "manual";
-      }
-    } catch (e) {}
-
-    try {
-      document.documentElement.style.scrollBehavior = "auto";
-      document.body.style.scrollBehavior = "auto";
-    } catch (e) {}
-
-    try {
-      window.scrollTo = (..._args) => {};
-      Element.prototype.scrollIntoView = function (_arg) {};
-    } catch (e) {}
-
-    const handleHashChange = () => {
-      try {
-        document.documentElement.style.scrollBehavior = "auto";
-        document.body.style.scrollBehavior = "auto";
-      } catch (e) {}
-    };
-    window.addEventListener("hashchange", handleHashChange);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("hashchange", handleHashChange);
-
-      try {
-        if (origScrollTo) window.scrollTo = origScrollTo;
-        if (origScrollIntoView)
-          Element.prototype.scrollIntoView = origScrollIntoView;
-      } catch (e) {}
-
-      try {
-        if (
-          typeof history !== "undefined" &&
-          origScrollRestoration !== undefined &&
-          "scrollRestoration" in history
-        ) {
-          history.scrollRestoration = origScrollRestoration;
-        }
-      } catch (e) {}
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? "bg-white/95 backdrop-blur-md shadow-lg border-b border-[#E5E5E5]"
-          : "bg-white/90 backdrop-blur-sm"
+          ? "bg-[#FFF8EE] shadow-md border-b border-[#F2D7A0]"
+          : "bg-[#FFF4E0]"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex items-center justify-between h-20">
+          
           {/* Logo */}
-          <Link
-            href="/"
-            scroll={false}
-            className="flex items-center"
-            data-cursor="pointer"
-          >
+          <Link href="/" scroll={false} className="flex items-center">
             <Image
-              src="/logo.jpg"
-              alt="Astrousers - Discover your cosmic self"
+              src="/logo.png"
+              alt="Astrousers"
               width={170}
-              height={100}
-              className="rounded-full"
+              height={90}
+              className="object-contain"
+              priority
             />
           </Link>
 
-          {/* Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link
-              href="/"
-              scroll={false}
-              className="text-[#0A1A2F] hover:text-[#FFA726] font-medium transition-colors duration-200"
-            >
-              Home
-            </Link>
-
-            <Link
-              href="/services"
-              scroll={false}
-              className="text-[#0A1A2F] hover:text-[#FFA726] font-medium transition-colors duration-200"
-            >
-              Services
-            </Link>
-
-            <Link
-              href="/kundli"
-              scroll={false}
-              className="text-[#0A1A2F] hover:text-[#FFA726] font-medium transition-colors duration-200"
-            >
-              Kundli
-            </Link>
-
-            <Link
-              href="/astrologers"
-              scroll={false}
-              className="text-[#0A1A2F] hover:text-[#FFA726] font-medium transition-colors duration-200"
-            >
-              Astrologers
-            </Link>
-
-            <Link
-              href="/about"
-              scroll={false}
-              className="text-[#0A1A2F] hover:text-[#FFA726] font-medium transition-colors duration-200"
-            >
-              About
-            </Link>
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-8">
+            {["Home", "Services", "Kundli", "Astrologers", "About"].map(
+              (item) => (
+                <Link
+                  key={item}
+                  href={item === "Home" ? "/" : `/${item.toLowerCase()}`}
+                  scroll={false}
+                  className="text-[#0A1A2F] font-medium text-[15px] hover:text-[#FFA726] transition-colors"
+                >
+                  {item}
+                </Link>
+              )
+            )}
           </nav>
 
-          {/* CTAs */}
-          <div className="flex items-center gap-4">
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center gap-3">
             <SignedOut>
-              {/* REGISTER POPUP */}
               <SignUpButton mode="modal">
                 <Button
                   variant="ghost"
@@ -157,8 +73,6 @@ const Header = () => {
                   Register
                 </Button>
               </SignUpButton>
-
-              {/* LOGIN POPUP */}
               <SignInButton mode="modal">
                 <Button
                   variant="ghost"
@@ -174,28 +88,83 @@ const Header = () => {
                 afterSignOutUrl="/"
                 appearance={{
                   elements: {
-                    avatarBox: "w-8 h-8",
+                    avatarBox: "w-9 h-9",
                     userButtonPopoverCard:
-                      "bg-white border border-[#E5E5E5] shadow-lg rounded-xl",
+                      "bg-white shadow-xl border border-[#E5E5E5] rounded-xl",
                     userButtonPopoverActionButton:
-                      "text-[#0A1A2F] hover:text-[#FFA726] hover:bg-[#FFF7E6]",
+                      "text-[#0A1A2F] hover:bg-[#FFF7E6] hover:text-[#FFA726]",
                   },
                 }}
               />
             </SignedIn>
 
-            <Button
-              variant="outline"
-              className="border-[#0A1A2F] text-[#0A1A2F] hover:bg-[#0A1A2F] hover:text-white transition-all duration-200"
-            >
-              Talk to Astrologer
-            </Button>
+            <Link href="/astrologers" scroll={false}>
+              <Button
+                variant="outline"
+                className="border-[#0A1A2F]/20 text-[#0A1A2F] hover:bg-[#0A1A2F] hover:text-white transition"
+              >
+                Talk to Astrologer
+              </Button>
+            </Link>
 
-            <Button className="bg-gradient-to-r from-[#FFA726] to-[#FFB300] hover:from-[#FF8F00] hover:to-[#FFA726] text-white shadow-lg hover:shadow-xl transition-all duration-200 rounded-xl">
-              Book Appointment
-            </Button>
+            <Link href="/services" scroll={false}>
+              <Button className="bg-gradient-to-r from-[#FFA726] to-[#FFB300] hover:from-[#FF8F00] hover:to-[#FFA726] text-white shadow-md rounded-xl px-6">
+                Book E-Puja
+              </Button>
+            </Link>
           </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden text-[#0A1A2F]"
+            aria-label="Toggle menu"
+          >
+            {isMobileMenuOpen ? <X /> : <Menu />}
+          </button>
         </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden pb-6 pt-4 border-t border-[#EBD6A5]">
+            <nav className="flex flex-col gap-4">
+              {["Home", "Services", "Kundli", "Astrologers", "About"].map(
+                (item) => (
+                  <Link
+                    key={item}
+                    href={item === "Home" ? "/" : `/${item.toLowerCase()}`}
+                    scroll={false}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-[#0A1A2F] font-medium hover:text-[#FFA726]"
+                  >
+                    {item}
+                  </Link>
+                )
+              )}
+
+              <div className="pt-4 border-t border-[#EBD6A5] flex flex-col gap-3">
+                <SignedOut>
+                  <SignUpButton mode="modal">
+                    <Button variant="ghost" className="justify-start">
+                      Register
+                    </Button>
+                  </SignUpButton>
+                  <SignInButton mode="modal">
+                    <Button variant="ghost" className="justify-start">
+                      Login
+                    </Button>
+                  </SignInButton>
+                </SignedOut>
+
+                <Link href="/services" scroll={false}>
+                  <Button className="w-full bg-gradient-to-r from-[#FFA726] to-[#FFB300] text-white">
+                    Book Puja
+                  </Button>
+                </Link>
+              </div>
+            </nav>
+          </div>
+        )}
       </div>
     </header>
   );

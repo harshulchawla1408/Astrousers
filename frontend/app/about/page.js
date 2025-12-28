@@ -40,7 +40,7 @@ export default function AboutPage() {
       <Header />
       <main>
         {/* HERO */}
-        <section className="relative overflow-hidden pt-16">
+        <section className="relative overflow-hidden pt-20">
           <div className="max-w-7xl mx-auto px-6 py-20 lg:py-28 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             <div className="lg:col-span-7 space-y-6">
               <Badge className="bg-[#FFB300] text-[#0A1A2F]">About Astrousers</Badge>
@@ -149,16 +149,49 @@ export default function AboutPage() {
         </section>
 
         {/* FEATURES */}
-        <section className="py-16 bg-white border-t border-[#E5E5E5]">
-          <div className="max-w-7xl mx-auto px-6 lg:px-8">
-            <h2 className="text-2xl font-bold mb-6 text-[#0A1A2F]">What you can do on Astrousers</h2>
+        <section className="bg-white py-16 border-t">
+          <div className="max-w-7xl mx-auto px-6">
+            <h2 className="text-2xl font-bold mb-10">
+              What you can do on Astrousers
+            </h2>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              <FeatureCard title="Talk to Astrologers" desc="Instant chat, call or video with verified astrologers." emoji="🗣️" />
-              <FeatureCard title="Generate Kundli" desc="Accurate Vedic chart generation and downloadable reports." emoji="🧭" />
-              <FeatureCard title="Match Making" desc="Detailed kundli milan & compatibility reports for couples." emoji="💞" />
-              <FeatureCard title="Horoscope Insights" desc="Daily, weekly, monthly and yearly horoscopes tailored for you." emoji="📅" />
-              <FeatureCard title="Tarot & Spreads" desc="Instant tarot card readings for clarity and guidance." emoji="🔮" />
-              <FeatureCard title="Astro Store" desc="Gemstones, yantras and remedies recommended by experts." emoji="🛍️" />
+              <FeatureCard
+                title="Talk to Astrologers"
+                desc="Instant chat, call or video with verified astrologers."
+                icon="/icons/chat.png"
+                href="/astrologers"
+              />
+              <FeatureCard
+                title="Generate Kundli"
+                desc="Accurate Vedic chart generation and downloadable reports."
+                icon="/icons/kundli.png"
+                href="/kundli"
+              />
+              <FeatureCard
+                title="Match Making"
+                desc="Detailed kundli milan & compatibility reports."
+                icon="/icons/match.png"
+                href="/kundli/match-making"
+              />
+              <FeatureCard
+                title="Horoscope Insights"
+                desc="Daily, weekly, monthly and yearly horoscopes."
+                icon="/icons/horoscope.png"
+                href="/horoscope"
+              />
+              <FeatureCard
+                title="Online Puja"
+                desc="Book authentic Vedic pujas performed by expert pandits."
+                icon="/icons/puja.png"
+                href="/services"
+              />
+              <FeatureCard
+                title="Astro Store"
+                desc="Gemstones, yantras and remedies recommended by experts."
+                icon="/icons/store.png"
+                href="/store"
+              />
             </div>
           </div>
         </section>
@@ -188,13 +221,8 @@ export default function AboutPage() {
                 <Button variant="outline" className="border border-[#0A1A2F] text-[#0A1A2F] hover:bg-[#0A1A2F] hover:text-white rounded-xl">Meet the Team</Button>
               </div>
             </div>
-            <div>
-              <Card className="bg-white border border-[#E5E5E5] shadow-md rounded-[20px]">
-                <CardContent>
-                  <CardTitle className="text-[#0A1A2F]">Verified Experts</CardTitle>
-                  <CardDescription className="text-[#0A1A2F]/70">All astrologers on Astrousers go through a verification and interview process to ensure quality and authenticity.</CardDescription>
-                </CardContent>
-              </Card>
+            <div className="flex justify-center">
+              <Image src="/about/team.png" alt="Meet Our Team" width={500} height={400} className="rounded-[20px] object-cover w-full max-w-md" />
             </div>
           </div>
         </section>
@@ -217,21 +245,21 @@ export default function AboutPage() {
               <AboutTestimonial
                 name="Ritika Sharma"
                 location="Delhi, India"
-                avatar="/avatars/user1.jpg"
+                avatar="/avatars/user1.png"
                 quote="The guidance felt genuine and calming. I received clear direction instead of generic predictions."
               />
 
               <AboutTestimonial
                 name="Aman Verma"
                 location="Noida, India"
-                avatar="/avatars/user2.jpg"
+                avatar="/avatars/user2.png"
                 quote="Very patient explanation and accurate insights. The session helped clear my confusion."
               />
 
               <AboutTestimonial
                 name="Neha Kapoor"
                 location="Jaipur, India"
-                avatar="/avatars/user3.jpg"
+                avatar="/avatars/user3.png"
                 quote="Accurate kundli analysis with practical advice. It felt reassuring and balanced."
               />
 
@@ -284,13 +312,13 @@ function ValueCard({ title, description, iconEmoji }) {
   );
 }
 
-function FeatureCard({ title, desc, emoji }) {
+function FeatureCard({ title, desc, icon, href }) {
   return (
-    <div className="rounded-[20px] p-6 border border-[#E5E5E5] shadow-md bg-white">
-      <div className="text-3xl mb-4">{emoji}</div>
+    <a href={href} className="block rounded-[20px] p-6 border border-[#E5E5E5] shadow-md bg-white">
+      <Image src={icon} alt={title} width={48} height={48} className="mb-4 object-contain" />
       <h4 className="font-semibold mb-1 text-[#0A1A2F]">{title}</h4>
       <p className="text-sm text-[#0A1A2F]/70">{desc}</p>
-    </div>
+    </a>
   );
 }
 

@@ -6,8 +6,12 @@ export const fetchKundli = async ({
   latitude,
   longitude,
   language = "en",
-  ayanamsa = 1
+  ayanamsa = 1,
 }) => {
+  if (!dateTime || latitude == null || longitude == null) {
+    throw new Error("Missing required parameters for Kundli");
+  }
+
   const token = await getProkeralaToken();
 
   const url = `${process.env.PROKERALA_BASE_URL}/v2/astrology/kundli`;
@@ -15,19 +19,29 @@ export const fetchKundli = async ({
   try {
     const response = await axios.get(url, {
       headers: {
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
       params: {
         ayanamsa,
-        coordinates: `${latitude},${longitude}`,
+        coordinates: `${Number(latitude)},${Number(longitude)}`,
         datetime: dateTime,
-        la: language
-      }
+        la: language,
+      },
     });
 
     return response.data;
   } catch (error) {
-    console.error("❌ Kundli API Error:", error.response?.data || error.message);
-    throw new Error("Failed to fetch kundli");
+    console.error("❌ Kundli API Error");
+
+    if (error.response) {
+      console.error("Status:", error.response.status);
+      console.error("Data:", error.response.data);
+    } else {
+      console.error(error.message);
+    }
+
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch kundli"
+    );
   }
 };

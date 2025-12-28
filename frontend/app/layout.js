@@ -3,10 +3,12 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import UserSync from "@/components/UserSync";
+import { CartProvider } from "@/contexts/CartContext";
 
 export default function RootLayout({ children }) {
   return (
     <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
+      <CartProvider>
       <html lang="en">
         <head>
           <title>Astrousers | Personalized Birth Chart & Astrology</title>
@@ -19,6 +21,7 @@ export default function RootLayout({ children }) {
           {children}
         </body>
       </html>
+      </CartProvider>
     </ClerkProvider>
   );
 }

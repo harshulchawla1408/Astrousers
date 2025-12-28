@@ -1,7 +1,9 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,16 +14,50 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import { Country, State, City } from "country-state-city";
 
 export default function PanchangPage() {
   const [form, setForm] = useState({
     date: "",
     time: "",
+    country: "",
+    state: "",
+    city: "",
     lat: "",
     lon: "",
   });
+
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const countries = Country.getAllCountries();
+  const states = form.country ? State.getStatesOfCountry(form.country) : [];
+  const cities =
+    form.country && form.state
+      ? City.getCitiesOfState(form.country, form.state)
+      : [];
+
+  // Auto lat/lon when city selected
+  useEffect(() => {
+    if (!form.city) return;
+
+    const cityObj = cities.find((c) => c.name === form.city);
+    if (!cityObj) return;
+
+    setForm((prev) => ({
+      ...prev,
+      lat: cityObj.latitude,
+      lon: cityObj.longitude,
+    }));
+  }, [form.city]);
 
   const submit = async () => {
     setLoading(true);
@@ -30,7 +66,12 @@ export default function PanchangPage() {
     const res = await fetch("/api/astrology/panchang", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify({
+        date: form.date,
+        time: form.time,
+        lat: form.lat,
+        lon: form.lon,
+      }),
     });
 
     const json = await res.json();
@@ -38,7 +79,7 @@ export default function PanchangPage() {
     setLoading(false);
   };
 
-  const TimeBox = ({ title, items }) => (
+  const TimeBox = ({ items }) => (
     <div className="space-y-2">
       {items.map((i, idx) => (
         <div
@@ -57,20 +98,102 @@ export default function PanchangPage() {
   return (
     <div className="min-h-screen bg-[#FFF7E6]">
       <Header />
-      <main className="max-w-6xl mx-auto px-4 py-14 space-y-8">
+
+      <main className="max-w-6xl mx-auto px-4 py-14 space-y-10">
 
         {/* FORM */}
-        <Card>
+        <Card className="shadow-lg border-none">
           <CardHeader>
-            <CardTitle>Daily Panchang</CardTitle>
+            <CardTitle className="text-2xl">Daily Panchang</CardTitle>
           </CardHeader>
+
           <CardContent className="grid md:grid-cols-4 gap-4">
-            <Input type="date" onChange={e => setForm({ ...form, date: e.target.value })} />
-            <Input type="time" onChange={e => setForm({ ...form, time: e.target.value })} />
-            <Input placeholder="Latitude" onChange={e => setForm({ ...form, lat: e.target.value })} />
-            <Input placeholder="Longitude" onChange={e => setForm({ ...form, lon: e.target.value })} />
-            <Button className="md:col-span-4" onClick={submit}>
-              {loading ? "Fetching..." : "Get Panchang"}
+            <Input
+              type="date"
+              value={form.date}
+              onChange={(e) =>
+                setForm({ ...form, date: e.target.value })
+              }
+            />
+
+            <Input
+              type="time"
+              value={form.time}
+              onChange={(e) =>
+                setForm({ ...form, time: e.target.value })
+              }
+            />
+
+            {/* COUNTRY */}
+            <Select
+              onValueChange={(val) =>
+                setForm({
+                  ...form,
+                  country: val,
+                  state: "",
+                  city: "",
+                })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Country" />
+              </SelectTrigger>
+              <SelectContent>
+                {countries.map((c) => (
+                  <SelectItem key={c.isoCode} value={c.isoCode}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* STATE */}
+            <Select
+              disabled={!form.country}
+              onValueChange={(val) =>
+                setForm({
+                  ...form,
+                  state: val,
+                  city: "",
+                })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="State" />
+              </SelectTrigger>
+              <SelectContent>
+                {states.map((s) => (
+                  <SelectItem key={s.isoCode} value={s.isoCode}>
+                    {s.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* CITY */}
+            <Select
+              disabled={!form.state}
+              onValueChange={(val) =>
+                setForm({ ...form, city: val })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="City" />
+              </SelectTrigger>
+              <SelectContent>
+                {cities.map((c) => (
+                  <SelectItem key={c.name} value={c.name}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Button
+              className="md:col-span-4 bg-[#FFB300] text-[#0A1A2F] hover:bg-[#0A1A2F] hover:text-white"
+              onClick={submit}
+            >
+              {loading ? "Fetching Panchang..." : "Get Panchang"}
             </Button>
           </CardContent>
         </Card>
@@ -111,30 +234,35 @@ export default function PanchangPage() {
               </TabsList>
 
               <TabsContent value="nakshatra">
-                <TimeBox title="Nakshatra" items={data.nakshatra} />
+                <TimeBox items={data.nakshatra} />
               </TabsContent>
 
               <TabsContent value="tithi">
-                <TimeBox title="Tithi" items={data.tithi} />
+                <TimeBox items={data.tithi} />
               </TabsContent>
 
               <TabsContent value="yoga">
-                <TimeBox title="Yoga" items={data.yoga} />
+                <TimeBox items={data.yoga} />
               </TabsContent>
 
               <TabsContent value="karana">
-                <TimeBox title="Karana" items={data.karana} />
+                <TimeBox items={data.karana} />
               </TabsContent>
             </Tabs>
 
             {/* AUSPICIOUS */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-green-700">Auspicious Periods</CardTitle>
+                <CardTitle className="text-green-700">
+                  Auspicious Periods
+                </CardTitle>
               </CardHeader>
               <CardContent className="grid md:grid-cols-2 gap-4">
                 {data.auspicious_period.map((a) => (
-                  <div key={a.id} className="border rounded-xl p-4 bg-green-50">
+                  <div
+                    key={a.id}
+                    className="border rounded-xl p-4 bg-green-50"
+                  >
                     <p className="font-semibold">{a.name}</p>
                     {a.period.map((p, i) => (
                       <p key={i} className="text-sm">
@@ -149,11 +277,16 @@ export default function PanchangPage() {
             {/* INAUSPICIOUS */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-red-700">Inauspicious Periods</CardTitle>
+                <CardTitle className="text-red-700">
+                  Inauspicious Periods
+                </CardTitle>
               </CardHeader>
               <CardContent className="grid md:grid-cols-2 gap-4">
                 {data.inauspicious_period.map((a) => (
-                  <div key={a.id} className="border rounded-xl p-4 bg-red-50">
+                  <div
+                    key={a.id}
+                    className="border rounded-xl p-4 bg-red-50"
+                  >
                     <p className="font-semibold">{a.name}</p>
                     {a.period.map((p, i) => (
                       <p key={i} className="text-sm">
@@ -167,8 +300,8 @@ export default function PanchangPage() {
 
           </div>
         )}
-
       </main>
+
       <Footer />
     </div>
   );
