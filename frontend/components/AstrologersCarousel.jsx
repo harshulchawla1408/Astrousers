@@ -151,9 +151,9 @@ const AstrologersCarousel = () => {
                         {/* Avatar and Status */}
                         <div className="relative">
                           <Avatar className="w-24 h-24 border-4 border-white shadow-lg">
-                            <AvatarImage src={astrologer.image} alt={astrologer.name} />
+                            <AvatarImage src={astrologer.image} alt={astrologer.name || "Astrologer"} />
                             <AvatarFallback className="bg-gradient-to-br from-[#FFA726] to-[#FFB300] text-white text-xl">
-                              {astrologer.name.split(' ').map(n => n[0]).join('')}
+                              {(astrologer.name || "A").split(' ').map(n => n[0]).join('').toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           
@@ -170,10 +170,10 @@ const AstrologersCarousel = () => {
                         {/* Name and Specialty */}
                         <div className="space-y-2">
                           <h3 className="text-lg font-semibold text-[#0A1A2F] group-hover:text-[#FFA726] transition-colors duration-200">
-                            {astrologer.name}
+                            {astrologer.name || "Unknown Astrologer"}
                           </h3>
                           <p className="text-sm text-[#0A1A2F]/70 leading-relaxed">
-                            {astrologer.expertise}
+                            {astrologer.expertise || "N/A"}
                           </p>
                         </div>
 

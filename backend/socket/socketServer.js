@@ -1,223 +1,122 @@
-// backend/socket/socketServer.js
 import { Server } from "socket.io";
 import User from "../models/user.js";
 import Astrologer from "../models/astrologerModel.js";
-import Session from "../models/sessionModel.js";
-import Message from "../models/messageModel.js";
 
 let io;
 
-// Format helper
-const getUserRoom = (id) => `user:${id}`;
-const getAstroRoom = (id) => `astrologer:${id}`;
-const getSessionRoom = (id) => `session:${id}`;
-
 export const initializeSocket = (server) => {
   io = new Server(server, {
-    cors: { origin: "*", credentials: true }
+    cors: { origin: "*", credentials: true },
   });
 
   io.on("connection", async (socket) => {
     try {
       const clerkId = socket.handshake.auth?.clerkId;
-      if (!clerkId) {
-        socket.disconnect();
-        return;
-      }
+      if (!clerkId) return socket.disconnect();
 
-      // ℹ Fetch user or astrologer
-      let user = await User.findOne({ clerkId });
-      let astrologer = await Astrologer.findOne({ clerkId });
+      const user = await User.findOne({ clerkId });
+      if (!user) return socket.disconnect();
 
-      if (!user) {
-        // create minimum user profile if not exist
-        user = await User.create({
-          clerkId,
-          wallet: 0,
-          name: "New User"
-        });
-      }
+      socket.userId = user._id.toString();
+      socket.role = user.role; // "user" | "astrologer"
 
-      // Attach to socket object
-      socket.clerkId = clerkId;
-      socket.mongoUserId = user._id.toString();
-      socket.role = astrologer ? "astrologer" : "user";
+      socket.join(`user:${socket.userId}`);
 
-      // Bind socket to user document
-      await User.findOneAndUpdate(
-        { clerkId },
-        { socketId: socket.id, isOnline: true, lastSeen: new Date() }
-      );
+      console.log("⚡ Connected:", user.name, socket.role);
 
-      // Update astrologer online
-      if (socket.role === "astrologer") {
+      /*
+      ================================
+      ASTROLOGER MANUAL ONLINE/OFFLINE
+      ================================
+      */
+      socket.on("astrologer:go-online", async () => {
+        if (socket.role !== "astrologer") return;
+
         await Astrologer.findOneAndUpdate(
-          { clerkId },
-          { online: true }
+          { userId: socket.userId },
+          { isOnline: true, socketId: socket.id }
         );
-      }
 
-      // Join personal rooms
-      socket.join(getUserRoom(user._id.toString()));
-      if (astrologer) {
-        socket.join(getAstroRoom(astrologer._id.toString()));
-        socket.join("astrologers"); // for dashboards
-      }
-
-      console.log("⚡ Connected:", clerkId, "Role:", socket.role);
-
-      // BROADCAST updated astrologer presence
-      const onlineAstros = await Astrologer.find({ online: true }).select(
-        "_id name pricePerMin rating image availability"
-      );
-      io.emit("presence:online-list", onlineAstros);
-
-      /*
-      ---------------------------------------------------------
-        📌 1) JOIN SESSION ROOM
-      ---------------------------------------------------------
-      */
-      socket.on("session:join", ({ sessionId }) => {
-        socket.join(getSessionRoom(sessionId));
+        broadcastOnlineAstrologers();
       });
 
-      socket.on("session:leave", ({ sessionId }) => {
-        socket.leave(getSessionRoom(sessionId));
+      socket.on("astrologer:go-offline", async () => {
+        if (socket.role !== "astrologer") return;
+
+        await Astrologer.findOneAndUpdate(
+          { userId: socket.userId },
+          { isOnline: false, socketId: null }
+        );
+
+        broadcastOnlineAstrologers();
       });
 
       /*
-      ---------------------------------------------------------
-        📌 2) CHAT: SEND MESSAGE
-      ---------------------------------------------------------
+      ================================
+      SESSION ROOMS
+      ================================
       */
-      socket.on("message:send", async ({ sessionId, text }) => {
-        if (!text || !sessionId) return;
+      socket.on("join-session", ({ sessionId }) => {
+        socket.join(`session:${sessionId}`);
+        console.log("📥 Joined session:", sessionId);
+      });
 
-        const session = await Session.findById(sessionId);
-        if (!session || session.status !== "active") return;
+      socket.on("leave-session", ({ sessionId }) => {
+        socket.leave(`session:${sessionId}`);
+        console.log("📤 Left session:", sessionId);
+      });
 
-        const fromUserId = socket.mongoUserId;
-        const isUser = session.userId === fromUserId;
-        const isAstro = session.astrologerId === fromUserId;
-
-        if (!isUser && !isAstro) return;
-
-        const toUserId = isUser ? session.astrologerId : session.userId;
-
-        const msg = await Message.create({
-          sessionId,
-          fromUserId,
-          toUserId,
-          text,
-          timestamp: new Date()
+      /*
+      ================================
+      SESSION REQUEST (USER → ASTROLOGER)
+      ================================
+      */
+      socket.on("session:request", async ({ sessionId }) => {
+        const astrologer = await Astrologer.findOne({
+          isOnline: true,
+          socketId: { $ne: null },
         });
 
-        io.to(getSessionRoom(sessionId)).emit("message:receive", msg);
+        if (astrologer?.socketId) {
+          io.to(astrologer.socketId).emit("session:incoming", {
+            sessionId,
+            userId: socket.userId,
+          });
+        }
       });
 
       /*
-      ---------------------------------------------------------
-        📌 3) REAL-TIME INCOMING REQUEST (controller triggers)
-      ---------------------------------------------------------
-      */
-      socket.on("session:incoming", (data) => {
-        // No internal logic needed. Controller emits this.
-      });
-
-      /*
-      ---------------------------------------------------------
-        📌 4) CALL SIGNALING (WebRTC / Agora)
-      ---------------------------------------------------------
-      */
-      socket.on("call:signal", async ({ sessionId, signal }) => {
-        const session = await Session.findById(sessionId);
-        if (!session) return;
-
-        const fromId = socket.mongoUserId;
-        const toId = fromId === session.userId ? session.astrologerId : session.userId;
-
-        io.to(getUserRoom(toId)).emit("call:signal", {
-          sessionId,
-          signal,
-          from: fromId
-        });
-      });
-
-      /*
-      ---------------------------------------------------------
-        📌 5) SESSION ACCEPT
-      ---------------------------------------------------------
-      */
-      socket.on("session:accept", async ({ sessionId }) => {
-        const session = await Session.findById(sessionId);
-        if (!session) return;
-
-        io.to(getUserRoom(session.userId)).emit("session:accepted", {
-          sessionId,
-          channelName: session.channelName,
-          sessionType: session.sessionType
-        });
-      });
-
-      /*
-      ---------------------------------------------------------
-        📌 6) SESSION REJECT
-      ---------------------------------------------------------
-      */
-      socket.on("session:reject", async ({ sessionId }) => {
-        const session = await Session.findById(sessionId);
-        if (!session) return;
-
-        io.to(getUserRoom(session.userId)).emit("session:rejected", {
-          sessionId,
-          message: "Astrologer rejected your request"
-        });
-      });
-
-      /*
-      ---------------------------------------------------------
-        📌 7) BILLING PING (EVERY 60 SEC)
-      ---------------------------------------------------------
-      */
-      socket.on("billing:tick", async ({ sessionId }) => {
-        const s = await Session.findById(sessionId);
-        if (!s || s.status !== "active") return;
-
-        io.to(getSessionRoom(sessionId)).emit("billing:update", {});
-      });
-
-      /*
-      ---------------------------------------------------------
-        ❌ DISCONNECT LOGIC
-      ---------------------------------------------------------
+      ================================
+      DISCONNECT
+      ================================
       */
       socket.on("disconnect", async () => {
-        console.log("❌ Disconnected:", clerkId);
-
-        await User.findOneAndUpdate(
-          { clerkId },
-          { isOnline: false, socketId: null, lastSeen: new Date() }
-        );
+        console.log("❌ Disconnected:", user.name);
 
         if (socket.role === "astrologer") {
           await Astrologer.findOneAndUpdate(
-            { clerkId },
-            { online: false }
+            { socketId: socket.id },
+            { isOnline: false, socketId: null }
           );
 
-          const onlineAstros = await Astrologer.find({ online: true }).select(
-            "_id name image pricePerMin rating availability"
-          );
-          io.emit("presence:online-list", onlineAstros);
+          broadcastOnlineAstrologers();
         }
       });
     } catch (err) {
-      console.log("🔥 Socket error:", err);
+      console.error("🔥 Socket Error:", err);
       socket.disconnect();
     }
   });
 
   return io;
 };
+
+async function broadcastOnlineAstrologers() {
+  const online = await Astrologer.find({ isOnline: true })
+    .populate("userId", "name avatar")
+    .select("pricePerMinute rating userId");
+
+  io.emit("astrologers:online", online);
+}
 
 export const getIO = () => io;

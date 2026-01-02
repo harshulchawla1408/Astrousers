@@ -5,33 +5,33 @@ import { useEffect, useRef, useState } from "react";
 
 let socketInstance = null;
 
-export const getSocket = (token) => {
+export const getSocket = (clerkId) => {
   if (socketInstance && socketInstance.connected) {
     return socketInstance;
   }
 
-  const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000').replace(/\/$/, '');
-  
+  const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000").replace(/\/$/, "");
+
   socketInstance = io(backendUrl, {
     auth: {
-      token: token
+      clerkId, // ✅ FIXED (was token earlier)
     },
-    transports: ['websocket', 'polling'],
+    transports: ["websocket"],
     reconnection: true,
+    reconnectionAttempts: 5,
     reconnectionDelay: 1000,
-    reconnectionAttempts: 5
   });
 
-  socketInstance.on('connect', () => {
-    console.log('✅ Socket connected:', socketInstance.id);
+  socketInstance.on("connect", () => {
+    console.log("✅ Socket connected:", socketInstance.id);
   });
 
-  socketInstance.on('disconnect', () => {
-    console.log('❌ Socket disconnected');
+  socketInstance.on("disconnect", () => {
+    console.log("❌ Socket disconnected");
   });
 
-  socketInstance.on('connect_error', (error) => {
-    console.error('Socket connection error:', error);
+  socketInstance.on("connect_error", (err) => {
+    console.error("🔥 Socket connection error:", err.message);
   });
 
   return socketInstance;
@@ -44,47 +44,28 @@ export const disconnectSocket = () => {
   }
 };
 
-// React hook for socket connection
+// React hook
 export const useSocket = () => {
   const { user, isLoaded } = useUser();
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
-  const tokenRef = useRef(null);
+  const initialized = useRef(false);
 
   useEffect(() => {
-    if (!isLoaded || !user) {
-      return;
-    }
+    if (!isLoaded || !user || initialized.current) return;
 
-    const connectSocket = async () => {
-      try {
-        const token = await user.getToken();
-        tokenRef.current = token;
-        const socketInstance = getSocket(token);
-        setSocket(socketInstance);
+    const socket = getSocket(user.id);
+    initialized.current = true;
+    setSocket(socket);
 
-        socketInstance.on('connect', () => {
-          setIsConnected(true);
-        });
-
-        socketInstance.on('disconnect', () => {
-          setIsConnected(false);
-        });
-      } catch (error) {
-        console.error('Error getting token for socket:', error);
-      }
-    };
-
-    connectSocket();
+    socket.on("connect", () => setIsConnected(true));
+    socket.on("disconnect", () => setIsConnected(false));
 
     return () => {
-      if (socketInstance) {
-        socketInstance.off('connect');
-        socketInstance.off('disconnect');
-      }
+      socket.off("connect");
+      socket.off("disconnect");
     };
   }, [isLoaded, user]);
 
   return { socket, isConnected };
 };
-

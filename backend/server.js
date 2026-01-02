@@ -17,6 +17,8 @@ import agoraRoutes from "./routes/agoraRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import sessionRoutes from "./routes/sessionRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import adminAstrologerRoutes from "./routes/admin/astrologerRoutes.js";
+import adminDashboardRoutes from "./routes/admin/dashboardRoutes.js";
 import { initializeSocket } from "./socket/socketServer.js";
 
 const app = express();
@@ -121,6 +123,8 @@ app.use("/api/sessions", sessionRoutes);
 app.use("/api/v1/sessions", sessionRoutes); // Primary route for sessions
 app.use("/api/payment", paymentRoutes);
 app.use("/api/astrology", astrologyRoutes);
+app.use("/api/v1/admin/astrologers", adminAstrologerRoutes);
+app.use("/api/v1/admin/dashboard", adminDashboardRoutes);
 
 
 // -------------------- MongoDB Connection --------------------

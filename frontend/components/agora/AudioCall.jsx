@@ -15,13 +15,13 @@ export default function AudioCall() {
   const channelName = searchParams.get("channelName");
   const uid = searchParams.get("uid");
   const appId = searchParams.get("appId");
-  const role = searchParams.get("role") || "user";
 
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
   const [callDuration, setCallDuration] = useState(0);
   const [isCallActive, setIsCallActive] = useState(false);
 
   const durationInterval = useRef(null);
+  const billingInterval = useRef(null);
 
   const {
     isConnected,
@@ -39,7 +39,7 @@ export default function AudioCall() {
   });
 
   useEffect(() => {
-    if (token && isConnected) startCall();
+    if (token && isConnected && !isCallActive) startCall();
   }, [token, isConnected]);
 
   const startCall = async () => {
@@ -48,36 +48,41 @@ export default function AudioCall() {
       await publishTracks([audioTrack]);
 
       setIsCallActive(true);
-      startTimer();
+
+      durationInterval.current = setInterval(() => {
+        setCallDuration((p) => p + 1);
+      }, 1000);
+
+      billingInterval.current = setInterval(() => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/sessions/billing`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionId })
+        });
+      }, 60000);
     } catch (err) {
       console.error("Audio call start error:", err);
     }
   };
 
-  const startTimer = () => {
-    durationInterval.current = setInterval(() => {
-      setCallDuration((p) => p + 1);
-    }, 1000);
-  };
-
-  const stopTimer = () => {
-    if (durationInterval.current) {
-      clearInterval(durationInterval.current);
-      durationInterval.current = null;
-    }
-  };
-
   const toggleAudio = async () => {
-    const micTrack = localTracks.current.find((t) => t.trackMediaType === "audio");
+    const micTrack = localTracks.current.find(t => t.trackMediaType === "audio");
     if (!micTrack) return;
-
     await micTrack.setEnabled(!isAudioEnabled);
-    setIsAudioEnabled((p) => !p);
+    setIsAudioEnabled(p => !p);
   };
 
   const endCall = async () => {
     try {
-      stopTimer();
+      clearInterval(durationInterval.current);
+      clearInterval(billingInterval.current);
+
+      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/sessions/end`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId })
+      });
+
       await unpublishTracks();
       await cleanup();
 
@@ -87,9 +92,16 @@ export default function AudioCall() {
     }
   };
 
-  const format = (sec) => `${String(Math.floor(sec / 60)).padStart(2,"0")}:${String(sec%60).padStart(2,"0")}`;
+  const format = (sec) =>
+    `${String(Math.floor(sec / 60)).padStart(2, "0")}:${String(sec % 60).padStart(2, "0")}`;
 
-  useEffect(() => () => cleanup(), []);
+  useEffect(() => {
+    return () => {
+      clearInterval(durationInterval.current);
+      clearInterval(billingInterval.current);
+      cleanup();
+    };
+  }, []);
 
   return (
     <Card className="bg-white/10 backdrop-blur-sm border-0 shadow-xl">

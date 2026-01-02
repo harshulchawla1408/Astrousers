@@ -24,6 +24,7 @@ export default function VideoCall() {
   const [callDuration, setCallDuration] = useState(0);
 
   const durationInterval = useRef(null);
+  const billingInterval = useRef(null);
 
   const {
     isConnected,
@@ -44,50 +45,59 @@ export default function VideoCall() {
     if (token && isConnected) startCall();
   }, [token, isConnected]);
 
+  useEffect(() => {
+    remoteUsers.forEach(user => {
+      user.videoTrack?.play(remoteVideoRef.current);
+    });
+  }, [remoteUsers]);
+
   const startCall = async () => {
     try {
       const [micTrack, camTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
-
       camTrack.play(localVideoRef.current);
-
       await publishTracks([micTrack, camTrack]);
-      startTimer();
+
+      durationInterval.current = setInterval(() => {
+        setCallDuration(p => p + 1);
+      }, 1000);
+
+      billingInterval.current = setInterval(() => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/sessions/billing`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionId })
+        });
+      }, 60000);
     } catch (err) {
       console.error("Video call start error:", err);
     }
   };
 
-  const startTimer = () => {
-    durationInterval.current = setInterval(
-      () => setCallDuration((p) => p + 1),
-      1000
-    );
-  };
-
-  const stopTimer = () => {
-    if (durationInterval.current) {
-      clearInterval(durationInterval.current);
-      durationInterval.current = null;
-    }
-  };
-
   const toggleAudio = async () => {
-    const mic = localTracks.current.find((t) => t.trackMediaType === "audio");
+    const mic = localTracks.current.find(t => t.trackMediaType === "audio");
     if (!mic) return;
     await mic.setEnabled(!isAudioEnabled);
-    setIsAudioEnabled((p) => !p);
+    setIsAudioEnabled(p => !p);
   };
 
   const toggleVideo = async () => {
-    const cam = localTracks.current.find((t) => t.trackMediaType === "video");
+    const cam = localTracks.current.find(t => t.trackMediaType === "video");
     if (!cam) return;
     await cam.setEnabled(!isVideoEnabled);
-    setIsVideoEnabled((p) => !p);
+    setIsVideoEnabled(p => !p);
   };
 
   const endCall = async () => {
     try {
-      stopTimer();
+      clearInterval(durationInterval.current);
+      clearInterval(billingInterval.current);
+
+      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/sessions/end`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId })
+      });
+
       await unpublishTracks();
       await cleanup();
 
@@ -98,9 +108,15 @@ export default function VideoCall() {
   };
 
   const format = (sec) =>
-    `${String(Math.floor(sec / 60)).padStart(2, "0")}:${String(sec % 60).padStart(2,"0")}`;
+    `${String(Math.floor(sec / 60)).padStart(2, "0")}:${String(sec % 60).padStart(2, "0")}`;
 
-  useEffect(() => () => cleanup(), []);
+  useEffect(() => {
+    return () => {
+      clearInterval(durationInterval.current);
+      clearInterval(billingInterval.current);
+      cleanup();
+    };
+  }, []);
 
   return (
     <Card className="bg-white/10 backdrop-blur-sm border-0 shadow-xl">
@@ -120,20 +136,12 @@ export default function VideoCall() {
         </div>
 
         <div className="flex justify-center space-x-4">
-          <Button
-            onClick={toggleAudio}
-            className={`${isAudioEnabled ? "bg-green-600" : "bg-red-600"} text-white`}
-          >
+          <Button onClick={toggleAudio} className="bg-green-600 text-white">
             {isAudioEnabled ? "Mute" : "Unmute"}
           </Button>
-
-          <Button
-            onClick={toggleVideo}
-            className={`${isVideoEnabled ? "bg-green-600" : "bg-red-600"} text-white`}
-          >
+          <Button onClick={toggleVideo} className="bg-green-600 text-white">
             {isVideoEnabled ? "Camera Off" : "Camera On"}
           </Button>
-
           <Button onClick={endCall} className="bg-red-500 text-white">
             End Call
           </Button>

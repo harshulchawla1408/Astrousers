@@ -1,316 +1,83 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import Link from 'next/link';
-import SessionManager from '@/components/session/SessionManager';
+import SessionManager from "@/components/session/SessionManager";
 
-const AstrologerDetailPage = () => {
-  const params = useParams();
-  const [astrologer, setAstrologer] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [activeMode, setActiveMode] = useState(null); // 'chat', 'audio', 'video'
+export default function AstrologerDetailPage() {
+  const { id } = useParams();
+  const [astro, setAstro] = useState(null);
+  const [mode, setMode] = useState(null);
+
+  const backend =
+    (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000").replace(
+      /\/$/,
+      ""
+    );
 
   useEffect(() => {
-    const fetchAstrologer = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        // Get backend URL and ensure no trailing slash
-        const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000').replace(/\/$/, '');
-        const url = `${backendUrl}/api/v1/astrologers/${params.id}`;
-        
-        console.log('Backend URL:', process.env.NEXT_PUBLIC_BACKEND_URL || 'NOT SET - using fallback');
-        console.log('Fetching astrologer from:', url);
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Response error:', response.status, errorText);
-          throw new Error(`Failed to fetch astrologer: ${response.status} ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        console.log('Astrologer data received:', data);
-        setAstrologer(data.data);
-      } catch (err) {
-        console.error('Error fetching astrologer:', err);
-        setError(err.message || 'Failed to fetch astrologer. Please check if the backend is running.');
-      } finally {
-        setLoading(false);
-      }
-    };
+    fetch(`${backend}/api/v1/astrologers/${id}`)
+      .then((r) => r.json())
+      .then((d) => setAstro(d.data));
+  }, [id]);
 
-    if (params.id) {
-      fetchAstrologer();
-    }
-  }, [params.id]);
-
-  const handleCommunication = (mode) => {
-    setActiveMode(mode);
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#FFF7E6]">
-        <Header />
-        <div className="flex justify-center items-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#FFA726]"></div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (error || !astrologer) {
-    return (
-      <div className="min-h-screen bg-[#FFF7E6]">
-        <Header />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-[#0A1A2F] mb-4">Astrologer Not Found</h1>
-            <p className="text-[#0A1A2F]/70 mb-8">
-              {error || 'The astrologer you are looking for does not exist.'}
-            </p>
-            <Link href="/astrologers">
-              <Button className="bg-gradient-to-r from-[#FFA726] to-[#FFB300] hover:from-[#FF8F00] hover:to-[#FFA726] text-white rounded-xl">
-                Back to Astrologers
-              </Button>
-            </Link>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+  if (!astro) return null;
 
   return (
     <div className="min-h-screen bg-[#FFF7E6]">
       <Header />
-      
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 overflow-visible">
-        {/* Back Button */}
-        <div className="mb-8">
-          <Link href="/astrologers">
-            <Button variant="outline" className="border-[#0A1A2F] text-[#0A1A2F] hover:bg-[#0A1A2F] hover:text-white rounded-xl">
-              ← Back to Astrologers
-            </Button>
-          </Link>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Profile */}
-          <div className="lg:col-span-1">
-            <Card className="bg-white border border-[#E5E5E5] shadow-md rounded-[20px]">
-              <CardContent className="p-8">
-                <div className="text-center space-y-6">
-                  {/* Avatar and Status */}
-                  <div className="relative mx-auto w-32 h-32">
-                    <Avatar className="w-32 h-32 border-4 border-white shadow-2xl">
-                      <AvatarImage src={astrologer.image} alt={astrologer.name} />
-                      <AvatarFallback className="bg-gradient-to-br from-[#FFA726] to-[#FFB300] text-white text-2xl">
-                        {astrologer.name.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                    
-                    {/* Online Status */}
-                    <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full border-4 border-white bg-green-500">
-                      <div className="w-full h-full rounded-full bg-green-500 animate-pulse"></div>
-                    </div>
-                  </div>
+      <main className="max-w-6xl mx-auto px-4 py-12">
+        <Card className="bg-white rounded-[20px] shadow-md">
+          <CardContent className="p-8 space-y-6">
+            <h1 className="text-2xl font-bold">{astro.name}</h1>
+            <p className="text-gray-600">{astro.expertise}</p>
 
-                  {/* Name and Title */}
-                  <div>
-                    <h1 className="text-2xl font-bold text-[#0A1A2F] mb-2">{astrologer.name}</h1>
-                    <p className="text-[#FFA726] text-lg font-semibold">{astrologer.expertise}</p>
-                    {astrologer.verified && (
-                      <Badge className="mt-2 bg-green-50 text-green-700 border border-green-200">
-                        ✓ Verified Astrologer
-                      </Badge>
-                    )}
-                  </div>
+            <Badge className={astro.online ? "bg-green-500" : "bg-gray-400"}>
+              {astro.online ? "Online" : "Offline"}
+            </Badge>
 
-                  {/* Rating and Reviews */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-center space-x-2">
-                      <span className="text-3xl text-[#FFA726]">⭐</span>
-                      <span className="text-2xl font-bold text-[#0A1A2F]">{astrologer.rating}</span>
-                      <span className="text-[#0A1A2F]/70">({astrologer.reviews} reviews)</span>
-                    </div>
-                    <p className="text-[#0A1A2F]/70">{astrologer.experience} years of experience</p>
-                  </div>
+            <p className="text-lg font-semibold">
+              ₹{astro.pricePerMin}/min
+            </p>
 
-                  {/* Languages */}
-                  <div>
-                    <h3 className="text-[#0A1A2F] font-semibold mb-2">Languages</h3>
-                    <div className="flex flex-wrap gap-2 justify-center">
-                      {Array.isArray(astrologer.languages) ? (
-                        astrologer.languages.map((lang, index) => (
-                          <Badge key={index} variant="secondary" className="bg-[#FFF7E6] text-[#FFA726] border border-[#FFD56B]">
-                            {lang}
-                          </Badge>
-                        ))
-                      ) : (
-                        <Badge variant="secondary" className="bg-[#FFF7E6] text-[#FFA726] border border-[#FFD56B]">
-                          {astrologer.languages}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <Button
+                onClick={() => setMode("chat")}
+                className="bg-[#FFA726] text-white"
+              >
+                Chat
+              </Button>
 
-                  {/* Price */}
-                  <div className="bg-gradient-to-br from-[#FFA726] to-[#FFB300] rounded-xl p-4 border border-[#FFD56B]">
-                    <p className="text-white/90 text-sm">Price per minute</p>
-                    <p className="text-3xl font-bold text-white">₹{astrologer.pricePerMin}</p>
-                  </div>
+              <Button
+                disabled={!astro.online || !astro.availability?.call}
+                onClick={() => setMode("audio")}
+              >
+                Audio Call
+              </Button>
 
+              <Button
+                disabled={!astro.online || !astro.availability?.video}
+                onClick={() => setMode("video")}
+              >
+                Video Call
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-                  {/* Action Buttons */}
-                  <div className="space-y-3">
-                    <Button 
-                      size="lg" 
-                      onClick={() => handleCommunication('chat')}
-                      className="w-full bg-gradient-to-r from-[#FFA726] to-[#FFB300] hover:from-[#FF8F00] hover:to-[#FFA726] text-white shadow-lg hover:shadow-xl rounded-xl btn-glow"
-                    >
-                      💬 Start Chat
-                    </Button>
-                    
-                    <Button 
-                      size="lg" 
-                      variant="outline" 
-                      onClick={() => handleCommunication('audio')}
-                      className="w-full border-[#0A1A2F] text-[#0A1A2F] hover:bg-[#0A1A2F] hover:text-white rounded-xl transition-all duration-200"
-                    >
-                      🎧 Audio Call
-                    </Button>
-                    
-                    <Button 
-                      size="lg" 
-                      variant="outline" 
-                      onClick={() => handleCommunication('video')}
-                      className="w-full border-[#0A1A2F] text-[#0A1A2F] hover:bg-[#0A1A2F] hover:text-white rounded-xl transition-all duration-200"
-                    >
-                      📹 Video Call
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Right Column - Details */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* About Section */}
-            <Card className="bg-white border border-[#E5E5E5] shadow-md rounded-[20px]">
-              <CardContent className="p-8">
-                <h2 className="text-2xl font-bold text-[#0A1A2F] mb-6">About {astrologer.name}</h2>
-                <p className="text-[#0A1A2F]/70 leading-relaxed text-lg">
-                  {astrologer.description || `Meet ${astrologer.name}, a highly experienced ${astrologer.expertise} specialist with ${astrologer.experience} years of dedicated practice. ${astrologer.name} has helped thousands of clients find clarity and guidance in their lives through expert astrological consultations.`}
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Specialties */}
-            {astrologer.specialties && astrologer.specialties.length > 0 && (
-              <Card className="bg-white border border-[#E5E5E5] shadow-md rounded-[20px]">
-                <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold text-[#0A1A2F] mb-6">Specialties</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {astrologer.specialties.map((specialty, index) => (
-                      <div key={index} className="flex items-center space-x-3">
-                        <div className="w-2 h-2 bg-[#FFA726] rounded-full"></div>
-                        <span className="text-[#0A1A2F]/70">{specialty}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Availability */}
-            <Card className="bg-white border border-[#E5E5E5] shadow-md rounded-[20px]">
-              <CardContent className="p-8">
-                <h2 className="text-2xl font-bold text-[#0A1A2F] mb-6">Availability</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="text-center">
-                    <div className="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center bg-green-50 border-2 border-green-200">
-                      <span className="text-2xl">💬</span>
-                    </div>
-                    <h3 className="text-[#0A1A2F] font-semibold mb-1">Chat</h3>
-                    <p className="text-sm text-green-600">Available</p>
-                  </div>
-                  
-                  <div className="text-center">
-                    <div className="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center bg-green-50 border-2 border-green-200">
-                      <span className="text-2xl">📞</span>
-                    </div>
-                    <h3 className="text-[#0A1A2F] font-semibold mb-1">Call</h3>
-                    <p className="text-sm text-green-600">Available</p>
-                  </div>
-                  
-                  <div className="text-center">
-                    <div className="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center bg-green-50 border-2 border-green-200">
-                      <span className="text-2xl">📹</span>
-                    </div>
-                    <h3 className="text-[#0A1A2F] font-semibold mb-1">Video</h3>
-                    <p className="text-sm text-green-600">Available</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Reviews Section */}
-            <Card className="bg-white border border-[#E5E5E5] shadow-md rounded-[20px]">
-              <CardContent className="p-8">
-                <h2 className="text-2xl font-bold text-[#0A1A2F] mb-6">Client Reviews</h2>
-                <div className="space-y-4">
-                  <div className="bg-[#FFF7E6] rounded-xl p-4 border border-[#FFD56B]/30">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <span className="text-[#FFD56B]">⭐⭐⭐⭐⭐</span>
-                      <span className="text-[#0A1A2F] font-semibold">Excellent Service</span>
-                    </div>
-                    <p className="text-[#0A1A2F]/70">
-                      "Very accurate predictions and helpful guidance. Highly recommended!"
-                    </p>
-                    <p className="text-[#0A1A2F]/50 text-sm mt-2">- Anonymous Client</p>
-                  </div>
-                  
-                  <div className="bg-[#FFF7E6] rounded-xl p-4 border border-[#FFD56B]/30">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <span className="text-[#FFD56B]">⭐⭐⭐⭐⭐</span>
-                      <span className="text-[#0A1A2F] font-semibold">Great Experience</span>
-                    </div>
-                    <p className="text-[#0A1A2F]/70">
-                      "Professional and insightful consultation. Will definitely consult again."
-                    </p>
-                    <p className="text-[#0A1A2F]/50 text-sm mt-2">- Anonymous Client</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Communication Components */}
-        {activeMode && astrologer && (
+        {mode && (
           <div className="mt-8">
             <SessionManager
-              astrologerId={params.id}
-              astrologerName={astrologer.name}
-              sessionType={activeMode}
-              pricePerMin={astrologer.pricePerMin}
+              astrologerId={astro._id}
+              astrologerName={astro.name}
+              sessionType={mode}
+              pricePerMin={astro.pricePerMin}
             />
           </div>
         )}
@@ -319,6 +86,4 @@ const AstrologerDetailPage = () => {
       <Footer />
     </div>
   );
-};
-
-export default AstrologerDetailPage;
+}

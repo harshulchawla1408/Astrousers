@@ -55,16 +55,16 @@ export default function AboutPage() {
               </div>
 
               <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <StatCard number="500+" label="Verified Astrologers" />
-                <StatCard number="10M+" label="Chat & Call Minutes" />
-                <StatCard number="1M+" label="Happy Users" />
-                <StatCard number="4.8/5" label="Average Rating" />
+                <StatCard number="50+" label="Verified Astrologers" />
+                <StatCard number="1M+" label="Chat & Call Minutes" />
+                <StatCard number="1k+" label="Happy Users" />
+                <StatCard number="4.7/5" label="Average Rating" />
               </div>
             </div>
 
             <div className="lg:col-span-5 flex justify-center lg:justify-end">
-              <div className="relative w-full max-w-md rounded-2xl overflow-hidden shadow-2xl ring-1 ring-slate-100">
-                <Image src={HERO_IMAGE} alt="Astrousers" width={640} height={480} className="object-cover" />
+              <div className="relative w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl ring-1 ring-slate-100">
+                <Image src="/about.png" alt="Astrousers" width={1000} height={800} className="object-cover" />
               </div>
             </div>
           </div>
@@ -172,13 +172,13 @@ export default function AboutPage() {
                 title="Match Making"
                 desc="Detailed kundli milan & compatibility reports."
                 icon="/icons/match.png"
-                href="/kundli/match-making"
+                href="/match-making"
               />
               <FeatureCard
                 title="Horoscope Insights"
                 desc="Daily, weekly, monthly and yearly horoscopes."
                 icon="/icons/horoscope.png"
-                href="/horoscope"
+                href="/panchang"
               />
               <FeatureCard
                 title="Online Puja"
@@ -222,7 +222,7 @@ export default function AboutPage() {
               </div>
             </div>
             <div className="flex justify-center">
-              <Image src="/about/team.png" alt="Meet Our Team" width={500} height={400} className="rounded-[20px] object-cover w-full max-w-md" />
+              <Image src="/about-team.png" alt="Meet Our Team" width={500} height={400} className="rounded-[20px] object-cover w-full max-w-md" />
             </div>
           </div>
         </section>
@@ -315,9 +315,11 @@ function ValueCard({ title, description, iconEmoji }) {
 function FeatureCard({ title, desc, icon, href }) {
   return (
     <a href={href} className="block rounded-[20px] p-6 border border-[#E5E5E5] shadow-md bg-white">
-      <Image src={icon} alt={title} width={48} height={48} className="mb-4 object-contain" />
-      <h4 className="font-semibold mb-1 text-[#0A1A2F]">{title}</h4>
-      <p className="text-sm text-[#0A1A2F]/70">{desc}</p>
+      <div className="flex items-center gap-4 mb-4">
+        <Image src={icon} alt={title} width={64} height={64} className="object-contain flex-shrink-0" />
+        <h4 className="text-xl font-bold text-[#0A1A2F]">{title}</h4>
+      </div>
+      <p className="text-sm text-[#0A1A2F]/70 leading-relaxed">{desc}</p>
     </a>
   );
 }

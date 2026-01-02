@@ -47,8 +47,14 @@ export default function AdvancedKundliPage() {
   useEffect(() => {
     setForm((prev) => ({
       ...prev,
+      name: params.get("name") || "",
       dob: params.get("dob") || "",
       tob: params.get("tob") || "",
+      lat: params.get("lat") || "",
+      lon: params.get("lon") || "",
+      country: params.get("country") || "",
+      state: params.get("state") || "",
+      city: params.get("city") || "",
     }));
   }, []);
 

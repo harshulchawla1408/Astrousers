@@ -1,88 +1,38 @@
 import mongoose from "mongoose";
 
-const transactionSchema = new mongoose.Schema({
-  type: { type: String, enum: ['credit', 'debit'], required: true },
+const walletTransactionSchema = new mongoose.Schema({
+  type: { type: String, enum: ["CREDIT", "DEBIT"], required: true },
   amount: { type: Number, required: true },
-  description: { type: String, required: true },
-  date: { type: Date, default: Date.now }
+  reason: String,
+  balanceAfter: Number,
+  createdAt: { type: Date, default: Date.now }
 });
 
 const userSchema = new mongoose.Schema(
   {
-    clerkId: { 
-      type: String, 
-      required: [true, 'clerkId is required'], 
+    clerkId: {
+      type: String,
+      required: true,
       unique: true,
-      trim: true,
       index: true
     },
-    email: { 
-      type: String, 
-      default: "",
-      trim: true
+
+    name: String,
+    email: String,
+    avatar: String,
+
+    role: {
+      type: String,
+      enum: ["USER", "ASTROLOGER", "ADMIN"],
+      default: "USER"
     },
-    firstName: { 
-      type: String, 
-      default: "",
-      trim: true
-    },
-    lastName: { 
-      type: String, 
-      default: "",
-      trim: true
-    },
-    name: { 
-      type: String, 
-      default: "",
-      trim: true
-    },
-    profileImage: { 
-      type: String, 
-      default: "",
-      trim: true
-    },
-    // Optional fields - not required for signup
-    dob: { type: Date, default: null },
-    tob: { type: String, default: null },
-    city: { type: String, default: null },
-    wallet: { 
-      type: Number, 
-      default: 30,
-      min: 0
-    },
-    transactions: { 
-      type: [transactionSchema], 
-      default: []
-    },
-    // Presence and session fields
-    isOnline: { 
-      type: Boolean, 
-      default: false 
-    },
-    socketId: { 
-      type: String, 
-      default: null 
-    },
-    currentSessionId: { 
-      type: mongoose.Schema.Types.ObjectId, 
-      ref: 'Session', 
-      default: null 
-    },
-    lastSeen: { 
-      type: Date, 
-      default: Date.now 
-    },
-    role: { 
-      type: String, 
-      enum: ['user', 'astrologer', 'admin'], 
-      default: 'user' 
-    }
+
+    walletBalance: { type: Number, default: 0 },
+    walletTransactions: [walletTransactionSchema],
+
+    lastSeen: { type: Date, default: Date.now }
   },
-  { 
-    timestamps: true,
-    // Ensure validation doesn't fail on optional fields
-    strict: true
-  }
+  { timestamps: true }
 );
 
 export default mongoose.model("User", userSchema);

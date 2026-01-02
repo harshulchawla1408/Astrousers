@@ -2,11 +2,11 @@
 import React, { useState } from "react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { useUser } from "@clerk/nextjs";
+import { useUserContext } from "@/contexts/UserContext";
 import { useRouter } from "next/navigation";
 
 export default function RechargeButton({ afterSuccess } = {}) {
-  const { user, isLoaded } = useUser();
+  const { user, refreshUser } = useUserContext();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -73,9 +73,7 @@ export default function RechargeButton({ afterSuccess } = {}) {
             // optionally trigger callback
             if (afterSuccess) afterSuccess(verifyJson);
             // refresh page or router to reflect new balance
-            setTimeout(() => {
-              router.replace(window.location.pathname);
-            }, 900);
+            refreshUser();
           } catch (err) {
             console.error("Verification error:", err);
             setError(err.message || "Payment verification failed");

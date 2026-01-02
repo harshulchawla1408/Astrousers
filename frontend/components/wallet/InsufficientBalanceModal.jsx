@@ -1,63 +1,116 @@
 "use client";
-import React from "react";
-import { Button } from "../ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
-export default function InsufficientBalanceModal({
-  isOpen,
-  onClose,
-  requiredCoins,
-  currentBalance,
-  onRecharge
-}) {
-  if (!isOpen) return null;
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useUserContext } from "@/contexts/UserContext";
+
+export default function Dashboard() {
+  const { user, loading } = useUserContext();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#FFA726]" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">
+            Please sign in to access your dashboard
+          </h1>
+          <Link href="/">
+            <Button>Go Home</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
-            <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-          </div>
-          <CardTitle className="text-red-600">Insufficient Balance</CardTitle>
-        </CardHeader>
+    <div className="min-h-screen bg-[#FFF8EE] py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-[#0A1A2F] mb-2">
+            Welcome back, {user.name || "User"}!
+          </h1>
+          <p className="text-lg text-[#666]">
+            Manage your astrology journey
+          </p>
+        </div>
 
-        <CardContent className="text-center space-y-4">
-          <div className="space-y-2">
-            <p className="text-gray-700">
-              You need <span className="font-semibold text-red-600">{requiredCoins} coins</span> to start this session.
-            </p>
-            <p className="text-sm text-gray-500">
-              Current balance: <span className="font-medium">{currentBalance} coins</span>
-            </p>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {/* Wallet */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-[#0A1A2F]">
+                Wallet Balance
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold text-[#FFA726]">
+                ₹{user.wallet || 0}
+              </p>
+              <Link href="/wallet">
+                <Button variant="outline" className="mt-4">
+                  Manage Wallet
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
 
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-            <p className="text-sm text-yellow-800">
-              💡 Tip: Recharge your wallet to continue consulting with astrologers
-            </p>
-          </div>
+          {/* Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-[#0A1A2F]">
+                Quick Actions
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Link href="/kundli">
+                <Button className="w-full bg-gradient-to-r from-[#FFA726] to-[#FFB300] text-white">
+                  Generate Kundli
+                </Button>
+              </Link>
+              <Link href="/astrologers">
+                <Button variant="outline" className="w-full">
+                  Talk to Astrologer
+                </Button>
+              </Link>
+              <Link href="/services">
+                <Button variant="outline" className="w-full">
+                  Book E-Puja
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
 
-          <div className="flex gap-3 pt-4">
-            <Button
-              onClick={onClose}
-              variant="outline"
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={onRecharge}
-              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
-            >
-              Recharge Now
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          {/* Activity */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-[#0A1A2F]">
+                Recent Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-[#666]">No recent activity</p>
+              <p className="text-sm text-[#999] mt-2">
+                Your astrology journey starts here!
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="text-center">
+          <Link href="/">
+            <Button variant="ghost">← Back to Home</Button>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

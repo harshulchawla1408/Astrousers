@@ -2,22 +2,15 @@ import express from "express";
 import {
   createOrder,
   verifyPayment,
-  getBalance,
-  getHistory
+  getWallet
 } from "../controllers/paymentController.js";
+
+import { requireAuth } from "../middleware/clerkAuth.js";
 
 const router = express.Router();
 
-// 1) Create Razorpay Order
-router.post("/order", createOrder);
-
-// 2) Verify Payment + Credit Wallet
-router.post("/verify", verifyPayment);
-
-// 3) Get Wallet Balance
-router.get("/balance", getBalance);
-
-// 4) Get Transaction History
-router.get("/history", getHistory);
+router.post("/order", requireAuth, createOrder);
+router.post("/verify", requireAuth, verifyPayment);
+router.get("/wallet", requireAuth, getWallet);
 
 export default router;

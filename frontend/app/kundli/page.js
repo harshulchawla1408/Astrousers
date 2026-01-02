@@ -96,10 +96,14 @@ export default function KundliPage() {
 
   const goToAdvancedKundli = () => {
     const query = new URLSearchParams({
+      name: form.name,
       dob: form.dob,
       tob: form.tob,
       lat: form.lat,
       lon: form.lon,
+      country: form.country,
+      state: form.state,
+      city: form.city,
     }).toString();
 
     router.push(`/kundli/advanced?${query}`);

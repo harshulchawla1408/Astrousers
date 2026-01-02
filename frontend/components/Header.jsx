@@ -12,16 +12,27 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
+import { useUserContext } from "@/contexts/UserContext";
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const { role, loading } = useUserContext();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // 🎯 Dashboard route based on role
+  const dashboardRoute =
+    role === "ADMIN"
+      ? "/admin"
+      : role === "ASTROLOGER"
+      ? "/astrologer/dashboard"
+      : "/dashboard";
 
   return (
     <header
@@ -84,6 +95,17 @@ const Header = () => {
             </SignedOut>
 
             <SignedIn>
+              {!loading && role && (
+                <Link href={dashboardRoute} scroll={false}>
+                  <Button
+                    variant="ghost"
+                    className="text-[#0A1A2F] hover:text-[#FFA726]"
+                  >
+                    Dashboard
+                  </Button>
+                </Link>
+              )}
+
               <UserButton
                 afterSignOutUrl="/"
                 appearance={{
@@ -155,6 +177,19 @@ const Header = () => {
                     </Button>
                   </SignInButton>
                 </SignedOut>
+
+                <SignedIn>
+                  {!loading && role && (
+                    <Link href={dashboardRoute} scroll={false}>
+                      <Button
+                        variant="ghost"
+                        className="justify-start w-full"
+                      >
+                        Dashboard
+                      </Button>
+                    </Link>
+                  )}
+                </SignedIn>
 
                 <Link href="/services" scroll={false}>
                   <Button className="w-full bg-gradient-to-r from-[#FFA726] to-[#FFB300] text-white">
