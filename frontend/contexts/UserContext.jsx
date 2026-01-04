@@ -1,8 +1,8 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useRef } from "react";
 import { useUser, useAuth } from "@clerk/nextjs";
-import { getSocket as initSocket, disconnectSocket } from "@/lib/socketClient";
+import { disconnectSocket } from "@/lib/socketClient";
 
 const UserContext = createContext(null);
 
@@ -12,6 +12,7 @@ export const UserProvider = ({ children }) => {
 
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const retryTimeoutRef = useRef(null);
 
   /*
   ========================================
@@ -26,10 +27,24 @@ export const UserProvider = ({ children }) => {
       setProfile(null);
       setLoading(false);
       disconnectSocket();
+      // Clear any pending retry
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = null;
+      }
       return;
     }
 
-    const fetchProfile = async () => {
+    // Clear any existing retry timeout
+    if (retryTimeoutRef.current) {
+      clearTimeout(retryTimeoutRef.current);
+      retryTimeoutRef.current = null;
+    }
+
+    const fetchProfile = async (isRetry = false) => {
+      let syncData = null;
+      let fullProfileFetched = false;
+      
       try {
         setLoading(true);
 
@@ -50,84 +65,135 @@ export const UserProvider = ({ children }) => {
           }
         );
 
-        if (!syncRes.ok) {
-          const errText = await syncRes.text();
-          console.error("❌ User sync failed:", errText);
-          // Don't throw - allow app to continue even if sync fails
-          // The user might still be able to use the app
-        } else {
-          // Verify sync response is JSON (not HTML error page)
+        if (syncRes.ok) {
           const syncContentType = syncRes.headers.get("content-type");
-          if (!syncContentType || !syncContentType.includes("application/json")) {
-            const errText = await syncRes.clone().text();
-            console.error("❌ User sync returned non-JSON:", syncContentType, errText.substring(0, 100));
-          }
-        }
-
-        // 2️⃣ Get Clerk JWT for authenticated requests
-        const token = await getToken();
-        if (!token) {
-          console.warn("⚠️ No auth token available");
-          setLoading(false);
-          return;
-        }
-
-        // 3️⃣ Fetch profile from backend (AUTH REQUIRED)
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/me`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "x-user-id": user.id
+          if (syncContentType && syncContentType.includes("application/json")) {
+            try {
+              syncData = await syncRes.json();
+              // Use sync response data immediately if available
+              if (syncData.success && syncData.user) {
+                setProfile({
+                  id: syncData.user.id,
+                  role: syncData.user.role,
+                  name: syncData.user.name,
+                  avatar: syncData.user.avatar,
+                  email: user.primaryEmailAddress?.emailAddress,
+                  walletBalance: syncData.user.walletBalance || 0,
+                  walletTransactions: []
+                });
+              }
+            } catch (parseErr) {
+              console.error("❌ Failed to parse sync response:", parseErr);
             }
           }
-        );
-
-        if (!res.ok) {
-          const errText = await res.text();
-          console.error("❌ Failed to fetch user profile:", errText);
-          setLoading(false);
-          return;
+        } else {
+          const errText = await syncRes.text();
+          console.error("❌ User sync failed:", errText);
         }
 
-        // Safely parse JSON - handle HTML error pages
-        // Read as text first to check if it's HTML or JSON
-        const responseText = await res.text();
-        
-        // Check if response is HTML (error page)
-        if (responseText.trim().startsWith("<!DOCTYPE") || responseText.trim().startsWith("<html")) {
-          console.error("❌ Backend returned HTML instead of JSON. Response preview:", responseText.substring(0, 200));
-          setLoading(false);
-          return;
-        }
+        // 2️⃣ Wait a bit for Clerk session to be fully established (for new users)
+        // This is especially important for newly registered users
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-        // Try to parse as JSON
-        let data;
+        // 3️⃣ Try to get Clerk JWT and fetch full profile
+        // For new users, this might fail initially, but we have sync data as fallback
         try {
-          data = JSON.parse(responseText);
-        } catch (parseErr) {
-          console.error("❌ Failed to parse JSON response:", parseErr.message);
-          console.error("Response preview:", responseText.substring(0, 200));
-          setLoading(false);
-          return;
+          const token = await getToken();
+          
+          if (token) {
+            // 4️⃣ Fetch full profile from backend (AUTH REQUIRED)
+            // This gives us complete user data including wallet transactions
+            const res = await fetch(
+              `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/me`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json"
+                }
+              }
+            );
+
+            // Check response status BEFORE parsing
+            if (res.ok) {
+              const contentType = res.headers.get("content-type");
+              if (contentType && contentType.includes("application/json")) {
+                const data = await res.json();
+                
+                if (data.success && data.user) {
+                  // Update profile with full data from /me endpoint
+                  setProfile(data.user);
+                  fullProfileFetched = true;
+                  
+                  setLoading(false);
+                  return; // Success - exit early
+                }
+              }
+            } else {
+              // Token might be invalid for new users - that's okay, we have sync data
+              const contentType = res.headers.get("content-type");
+              if (contentType && contentType.includes("application/json")) {
+                const errorData = await res.json();
+                // Only log as warning if we have sync data (expected for new users)
+                if (syncData) {
+                  console.warn("⚠️ Profile fetch failed (token may need time to activate):", errorData.message);
+                } else {
+                  console.error("❌ Failed to fetch user profile:", errorData.message || "Unknown error");
+                }
+              }
+            }
+          } else {
+            // No token available - that's okay for new users, we have sync data
+            if (!syncData) {
+              console.warn("⚠️ No auth token available and no sync data");
+            }
+          }
+        } catch (tokenErr) {
+          // Token fetch or profile fetch failed - that's okay if we have sync data
+          if (!syncData) {
+            console.error("❌ Error fetching token or profile:", tokenErr.message);
+          } else {
+            console.warn("⚠️ Token/profile fetch failed but sync data available:", tokenErr.message);
+          }
         }
 
-        if (data.success && data.user) {
-          setProfile(data.user);
-
-          // 🔌 Init socket AFTER profile exists
-          initSocket(user.id);
+        // If we have sync data but couldn't fetch full profile, schedule a retry
+        if (syncData && !isRetry && !fullProfileFetched) {
+          // Retry after a delay to allow token to become valid
+          retryTimeoutRef.current = setTimeout(() => {
+            fetchProfile(true);
+          }, 2000);
+        }
+        
+        // If we have sync data, use it and set loading to false
+        // The full profile fetch can happen later when token is ready
+        if (syncData) {
+          setLoading(false);
+        } else {
+          // No sync data and no profile - something went wrong
+          setLoading(false);
         }
       } catch (err) {
         console.error("❌ UserContext error:", err);
-        // Don't crash the app - set profile to null but allow app to continue
-        setProfile(null);
-      } finally {
-        setLoading(false);
+        // If we have sync data, keep using it; otherwise clear profile
+        if (!syncData) {
+          setProfile(null);
+          setLoading(false);
+        } else {
+          // Keep sync data and just set loading to false
+          setLoading(false);
+        }
       }
     };
 
     fetchProfile();
+
+    // Cleanup function to clear timeout on unmount or dependency change
+    return () => {
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = null;
+      }
+    };
   }, [isLoaded, user, getToken]);
 
   /*

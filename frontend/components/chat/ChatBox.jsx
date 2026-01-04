@@ -7,7 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSocket } from "@/lib/socketClient";
 
 export default function ChatBox({ sessionId, userId, astrologer }) {
-  const { socket, isConnected } = useSocket();
+  const { socket, isConnected } = useSocket(true);
+
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef(null);
@@ -48,7 +49,7 @@ export default function ChatBox({ sessionId, userId, astrologer }) {
   }, [socket, sessionId]);
 
   const sendMessage = () => {
-    if (!newMessage.trim()) return;
+    if (!socket || !newMessage.trim()) return;
 
     socket.emit("message:send", {
       sessionId,
@@ -76,7 +77,8 @@ export default function ChatBox({ sessionId, userId, astrologer }) {
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.map((msg, idx) => {
-            const isSelf = msg.fromUserId === userId;
+            // Support both message formats: fromUserId (legacy) and senderId (new)
+            const isSelf = (msg.fromUserId === userId || msg.senderId === userId || (typeof msg.senderId === 'object' && msg.senderId?._id === userId));
             return (
               <div key={idx} className={`flex ${isSelf ? "justify-end" : "justify-start"}`}>
                 <div className={`px-4 py-2 rounded-lg ${

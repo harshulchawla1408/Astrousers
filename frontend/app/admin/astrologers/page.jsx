@@ -11,22 +11,24 @@ import { useUserContext } from "@/contexts/UserContext";
 import { Input } from "@/components/ui/input";
 
 export default function AdminAstrologersPage() {
-  const { user } = useUser();
-  const { getToken } = useAuth();
+  const { user, isLoaded: userLoaded } = useUser();
+  const { getToken, isLoaded: authLoaded } = useAuth();
   const { role } = useUserContext();
   const [astrologers, setAstrologers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedAstro, setSelectedAstro] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
+    userId: "",
     expertise: "",
     category: "",
     gender: "",
     experience: "",
     languages: "",
+    bio: "",
     pricePerMinute: { chat: "", call: "", video: "" }
   });
 
@@ -34,42 +36,216 @@ export default function AdminAstrologersPage() {
     (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000").replace(/\/$/, "");
 
   useEffect(() => {
-    if (role === "ADMIN") {
-      fetchAstrologers();
+    // Wait for both user and auth to be loaded before fetching
+    if (role === "ADMIN" && user?.id && userLoaded && authLoaded) {
+      // Wait a bit for token to be ready, then fetch data
+      const timer = setTimeout(() => {
+        fetchAstrologers();
+        fetchUsers();
+      }, 800);
+      return () => clearTimeout(timer);
     }
-  }, [role]);
+  }, [role, user?.id, userLoaded, authLoaded]);
 
-  const fetchAstrologers = async () => {
+  // Also fetch users when modal opens (in case they weren't loaded initially)
+  useEffect(() => {
+    if (isAddModalOpen && role === "ADMIN" && user?.id && users.length === 0 && !loadingUsers) {
+      fetchUsers();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAddModalOpen]);
+
+  const fetchUsers = async (retryCount = 0) => {
     if (!user?.id) return;
     
     try {
-      setLoading(true);
-      const token = await getToken();
-      const res = await fetch(`${backend}/api/v1/admin/astrologers`, {
+      setLoadingUsers(true);
+      
+      // Get token with retry logic
+      let token = null;
+      try {
+        // Get token without template (Clerk will use default behavior)
+        token = await getToken();
+        
+        if (!token) {
+          console.warn("⚠️ Token is null, retrying...");
+          if (retryCount < 3) {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            return fetchUsers(retryCount + 1);
+          }
+          console.error("❌ No token available after retries");
+          setLoadingUsers(false);
+          return;
+        }
+        
+        // Validate token format (should be a JWT string)
+        if (typeof token !== 'string' || token.length < 10) {
+          console.error("❌ Invalid token format:", typeof token, token?.substring(0, 20));
+          if (retryCount < 3) {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            return fetchUsers(retryCount + 1);
+          }
+          setLoadingUsers(false);
+          return;
+        }
+        
+        console.log("✅ Token retrieved successfully, length:", token.length);
+        console.log("🔍 Token preview:", token.substring(0, 50) + "...");
+      } catch (tokenErr) {
+        console.error("❌ Error getting token:", tokenErr);
+        console.error("❌ Token error details:", {
+          message: tokenErr.message,
+          name: tokenErr.name,
+          stack: tokenErr.stack?.substring(0, 200)
+        });
+        if (retryCount < 3) {
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          return fetchUsers(retryCount + 1);
+        }
+        setLoadingUsers(false);
+        return;
+      }
+
+      const res = await fetch(`${backend}/api/v1/admin/astrologers/users`, {
         headers: {
-          "x-user-id": user.id,
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
         }
       });
 
       if (!res.ok) {
-        const errText = await res.text();
-        console.error("Failed to fetch astrologers:", errText);
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const errorData = await res.json();
+          console.error("Failed to fetch users:", errorData.message || "Unknown error");
+          // If token error and we haven't retried enough, try again with fresh token
+          if ((errorData.message?.includes("token") || errorData.message?.includes("Invalid") || res.status === 401) && retryCount < 3) {
+            console.log(`Retrying fetchUsers (attempt ${retryCount + 1}/3)...`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            return fetchUsers(retryCount + 1);
+          }
+        } else {
+          const errorText = await res.text();
+          console.error("Non-JSON error response:", errorText.substring(0, 200));
+        }
+        setLoadingUsers(false);
         return;
       }
 
-      const responseText = await res.text();
-      if (responseText.trim().startsWith("<!DOCTYPE") || responseText.trim().startsWith("<html")) {
-        console.error("Backend returned HTML instead of JSON");
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        console.error("Backend returned non-JSON response");
+        setLoadingUsers(false);
         return;
       }
 
-      const data = JSON.parse(responseText);
+      const data = await res.json();
+      if (data.success) {
+        setUsers(data.data || []);
+      } else {
+        console.error("Failed to fetch users: API returned success=false");
+      }
+    } catch (err) {
+      console.error("Failed to fetch users:", err);
+      // Retry on network errors
+      if (retryCount < 2) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return fetchUsers(retryCount + 1);
+      }
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  const fetchAstrologers = async (retryCount = 0) => {
+    if (!user?.id) return;
+    
+    try {
+      setLoading(true);
+      
+      // Get token with retry logic
+      let token = null;
+      try {
+        // Get token without template (Clerk will use default behavior)
+        token = await getToken();
+        
+        if (!token) {
+          console.warn("Token is null, retrying...");
+          if (retryCount < 3) {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            return fetchAstrologers(retryCount + 1);
+          }
+          console.error("No token available after retries");
+          setLoading(false);
+          return;
+        }
+        
+        // Validate token format (should be a JWT string)
+        if (typeof token !== 'string' || token.length < 10) {
+          console.error("Invalid token format:", token);
+          if (retryCount < 3) {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            return fetchAstrologers(retryCount + 1);
+          }
+          setLoading(false);
+          return;
+        }
+      } catch (tokenErr) {
+        console.error("Error getting token:", tokenErr);
+        if (retryCount < 3) {
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          return fetchAstrologers(retryCount + 1);
+        }
+        setLoading(false);
+        return;
+      }
+
+      const res = await fetch(`${backend}/api/v1/admin/astrologers`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      });
+
+      if (!res.ok) {
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const errorData = await res.json();
+          console.error("Failed to fetch astrologers:", errorData.message || "Unknown error");
+          // If token error and we haven't retried enough, try again with fresh token
+          if ((errorData.message?.includes("token") || errorData.message?.includes("Invalid") || res.status === 401) && retryCount < 3) {
+            console.log(`Retrying fetchAstrologers (attempt ${retryCount + 1}/3)...`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            return fetchAstrologers(retryCount + 1);
+          }
+        } else {
+          const errorText = await res.text();
+          console.error("Non-JSON error response:", errorText.substring(0, 200));
+        }
+        setLoading(false);
+        return;
+      }
+
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        console.error("Backend returned non-JSON response");
+        setLoading(false);
+        return;
+      }
+
+      const data = await res.json();
       if (data.success) {
         setAstrologers(data.data || []);
+      } else {
+        console.error("Failed to fetch astrologers: API returned success=false");
       }
     } catch (err) {
       console.error("Failed to fetch astrologers:", err);
+      // Retry on network errors
+      if (retryCount < 2) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return fetchAstrologers(retryCount + 1);
+      }
     } finally {
       setLoading(false);
     }
@@ -77,13 +253,13 @@ export default function AdminAstrologersPage() {
 
   const handleAdd = () => {
     setFormData({
-      name: "",
-      email: "",
+      userId: "",
       expertise: "",
       category: "",
       gender: "",
       experience: "",
       languages: "",
+      bio: "",
       pricePerMinute: { chat: "", call: "", video: "" }
     });
     setSelectedAstro(null);
@@ -93,6 +269,7 @@ export default function AdminAstrologersPage() {
   const handleEdit = (astro) => {
     const userData = astro.userId || {};
     setFormData({
+      userId: "",
       name: userData.name || "",
       email: userData.email || "",
       expertise: Array.isArray(astro.expertise) ? astro.expertise.join(", ") : astro.expertise || "",
@@ -100,6 +277,7 @@ export default function AdminAstrologersPage() {
       gender: astro.gender || "",
       experience: astro.experience?.toString() || "",
       languages: Array.isArray(astro.languages) ? astro.languages.join(", ") : astro.languages || "",
+      bio: astro.bio || "",
       pricePerMinute: {
         chat: astro.pricePerMinute?.chat?.toString() || "",
         call: astro.pricePerMinute?.call?.toString() || "",
@@ -116,14 +294,36 @@ export default function AdminAstrologersPage() {
 
     try {
       const token = await getToken();
-      const payload = {
-        name: formData.name,
-        email: formData.email,
+      
+      if (!selectedAstro && !formData.userId) {
+        alert("Please select a user to convert to astrologer");
+        return;
+      }
+
+      const payload = selectedAstro ? {
+        // For update, include name/email if provided
+        ...(formData.name && { name: formData.name }),
+        ...(formData.email && { email: formData.email }),
         expertise: formData.expertise.split(",").map(e => e.trim()).filter(Boolean),
         category: formData.category,
         gender: formData.gender,
         experience: Number(formData.experience) || 0,
         languages: formData.languages.split(",").map(l => l.trim()).filter(Boolean),
+        bio: formData.bio,
+        pricePerMinute: {
+          chat: Number(formData.pricePerMinute.chat) || 0,
+          call: Number(formData.pricePerMinute.call) || 0,
+          video: Number(formData.pricePerMinute.video) || 0
+        }
+      } : {
+        // For create, send userId to convert existing user
+        userId: formData.userId,
+        expertise: formData.expertise.split(",").map(e => e.trim()).filter(Boolean),
+        category: formData.category,
+        gender: formData.gender,
+        experience: Number(formData.experience) || 0,
+        languages: formData.languages.split(",").map(l => l.trim()).filter(Boolean),
+        bio: formData.bio,
         pricePerMinute: {
           chat: Number(formData.pricePerMinute.chat) || 0,
           call: Number(formData.pricePerMinute.call) || 0,
@@ -141,16 +341,25 @@ export default function AdminAstrologersPage() {
         method,
         headers: {
           "Content-Type": "application/json",
-          "x-user-id": user.id,
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(payload)
       });
 
       if (!res.ok) {
-        const errText = await res.text();
-        console.error("Failed to save astrologer:", errText);
-        alert("Failed to save astrologer. Please try again.");
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const errorData = await res.json();
+          alert(errorData.message || "Failed to save astrologer. Please try again.");
+        } else {
+          alert("Failed to save astrologer. Please try again.");
+        }
+        return;
+      }
+
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        alert("Unexpected response from server");
         return;
       }
 
@@ -160,6 +369,8 @@ export default function AdminAstrologersPage() {
         setIsEditModalOpen(false);
         setSelectedAstro(null);
         fetchAstrologers();
+        fetchUsers(); // Refresh users list
+        alert(selectedAstro ? "Astrologer updated successfully" : "User converted to astrologer successfully");
       }
     } catch (err) {
       console.error("Error saving astrologer:", err);
@@ -176,15 +387,25 @@ export default function AdminAstrologersPage() {
       const res = await fetch(`${backend}/api/v1/admin/astrologers/${astroId}`, {
         method: "DELETE",
         headers: {
-          "x-user-id": user.id,
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
         }
       });
 
       if (!res.ok) {
-        const errText = await res.text();
-        console.error("Failed to disable astrologer:", errText);
-        alert("Failed to disable astrologer. Please try again.");
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const errorData = await res.json();
+          alert(errorData.message || "Failed to disable astrologer. Please try again.");
+        } else {
+          alert("Failed to disable astrologer. Please try again.");
+        }
+        return;
+      }
+
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        alert("Unexpected response from server");
         return;
       }
 
@@ -198,6 +419,18 @@ export default function AdminAstrologersPage() {
     }
   };
 
+  // Show loading while checking role
+  if (!role) {
+    return (
+      <div className="min-h-screen bg-[#FFF8EE] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (role !== "ADMIN") {
     return (
       <div className="min-h-screen bg-[#FFF8EE]">
@@ -205,6 +438,7 @@ export default function AdminAstrologersPage() {
         <main className="max-w-7xl mx-auto px-4 py-24 text-center">
           <h1 className="text-2xl font-bold text-red-600">Access Denied</h1>
           <p className="text-gray-600 mt-4">You must be an admin to access this page.</p>
+          <p className="text-sm text-gray-500 mt-2">Your current role: {role || "Unknown"}</p>
         </main>
         <Footer />
       </div>
@@ -318,26 +552,57 @@ export default function AdminAstrologersPage() {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium mb-1">Name *</label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                <div>
+                  <label htmlFor="userId" className="block text-sm font-medium mb-1">Select User to Convert *</label>
+                  {loadingUsers ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#FFA726]"></div>
+                      <p className="text-sm text-gray-500">Loading users...</p>
+                    </div>
+                  ) : users.length === 0 ? (
+                    <div className="space-y-2">
+                      <p className="text-sm text-red-500">No users available for conversion</p>
+                      <p className="text-xs text-gray-500">
+                        All existing users may already be astrologers, or there are no users in the system yet.
+                      </p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fetchUsers()}
+                        className="mt-2"
+                      >
+                        Retry
+                      </Button>
+                    </div>
+                  ) : (
+                    <select
+                      id="userId"
+                      value={formData.userId}
+                      onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFA726]"
                       required
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium mb-1">Email *</label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      required
-                    />
-                  </div>
+                    >
+                      <option value="">-- Select a user ({users.length} available) --</option>
+                      {users.map((u) => (
+                        <option key={u._id} value={u._id}>
+                          {u.name || "Unknown"} ({u.email || "No email"})
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="bio" className="block text-sm font-medium mb-1">Bio</label>
+                  <textarea
+                    id="bio"
+                    value={formData.bio}
+                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFA726]"
+                    rows={3}
+                    placeholder="Astrologer bio and description"
+                  />
                 </div>
 
                 <div>
@@ -497,6 +762,18 @@ export default function AdminAstrologersPage() {
                     value={formData.expertise}
                     onChange={(e) => setFormData({ ...formData, expertise: e.target.value })}
                     required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="edit-bio" className="block text-sm font-medium mb-1">Bio</label>
+                  <textarea
+                    id="edit-bio"
+                    value={formData.bio}
+                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFA726]"
+                    rows={3}
+                    placeholder="Astrologer bio and description"
                   />
                 </div>
 

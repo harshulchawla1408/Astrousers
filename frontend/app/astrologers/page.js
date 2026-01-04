@@ -32,10 +32,27 @@ export default function AstrologersPage() {
       setLoading(true);
 
       const astroRes = await fetch(
-        `${backend}/api/v1/astrologers?online=true`
+        `${backend}/api/v1/astrologers/online`
       );
-      const astroJson = await astroRes.json();
 
+      if (!astroRes.ok) {
+        const contentType = astroRes.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const errorData = await astroRes.json();
+          console.error("Failed to fetch astrologers:", errorData.message || "Unknown error");
+        } else {
+          console.error("Failed to fetch astrologers: Non-JSON response");
+        }
+        return;
+      }
+
+      const contentType = astroRes.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        console.error("Backend returned non-JSON response");
+        return;
+      }
+
+      const astroJson = await astroRes.json();
       if (astroJson.success) {
         setAstrologers(astroJson.data || []);
       }
@@ -44,8 +61,14 @@ export default function AstrologersPage() {
         const walletRes = await fetch(
           `${backend}/api/payment/balance?clerkId=${user.id}`
         );
-        const walletJson = await walletRes.json();
-        if (walletJson.success) setWallet(walletJson.wallet || 0);
+        
+        if (walletRes.ok) {
+          const walletContentType = walletRes.headers.get("content-type");
+          if (walletContentType && walletContentType.includes("application/json")) {
+            const walletJson = await walletRes.json();
+            if (walletJson.success) setWallet(walletJson.wallet || 0);
+          }
+        }
       }
     } catch (err) {
       console.error("Failed loading astrologers:", err);

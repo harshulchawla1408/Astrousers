@@ -21,6 +21,7 @@ const astrologerSchema = new mongoose.Schema(
     gender: String,
     experience: Number,
     languages: [String],
+    bio: String,
 
     pricePerMinute: {
       chat: Number,

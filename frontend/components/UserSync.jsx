@@ -22,10 +22,15 @@ export default function UserSync() {
     };
 
     // 1️⃣ Sync user to backend (create or update)
-    fetch(`${backend}/api/v1/user`, {
+    fetch(`${backend}/api/v1/user/sync`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        clerkId: user.id,
+        email: user.primaryEmailAddress?.emailAddress || "",
+        name: user.fullName || `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+        avatar: user.imageUrl || ""
+      }),
     })
       .then((res) => res.json())
       .catch((err) => console.error("User sync failed:", err));

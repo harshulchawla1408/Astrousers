@@ -55,15 +55,17 @@ export default function AstrologerDetailPage() {
               </Button>
 
               <Button
-                disabled={!astro.online || !astro.availability?.call}
+                disabled={!astro.online}
                 onClick={() => setMode("audio")}
+                className="bg-[#FFA726] text-white"
               >
                 Audio Call
               </Button>
 
               <Button
-                disabled={!astro.online || !astro.availability?.video}
+                disabled={!astro.online}
                 onClick={() => setMode("video")}
+                className="bg-[#FFA726] text-white"
               >
                 Video Call
               </Button>

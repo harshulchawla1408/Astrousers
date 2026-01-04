@@ -93,15 +93,20 @@ export default function MatchMakingPage() {
   const submit = async () => {
     setLoading(true);
     setResult(null);
+    const formatToISOWithTimezone = (localDateTime) => {
+      const date = new Date(localDateTime);
+      return date.toISOString().replace("Z", "+05:30");
+    };
 
     const payload = {
-      girlDob: form.girlDob,
+      girlDob: formatToISOWithTimezone(form.girlDob),
+      boyDob: formatToISOWithTimezone(form.boyDob),
       girlLat: form.girlLat,
       girlLon: form.girlLon,
-      boyDob: form.boyDob,
       boyLat: form.boyLat,
       boyLon: form.boyLon,
     };
+
 
     const res = await fetch("/api/astrology/kundli-matching/advanced", {
       method: "POST",

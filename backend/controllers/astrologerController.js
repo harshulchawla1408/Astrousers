@@ -37,12 +37,22 @@ export const getAllAstrologers = async (req, res) => {
       image: astro.userId?.avatar || null,
       online: astro.isOnline || false,
       pricePerMin: astro.pricePerMinute?.chat || astro.pricePerMinute?.call || astro.pricePerMinute?.video || 0,
-      expertise: Array.isArray(astro.expertise) ? astro.expertise.join(", ") : astro.expertise || "N/A"
+      expertise: Array.isArray(astro.expertise) ? astro.expertise.join(", ") : astro.expertise || "N/A",
+      // Add availability - default to true for all types if not set
+      availability: astro.availability || {
+        chat: true,
+        call: true,
+        video: true
+      }
     }));
 
     res.json({ success: true, data: transformedAstrologers });
   } catch (err) {
-    res.status(500).json({ success: false });
+    console.error("getAllAstrologers error:", err);
+    res.status(500).json({ 
+      success: false,
+      message: "Failed to fetch astrologers"
+    });
   }
 };
 
@@ -64,7 +74,13 @@ export const getOnlineAstrologers = async (req, res) => {
       image: astro.userId?.avatar || null,
       online: astro.isOnline || false,
       pricePerMin: astro.pricePerMinute?.chat || astro.pricePerMinute?.call || astro.pricePerMinute?.video || 0,
-      expertise: Array.isArray(astro.expertise) ? astro.expertise.join(", ") : astro.expertise || "N/A"
+      expertise: Array.isArray(astro.expertise) ? astro.expertise.join(", ") : astro.expertise || "N/A",
+      // Add availability - default to true for all types if not set
+      availability: astro.availability || {
+        chat: true,
+        call: true,
+        video: true
+      }
     }));
 
     res.json({
@@ -72,8 +88,12 @@ export const getOnlineAstrologers = async (req, res) => {
       count: transformedAstrologers.length,
       data: transformedAstrologers
     });
-  } catch {
-    res.status(500).json({ success: false });
+  } catch (err) {
+    console.error("getOnlineAstrologers error:", err);
+    res.status(500).json({ 
+      success: false,
+      message: "Failed to fetch online astrologers"
+    });
   }
 };
 
@@ -99,12 +119,22 @@ export const getAstrologerById = async (req, res) => {
       image: astrologer.userId?.avatar || null,
       online: astrologer.isOnline || false,
       pricePerMin: astrologer.pricePerMinute?.chat || astrologer.pricePerMinute?.call || astrologer.pricePerMinute?.video || 0,
-      expertise: Array.isArray(astrologer.expertise) ? astrologer.expertise.join(", ") : astrologer.expertise || "N/A"
+      expertise: Array.isArray(astrologer.expertise) ? astrologer.expertise.join(", ") : astrologer.expertise || "N/A",
+      // Add availability - default to true for all types if not set
+      availability: astrologer.availability || {
+        chat: true,
+        call: true,
+        video: true
+      }
     };
 
     res.json({ success: true, data: transformedAstrologer });
-  } catch {
-    res.status(500).json({ success: false });
+  } catch (err) {
+    console.error("getAstrologerById error:", err);
+    res.status(500).json({ 
+      success: false,
+      message: "Failed to fetch astrologer"
+    });
   }
 };
 
@@ -115,7 +145,11 @@ CREATE ASTROLOGER PROFILE (FIRST TIME)
 */
 export const createAstrologer = async (req, res) => {
   try {
-    const user = req.user;
+    // Get user from database using req.userId (set by requireAuth middleware)
+    const user = await User.findOne({ clerkId: req.userId });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
 
     if (user.role !== "ASTROLOGER") {
       return res.status(403).json({ success: false });
@@ -132,8 +166,12 @@ export const createAstrologer = async (req, res) => {
     });
 
     res.status(201).json({ success: true, data: astrologer });
-  } catch {
-    res.status(500).json({ success: false });
+  } catch (err) {
+    console.error("createAstrologer error:", err);
+    res.status(500).json({ 
+      success: false,
+      message: "Failed to create astrologer profile"
+    });
   }
 };
 
@@ -144,7 +182,11 @@ UPDATE ASTROLOGER PROFILE
 */
 export const updateAstrologer = async (req, res) => {
   try {
-    const user = req.user;
+    // Get user from database using req.userId (set by requireAuth middleware)
+    const user = await User.findOne({ clerkId: req.userId });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
 
     const astrologer = await Astrologer.findOneAndUpdate(
       { userId: user._id },
@@ -157,8 +199,12 @@ export const updateAstrologer = async (req, res) => {
     }
 
     res.json({ success: true, data: astrologer });
-  } catch {
-    res.status(500).json({ success: false });
+  } catch (err) {
+    console.error("updateAstrologer error:", err);
+    res.status(500).json({ 
+      success: false,
+      message: "Failed to update astrologer profile"
+    });
   }
 };
 
@@ -221,11 +267,21 @@ export const getTopAstrologers = async (req, res) => {
       image: astro.userId?.avatar || null,
       online: astro.isOnline || false,
       pricePerMin: astro.pricePerMinute?.chat || astro.pricePerMinute?.call || astro.pricePerMinute?.video || 0,
-      expertise: Array.isArray(astro.expertise) ? astro.expertise.join(", ") : astro.expertise || "N/A"
+      expertise: Array.isArray(astro.expertise) ? astro.expertise.join(", ") : astro.expertise || "N/A",
+      // Add availability - default to true for all types if not set
+      availability: astro.availability || {
+        chat: true,
+        call: true,
+        video: true
+      }
     }));
 
     res.json({ success: true, data: transformedAstrologers });
-  } catch {
-    res.status(500).json({ success: false });
+  } catch (err) {
+    console.error("getTopAstrologers error:", err);
+    res.status(500).json({ 
+      success: false,
+      message: "Failed to fetch top astrologers"
+    });
   }
 };

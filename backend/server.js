@@ -118,14 +118,24 @@ app.use("/api/users", userRoutes);
 app.use("/api/v1/user", userRoutes); // Primary route for user creation/update
 app.use("/api/v1/astrologers", astrologerRoutes);
 app.use("/api/agora", agoraRoutes);
+app.use("/api/v1/agora", agoraRoutes); // Primary route for agora
 app.use("/api/chat", chatRoutes);
+app.use("/api/v1/chat", chatRoutes); // Primary route for chat
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/v1/sessions", sessionRoutes); // Primary route for sessions
 app.use("/api/payment", paymentRoutes);
+app.use("/api/v1/payment", paymentRoutes); // Primary route for payment
 app.use("/api/astrology", astrologyRoutes);
 app.use("/api/v1/admin/astrologers", adminAstrologerRoutes);
 app.use("/api/v1/admin/dashboard", adminDashboardRoutes);
 
+// -------------------- 404 Handler (Must be before error handler) --------------------
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Route not found: ${req.method} ${req.path}`
+  });
+});
 
 // -------------------- MongoDB Connection --------------------
 const connectDB = async () => {

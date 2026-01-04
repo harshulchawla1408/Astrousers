@@ -2,6 +2,7 @@ import express from "express";
 import {
   createSession,
   acceptSession,
+  rejectSession,
   endSession,
   getSession,
   getUserSessions,
@@ -21,6 +22,11 @@ router.post("/start", requireAuth, createSession);
 ASTROLOGER → ACCEPT
 */
 router.post("/accept", requireAuth, acceptSession);
+
+/*
+ASTROLOGER → REJECT
+*/
+router.post("/reject", requireAuth, rejectSession);
 
 /*
 END SESSION (ANY PARTICIPANT)

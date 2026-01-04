@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import AgoraRTC from "agora-rtc-sdk-ng";
 
 export function useAgora({ channelName, token, uid, appId, onError }) {
   const clientRef = useRef(null);
@@ -8,10 +7,12 @@ export function useAgora({ channelName, token, uid, appId, onError }) {
   const [remoteUsers, setRemoteUsers] = useState([]);
 
   useEffect(() => {
-    if (!channelName || !token || !appId) return;
+    if (!channelName || !token || !appId || typeof window === "undefined") return;
 
     const init = async () => {
       try {
+        // Dynamically import Agora SDK only on client side
+        const AgoraRTC = (await import("agora-rtc-sdk-ng")).default;
         clientRef.current = AgoraRTC.createClient({
           mode: "rtc",
           codec: "vp8",
@@ -84,6 +85,7 @@ export function useAgora({ channelName, token, uid, appId, onError }) {
   return {
     isConnected,
     remoteUsers,
+    localTracks,
     publishTracks,
     unpublishTracks,
     cleanup,

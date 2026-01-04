@@ -195,20 +195,7 @@ export default function AboutPage() {
             </div>
           </div>
         </section>
-
-        {/* WORKFLOW */}
-        <section className="bg-white py-16 border-t border-[#E5E5E5]">
-          <div className="max-w-6xl mx-auto px-6 lg:px-8">
-            <h3 className="text-2xl font-semibold mb-8 text-[#0A1A2F]">How Astrousers Works</h3>
-            <ol className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <WorkflowStep step="1" title="Create Account" desc="Sign up quickly with email or social providers." />
-              <WorkflowStep step="2" title="Add Profile" desc="(Optional) Add birth details for personalized readings." />
-              <WorkflowStep step="3" title="Connect" desc="Choose an astrologer by expertise, rating and price." />
-              <WorkflowStep step="4" title="Get Insights" desc="Receive clear, actionable answers and records." />
-            </ol>
-          </div>
-        </section>
-
+        
         {/* STORY */}
         <section className="py-16 bg-white border-t border-[#E5E5E5]">
           <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">

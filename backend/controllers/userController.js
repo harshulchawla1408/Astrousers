@@ -81,7 +81,10 @@ export const syncUser = async (req, res) => {
     });
   } catch (err) {
     console.error("syncUser error:", err);
-    res.status(500).json({ success: false });
+    res.status(500).json({ 
+      success: false,
+      message: "Failed to sync user"
+    });
   }
 };
 
@@ -117,6 +120,9 @@ export const getMe = async (req, res) => {
     });
   } catch (err) {
     console.error("getMe error:", err);
-    res.status(500).json({ success: false });
+    res.status(500).json({ 
+      success: false,
+      message: "Failed to fetch user profile"
+    });
   }
 };

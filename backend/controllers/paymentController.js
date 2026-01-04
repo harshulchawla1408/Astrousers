@@ -55,46 +55,102 @@ VERIFY PAYMENT
 ====================================================
 */
 export const verifyPayment = async (req, res) => {
-  const user = req.user;
-  const { razorpay_payment_id, razorpay_order_id, razorpay_signature, amount } = req.body;
+  try {
+    // Get user from database using req.userId (set by requireAuth middleware)
+    const user = await User.findOne({ clerkId: req.userId });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
 
-  const keySecret = process.env.RAZORPAY_KEY_SECRET;
-  if (!keySecret) {
-    return res.status(500).json({ success: false, message: "Payment service unavailable" });
+    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, amount } = req.body;
+
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    if (!keySecret) {
+      return res.status(500).json({ success: false, message: "Payment service unavailable" });
+    }
+
+    const sign = crypto
+      .createHmac("sha256", keySecret)
+      .update(razorpay_order_id + "|" + razorpay_payment_id)
+      .digest("hex");
+
+    if (sign !== razorpay_signature) {
+      return res.status(400).json({ success: false, message: "Invalid signature" });
+    }
+
+    user.walletBalance += amount;
+    user.walletTransactions.push({
+      type: "CREDIT",
+      amount,
+      reason: "Wallet Recharge",
+      balanceAfter: user.walletBalance
+    });
+
+    await user.save();
+
+    res.json({ success: true, balance: user.walletBalance, newBalance: user.walletBalance });
+  } catch (err) {
+    console.error("verifyPayment error:", err);
+    res.status(500).json({ success: false, message: "Failed to verify payment" });
   }
-
-  const sign = crypto
-    .createHmac("sha256", keySecret)
-    .update(razorpay_order_id + "|" + razorpay_payment_id)
-    .digest("hex");
-
-  if (sign !== razorpay_signature) {
-    return res.status(400).json({ success: false });
-  }
-
-  user.walletBalance += amount;
-  user.walletTransactions.push({
-    type: "CREDIT",
-    amount,
-    reason: "Wallet Recharge",
-    balanceAfter: user.walletBalance
-  });
-
-  await user.save();
-
-  res.json({ success: true, balance: user.walletBalance });
 };
 
 /*
 ====================================================
-GET WALLET
+GET WALLET (AUTH REQUIRED)
 ====================================================
 */
 export const getWallet = async (req, res) => {
-  const user = req.user;
-  res.json({
-    success: true,
-    balance: user.walletBalance,
-    transactions: user.walletTransactions.reverse().slice(0, 20)
-  });
+  try {
+    // Get user from database using req.userId (set by requireAuth middleware)
+    const user = await User.findOne({ clerkId: req.userId });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    res.json({
+      success: true,
+      wallet: user.walletBalance,
+      balance: user.walletBalance,
+      transactions: user.walletTransactions.reverse().slice(0, 20)
+    });
+  } catch (err) {
+    console.error("getWallet error:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch wallet" });
+  }
+};
+
+/*
+====================================================
+GET BALANCE (OPTIONAL AUTH - SUPPORTS QUERY PARAM)
+====================================================
+*/
+export const getBalance = async (req, res) => {
+  try {
+    let user;
+
+    // Support both auth token and clerkId query param
+    if (req.userId) {
+      // Authenticated request
+      user = await User.findOne({ clerkId: req.userId });
+    } else if (req.query.clerkId) {
+      // Query param request (for public access)
+      user = await User.findOne({ clerkId: req.query.clerkId });
+    } else {
+      return res.status(400).json({ success: false, message: "Missing clerkId or authentication" });
+    }
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    res.json({
+      success: true,
+      wallet: user.walletBalance,
+      balance: user.walletBalance
+    });
+  } catch (err) {
+    console.error("getBalance error:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch balance" });
+  }
 };

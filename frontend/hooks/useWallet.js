@@ -15,7 +15,7 @@ export const useWallet = () => {
 
     try {
       setLoading(true);
-      const res = await fetch(`${backend}/api/v1/payment/balance?clerkId=${user.id}`);
+      const res = await fetch(`${backend}/api/payment/balance?clerkId=${user.id}`);
       const data = await res.json();
 
       if (!data.success) throw new Error(data.message);
@@ -30,7 +30,7 @@ export const useWallet = () => {
 
   const checkBalance = async (requiredCoins) => {
     try {
-      const res = await fetch(`${backend}/api/v1/payment/balance?clerkId=${user.id}`);
+      const res = await fetch(`${backend}/api/payment/balance?clerkId=${user.id}`);
       const data = await res.json();
 
       return {
