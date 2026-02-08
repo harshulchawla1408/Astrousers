@@ -8,11 +8,11 @@ Complete, scalable blog system for astrology website using Next.js App Router.
 frontend/
 ├── app/
 │   └── blogs/
-│       ├── page.jsx                    # All categories page
+│       ├── page.js                    # All categories page
 │       └── [category]/
-│           ├── page.jsx                # Category blogs listing
+│           ├── page.js                # Category blogs listing
 │           └── [slug]/
-│               └── page.jsx            # Single blog post
+│               └── page.js           # Single blog post
 ├── content/
 │   └── blogs/
 │       ├── kundli/
