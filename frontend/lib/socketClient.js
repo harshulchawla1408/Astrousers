@@ -100,3 +100,15 @@ export const useSocket = (shouldConnect = true) => {
 
   return { socket, isConnected };
 };
+
+export const getSocket = (clerkId) => {
+  if (!socketInstance) {
+    if (!clerkId) {
+      throw new Error("clerkId required to initialize socket");
+    }
+    socketInstance = createSocket();
+    socketInstance.auth = { clerkId };
+    socketInstance.connect();
+  }
+  return socketInstance;
+};

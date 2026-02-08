@@ -21,6 +21,16 @@ export const getCalendarData = async (req, res, next) => {
       analysis,
     });
   } catch (err) {
+    console.error("📅 Calendar fetch failed:", err.message);
+
+    if (err.statusCode) {
+      return res.status(err.statusCode).json({
+        status: "error",
+        message: err.message,
+        details: err.details || null,
+      });
+    }
+
     next(err);
   }
 };

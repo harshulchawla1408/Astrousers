@@ -1,27 +1,64 @@
 "use client";
 
-import { useState } from "react";
-import axios from "axios";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
+const calendarOptions = [
+  { label: "Tamil", value: "tamil", languages: ["en", "ta"] },
+  { label: "Malayalam", value: "malayalam", languages: ["en", "ml"] },
+  { label: "Shaka Samvat", value: "shaka-samvat", languages: ["en", "ml", "hi", "ta", "te"] },
+  { label: "Vikram Samvat", value: "vikram-samvat", languages: ["en", "ml", "hi", "ta", "te"] },
+  { label: "Amanta", value: "amanta", languages: ["en", "ml", "hi", "ta", "te"] },
+  { label: "Purnimanta", value: "purnimanta", languages: ["en", "ml", "hi", "ta", "te"] },
+  { label: "Hijri", value: "hijri", languages: ["en"] },
+  { label: "Gujarati", value: "gujarati", languages: ["en", "gu"] },
+  { label: "Bengali", value: "bengali", languages: ["en", "bn"] },
+  { label: "Lunar", value: "lunar", languages: ["en", "ml", "hi", "ta", "te"] },
+];
+
 export default function CalendarPage() {
   const [date, setDate] = useState("");
-  const [calendar, setCalendar] = useState("shaka-samvat");
+  const [calendar, setCalendar] = useState(calendarOptions[0].value);
+  const [language, setLanguage] = useState(calendarOptions[0].languages[0]);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const selectedCalendar = useMemo(
+    () => calendarOptions.find((option) => option.value === calendar),
+    [calendar]
+  );
 
   const fetchCalendar = async () => {
-    setLoading(true);
-    const res = await axios.post("/api/calendar", {
-      date,
-      calendar,
-      language: "en",
-    });
-    setResult(res.data);
-    setLoading(false);
+    try {
+      setLoading(true);
+      setError(null);
+
+      const res = await fetch("/api/calendar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date,
+          calendar,
+          language,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to fetch calendar");
+      }
+
+      setResult(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -43,17 +80,40 @@ export default function CalendarPage() {
 
             <select
               className="border p-2 w-full"
-              onChange={(e) => setCalendar(e.target.value)}
+              value={calendar}
+              onChange={(e) => {
+                const nextCalendar = e.target.value;
+                setCalendar(nextCalendar);
+                const option = calendarOptions.find((opt) => opt.value === nextCalendar);
+                if (option && !option.languages.includes(language)) {
+                  setLanguage(option.languages[0]);
+                }
+              }}
             >
-              <option value="shaka-samvat">Shaka Samvat</option>
-              <option value="vikram-samvat">Vikram Samvat</option>
-              <option value="tamil">Tamil</option>
-              <option value="lunar">Lunar</option>
+              {calendarOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+
+            <select
+              className="border p-2 w-full"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+            >
+              {(selectedCalendar?.languages || ["en"]).map((lang) => (
+                <option key={lang} value={lang}>
+                  {lang.toUpperCase()}
+                </option>
+              ))}
             </select>
 
             <Button onClick={fetchCalendar} disabled={loading}>
               {loading ? "Analyzing..." : "View Calendar Analysis"}
             </Button>
+
+            {error && <p className="text-red-600">{error}</p>}
           </CardContent>
         </Card>
 

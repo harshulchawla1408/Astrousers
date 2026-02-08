@@ -12,6 +12,7 @@ export const analyzeCalendar = (data) => {
     donts: [],
     warnings: [],
     remedies: [],
+    predictions: [],
   };
 
   /* ==========================
@@ -141,6 +142,17 @@ export const analyzeCalendar = (data) => {
     "Maintain cleanliness at home",
     "Light a diya in the evening"
   );
+
+  analysis.predictions = [
+    analysis.summary,
+    ...analysis.personalityTheme,
+    ...analysis.careerFinance,
+    ...analysis.relationships,
+    ...analysis.healthMind,
+    ...analysis.spiritualGuidance,
+    ...analysis.warnings,
+    ...analysis.remedies,
+  ].filter(Boolean);
 
   return analysis;
 };
