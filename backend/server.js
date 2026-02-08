@@ -25,8 +25,6 @@ import { initializeSocket } from "./socket/socketServer.js";
 const app = express();
 const httpServer = createServer(app);
 
-/* -------------------- Core Middlewares -------------------- */
-
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN || "*",
@@ -45,8 +43,6 @@ app.use(hpp());
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
-
-/* -------------------- Sanitization Middleware -------------------- */
 
 const sanitizeValue = (value) => {
   if (value === null || value === undefined) return value;
